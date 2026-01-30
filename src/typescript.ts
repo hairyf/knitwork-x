@@ -4,6 +4,44 @@ import { genString } from "./string";
 import type { CodegenOptions } from "./types";
 import { genObjectKey, wrapInDelimiters } from "./utils";
 
+export interface SpecificGeneric {
+  name: string;
+  extends?: string;
+  default?: string;
+}
+
+export interface SpecificField {
+  /** parameter name */
+  name: string;
+  /** parameter type */
+  type?: string;
+  /** optional parameter */
+  optional?: boolean;
+  /** default value (code string) */
+  default?: string;
+}
+
+export interface SpecificFunction {
+  /** function name */
+  name: string;
+  /** function params */
+  parameters?: SpecificField[];
+  /** function block (each string is one statement) */
+  body?: string[];
+  /** is export */
+  export?: boolean;
+  /** function comment */
+  comment?: string | string[];
+  /** async function */
+  async?: boolean;
+  /** generator function */
+  generator?: boolean;
+  /** return type */
+  returnType?: string;
+  /** generics */
+  generics?: SpecificGeneric[];
+}
+
 export type TypeObjectWithJSDoc = {
   type: string;
   jsdoc: string | Record<string, unknown>;
@@ -39,6 +77,25 @@ export interface GenEnumOptions extends CodegenOptions {
   const?: boolean;
   /** Add `export` modifier. */
   export?: boolean;
+}
+
+/**
+ * Create Type Alias
+ *
+ * @example type [name] = [value]
+ * @param name - alias name
+ * @param value - type value (right-hand side)
+ * @group Typescript
+ */
+export function genTypeAlias(
+  name: string,
+  value: string,
+  options: { export?: boolean } = {},
+): string {
+  const prefix = [options.export && "export", "type", name]
+    .filter(Boolean)
+    .join(" ");
+  return `${prefix} = ${value}`;
 }
 
 /**
@@ -203,6 +260,86 @@ export function genConstEnum(
   indent = "",
 ): string {
   return genEnum(name, members, { ...options, const: true }, indent);
+}
+
+/**
+ * Generate typescript function declaration from SpecificFunction.
+ *
+ * @group Typescript
+ */
+export function genFunction(
+  options: SpecificFunction,
+  _codegenOpts: CodegenOptions = {},
+  indent = "",
+): string {
+  const {
+    name,
+    parameters = [],
+    body = [],
+    export: isExport,
+    comment,
+    async: isAsync,
+    generator: isGenerator,
+    returnType,
+    generics = [],
+  } = options;
+
+  let jsdocComment = "";
+  if (comment !== undefined) {
+    const lines = Array.isArray(comment) ? comment : [comment];
+    jsdocComment =
+      `/**\n` + lines.map((line) => ` * ${line}`).join("\n") + "\n */\n";
+  }
+
+  const genericPart =
+    generics.length > 0
+      ? "<" +
+        generics
+          .map((g) => {
+            let s = g.name;
+            if (g.extends) s += ` extends ${g.extends}`;
+            if (g.default) s += ` = ${g.default}`;
+            return s;
+          })
+          .join(", ") +
+        ">"
+      : "";
+
+  const paramsPart =
+    "(" +
+    parameters
+      .map((p) => {
+        let s = p.name;
+        if (p.optional) s += "?";
+        if (p.type) s += `: ${p.type}`;
+        if (p.default !== undefined) s += ` = ${p.default}`;
+        return s;
+      })
+      .join(", ") +
+    ")";
+
+  const returnPart = returnType ? `: ${returnType}` : "";
+  const newIndent = indent + "  ";
+  const bodyContent =
+    body.length === 0
+      ? "{}"
+      : wrapInDelimiters(
+          body.map((line) => newIndent + line),
+          indent,
+          "{}",
+          false,
+        );
+
+  const prefix = [
+    isExport && "export",
+    isAsync && "async",
+    isGenerator ? "function*" : "function",
+    name + genericPart + paramsPart + returnPart,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return `${jsdocComment}${prefix} ${bodyContent}`;
 }
 
 /**

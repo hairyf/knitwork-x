@@ -5,9 +5,11 @@ import {
   genDeclareNamespace,
   genEnum,
   genConstEnum,
+  genFunction,
   genInlineTypeImport,
   genTypeImport,
   genTypeExport,
+  genTypeAlias,
 } from "../src";
 import { genTestTitle } from "./_utils";
 
@@ -363,6 +365,33 @@ describe("genTypeExport", () => {
   }
 });
 
+const genTypeAliasTests: Array<{
+  input: Parameters<typeof genTypeAlias>;
+  code: string;
+}> = [
+  {
+    input: ["Foo", "string"],
+    code: "type Foo = string",
+  },
+  {
+    input: ["Bar", "{ a: number; b: string }"],
+    code: "type Bar = { a: number; b: string }",
+  },
+  {
+    input: ["Baz", "string", { export: true }],
+    code: "export type Baz = string",
+  },
+];
+
+describe("genTypeAlias", () => {
+  for (const t of genTypeAliasTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genTypeAlias(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
 const genEnumTests: Array<{
   input: Parameters<typeof genEnum>;
   code: string;
@@ -441,6 +470,125 @@ describe("genConstEnum", () => {
   for (const t of genConstEnumTests) {
     it(genTestTitle(t.code), () => {
       const code = genConstEnum(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genFunctionTests: Array<{
+  input: Parameters<typeof genFunction>;
+  code: string;
+}> = [
+  {
+    input: [{ name: "foo" }],
+    code: "function foo() {}",
+  },
+  {
+    input: [
+      {
+        name: "foo",
+        parameters: [
+          { name: "x", type: "string" },
+          { name: "y", type: "number", optional: true },
+        ],
+      },
+    ],
+    code: "function foo(x: string, y?: number) {}",
+  },
+  {
+    input: [
+      {
+        name: "foo",
+        parameters: [{ name: "n", type: "number", default: "0" }],
+        body: ["return n + 1;"],
+      },
+    ],
+    code: `function foo(n: number = 0) {
+  return n + 1;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "foo",
+        export: true,
+        comment: "Exported foo",
+      },
+    ],
+    code: `/**
+ * Exported foo
+ */
+export function foo() {}`,
+  },
+  {
+    input: [
+      {
+        name: "bar",
+        comment: ["Line one", "Line two"],
+        async: true,
+        returnType: "Promise<void>",
+      },
+    ],
+    code: `/**
+ * Line one
+ * Line two
+ */
+async function bar(): Promise<void> {}`,
+  },
+  {
+    input: [
+      {
+        name: "gen",
+        generator: true,
+        parameters: [{ name: "max", type: "number" }],
+        returnType: "Generator<number>",
+        body: ["for (let i = 0; i < max; i++) yield i;"],
+      },
+    ],
+    code: `function* gen(max: number): Generator<number> {
+  for (let i = 0; i < max; i++) yield i;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "id",
+        generics: [{ name: "T" }],
+        parameters: [{ name: "x", type: "T" }],
+        returnType: "T",
+        body: ["return x;"],
+      },
+    ],
+    code: `function id<T>(x: T): T {
+  return x;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "pick",
+        generics: [
+          { name: "T", extends: "object" },
+          { name: "K", extends: "keyof T" },
+        ],
+        parameters: [
+          { name: "obj", type: "T" },
+          { name: "key", type: "K" },
+        ],
+        returnType: "T[K]",
+        body: ["return obj[key];"],
+      },
+    ],
+    code: `function pick<T extends object, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key];
+}`,
+  },
+];
+
+describe("genFunction", () => {
+  for (const t of genFunctionTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genFunction(...t.input);
       expect(code).to.equal(t.code);
     });
   }
