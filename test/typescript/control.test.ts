@@ -1,14 +1,48 @@
 import { expect, describe, it } from "vitest";
 import {
+  genPrefixedBlock,
   genIf,
   genElseIf,
   genElse,
   genTry,
   genCatch,
+  genFinally,
   type GenElseOptions,
   type GenCatchOptions,
 } from "../../src";
 import { genTestTitle } from "../_utils";
+
+const genPrefixedBlockTests: Array<{
+  input: Parameters<typeof genPrefixedBlock>;
+  code: string;
+}> = [
+  {
+    input: ["if (ok)", "return true;"],
+    code: `if (ok) {
+  return true;
+}`,
+  },
+  {
+    input: ["while (running)", ["step();", "check();"]],
+    code: `while (running) {
+  step();
+  check();
+}`,
+  },
+];
+describe("genPrefixedBlock", () => {
+  for (const t of genPrefixedBlockTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genPrefixedBlock(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+  it("for (;;) break; (bracket: false)", () => {
+    expect(genPrefixedBlock("for (;;)", "break;", { bracket: false })).to.equal(
+      "for (;;) break;",
+    );
+  });
+});
 
 const genIfTests: Array<{
   input: Parameters<typeof genIf>;
@@ -178,6 +212,42 @@ describe("genCatch", () => {
         t.input.length === 1
           ? genCatch(t.input[0])
           : genCatch(t.input[0], t.input[1]);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genFinallyTests: Array<{
+  input: Parameters<typeof genFinally>;
+  code: string;
+}> = [
+  {
+    input: ["cleanup();"],
+    code: `finally {
+  cleanup();
+}`,
+  },
+  {
+    input: [["release();", "log('done');"]],
+    code: `finally {
+  release();
+  log('done');
+}`,
+  },
+  {
+    input: ["cleanup();", { bracket: false }],
+    code: "finally cleanup();",
+  },
+  {
+    input: [[], {}],
+    code: "finally {}",
+  },
+];
+
+describe("genFinally", () => {
+  for (const t of genFinallyTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genFinally(...t.input);
       expect(code).to.equal(t.code);
     });
   }

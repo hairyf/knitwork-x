@@ -4,17 +4,33 @@ import type {
   GenElseOptions,
   GenTryOptions,
   GenCatchOptions,
+  GenFinallyOptions,
+  GenPrefixedBlockOptions,
 } from "./types";
 
-interface GenPrefixedBlockOptions {
-  bracket?: boolean;
-}
-
-function _genPrefixedBlock(
+/**
+ * Low-level helper: generate `prefix { statements }` or `prefix statement`.
+ *
+ * @example
+ *
+ * ```js
+ * genPrefixedBlock("if (ok)", "return true;");
+ * // ~> `if (ok) { return true; }`
+ *
+ * genPrefixedBlock("while (running)", ["step();", "check();"]);
+ * // ~> `while (running) { step(); check(); }`
+ *
+ * genPrefixedBlock("for (;;)", "break;", { bracket: false });
+ * // ~> `for (;;) break;`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genPrefixedBlock(
   prefix: string,
   statements: string | string[],
-  options: GenPrefixedBlockOptions,
-  indent: string,
+  options: GenPrefixedBlockOptions = {},
+  indent = "",
 ): string {
   const { bracket = true } = options;
   const lines = Array.isArray(statements) ? statements : [statements];
@@ -50,7 +66,7 @@ export function genIf(
   options: GenIfOptions = {},
   indent = "",
 ): string {
-  return _genPrefixedBlock(`if (${cond})`, statements, options, indent);
+  return genPrefixedBlock(`if (${cond})`, statements, options, indent);
 }
 
 /**
@@ -74,7 +90,7 @@ export function genElseIf(
   options: GenIfOptions = {},
   indent = "",
 ): string {
-  return _genPrefixedBlock(`else if (${cond})`, statements, options, indent);
+  return genPrefixedBlock(`else if (${cond})`, statements, options, indent);
 }
 
 /**
@@ -100,7 +116,7 @@ export function genElse(
   options: GenElseOptions = {},
   indent = "",
 ): string {
-  return _genPrefixedBlock("else", statements, options, indent);
+  return genPrefixedBlock("else", statements, options, indent);
 }
 
 /**
@@ -126,7 +142,7 @@ export function genTry(
   options: GenTryOptions = {},
   indent = "",
 ): string {
-  return _genPrefixedBlock("try", statements, options, indent);
+  return genPrefixedBlock("try", statements, options, indent);
 }
 
 /**
@@ -156,5 +172,31 @@ export function genCatch(
     typeof options.binding === "string"
       ? `catch (${options.binding})`
       : "catch";
-  return _genPrefixedBlock(prefix, statements, options, indent);
+  return genPrefixedBlock(prefix, statements, options, indent);
+}
+
+/**
+ * Generate `finally { statements }` or `finally statement`.
+ *
+ * @example
+ *
+ * ```js
+ * genFinally("cleanup();");
+ * // ~> `finally { cleanup(); }`
+ *
+ * genFinally(["release();", "log('done');"]);
+ * // ~> `finally { release(); log('done'); }`
+ *
+ * genFinally("cleanup();", { bracket: false });
+ * // ~> `finally cleanup();`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genFinally(
+  statements: string | string[],
+  options: GenFinallyOptions = {},
+  indent = "",
+): string {
+  return genPrefixedBlock("finally", statements, options, indent);
 }

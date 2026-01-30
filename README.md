@@ -280,14 +280,57 @@ Generate typescript `declare module` augmentation.
 genAugmentation("@nuxt/utils");
 // ~> `declare module "@nuxt/utils" {}`
 
-genAugmentation("@nuxt/utils", genInterface("MyInterface", {}));
+genAugmentation("@nuxt/utils", "interface MyInterface {}");
 // ~> `declare module "@nuxt/utils" { interface MyInterface {} }`
 
 genAugmentation("@nuxt/utils", [
-  genInterface("MyInterface", { "test?": "string" }),
+  "interface MyInterface { test?: string }",
   "type MyType = string",
 ]);
-// ~> declare module with multiple statements (interface + type)
+// ~> multi-line declare module with both interface and type
+```
+
+### `genBlock(statements?, indent)`
+
+Generate a statement block `{ statements }`.
+
+**Example:**
+
+```js
+genBlock();
+// ~> `{}`
+
+genBlock([]);
+// ~> `{}`
+
+genBlock("return x;");
+// ~> `{\n  return x;\n}`
+
+genBlock(["return x;"]);
+// ~> `{\n  return x;\n}`
+
+genBlock(["const a = 1;", "return a;"]);
+// ~> `{\n  const a = 1;\n  return a;\n}`
+
+genBlock(["return x;"], "  ");
+// ~> `{\n    return x;\n  }`
+```
+
+### `genCatch(statements, options, indent)`
+
+Generate `catch (binding) { statements }`, `catch { statements }`, or single-statement form.
+
+**Example:**
+
+```js
+genCatch(["throw e;"], { binding: "e" });
+// ~> `catch (e) { throw e; }`
+
+genCatch(["logError();"]);
+// ~> `catch { logError(); }`
+
+genCatch("handle(e);", { binding: "e", bracket: false });
+// ~> `catch (e) handle(e);`
 ```
 
 ### `genConstEnum(name, members, options, indent)`
@@ -314,14 +357,45 @@ Generate typescript `declare <namespace>` block (e.g. `declare global {}`).
 genDeclareNamespace("global");
 // ~> `declare global {}`
 
-genDeclareNamespace("global", genInterface("Window", {}));
+genDeclareNamespace("global", "interface Window {}");
 // ~> `declare global { interface Window {} }`
 
 genDeclareNamespace("global", [
-  genInterface("Window", { "customProp?": "string" }),
-  genVariable("foo", "string"),
+  "interface Window { customProp?: string }",
+  "const foo: string",
 ]);
-// ~> declare global with multiple statements (interface + const)
+// ~> `declare global { interface Window {...} const foo: string }`
+```
+
+### `genElse(statements, options, indent)`
+
+Generate `else { statements }` or `else statement`.
+
+**Example:**
+
+```js
+genElse(["return 0;"]);
+// ~> `else { return 0; }`
+
+genElse("fallback();");
+// ~> `else { fallback(); }`
+
+genElse("doIt();", { bracket: false });
+// ~> `else doIt();`
+```
+
+### `genElseIf(cond, statements, options, indent)`
+
+Generate `else if (cond) { statements }` or `else if (cond) statement`.
+
+**Example:**
+
+```js
+genElseIf("x < 0", "return -x;");
+// ~> `else if (x < 0) { return -x; }`
+
+genElseIf("ok", "doIt();", { bracket: false });
+// ~> `else if (ok) doIt();`
 ```
 
 ### `genEnum(name, members, options, indent)`
@@ -344,9 +418,26 @@ genEnum("MyEnum", { Foo: 1 }, { export: true, const: true });
 // ~> `export const enum MyEnum { Foo = 1 }`
 ```
 
-### `genFunction(options, _codegenOpts, indent)`
+### `genFinally(statements, options, indent)`
 
-Generate typescript function declaration from SpecificFunction.
+Generate `finally { statements }` or `finally statement`.
+
+**Example:**
+
+```js
+genFinally("cleanup();");
+// ~> `finally { cleanup(); }`
+
+genFinally(["release();", "log('done');"]);
+// ~> `finally { release(); log('done'); }`
+
+genFinally("cleanup();", { bracket: false });
+// ~> `finally cleanup();`
+```
+
+### `genFunction(options, indent)`
+
+Generate typescript function declaration from Function.
 
 **Example:**
 
@@ -362,6 +453,23 @@ genFunction({ name: "id", generics: [{ name: "T" }], parameters: [{ name: "x", t
 
 genFunction({ name: "foo", export: true });
 // ~> `export function foo() {}`
+```
+
+### `genIf(cond, statements, options, indent)`
+
+Generate `if (cond) { statements }` or `if (cond) statement`.
+
+**Example:**
+
+```js
+genIf("x > 0", "return x;");
+// ~> `if (x > 0) { return x; }`
+
+genIf("ok", ["doA();", "doB();"]);
+// ~> `if (ok) { doA(); doB(); }`
+
+genIf("x", "console.log(x);", { bracket: false });
+// ~> `if (x) console.log(x);`
 ```
 
 ### `genInlineTypeImport(specifier, name, options)`
@@ -398,9 +506,80 @@ genInterface("FooInterface", {}, { export: true });
 // ~> `export interface FooInterface {}`
 ```
 
+### `genParam(p)`
+
+Generate a single function parameter string from Field.
+
+**Example:**
+
+```js
+genParam({ name: "x", type: "string" });
+// ~> `x: string`
+
+genParam({ name: "y", type: "number", optional: true });
+// ~> `y?: number`
+
+genParam({ name: "z", type: "number", default: "0" });
+// ~> `z: number = 0`
+
+genParam({ name: "a" });
+// ~> `a`
+```
+
+### `genPrefixedBlock(prefix, statements, options, indent)`
+
+Low-level helper: generate `prefix { statements }` or `prefix statement`.
+
+**Example:**
+
+```js
+genPrefixedBlock("if (ok)", "return true;");
+// ~> `if (ok) { return true; }`
+
+genPrefixedBlock("while (running)", ["step();", "check();"]);
+// ~> `while (running) { step(); check(); }`
+
+genPrefixedBlock("for (;;)", "break;", { bracket: false });
+// ~> `for (;;) break;`
+```
+
+### `genProperty(field, indent)`
+
+Generate a single property signature from a TypeField. Returns `[name][optional?]: [type]`. When `field.jsdoc` is set, prepends JSDoc comment.
+
+**Example:**
+
+```js
+genProperty({ name: "foo", type: "string" });
+// ~> `foo: string`
+
+genProperty({ name: "bar", type: "number", optional: true });
+// ~> `bar?: number`
+
+genProperty({ name: "id", type: "string", jsdoc: "Unique id" }, "  ");
+// ~> `/** Unique id *\/\n  id: string`
+```
+
+### `genTry(statements, options, indent)`
+
+Generate `try { statements }` or `try statement`.
+
+**Example:**
+
+```js
+genTry("mightThrow();");
+// ~> `try { mightThrow(); }`
+
+genTry(["const x = await f();", "return x;"]);
+// ~> `try { const x = await f(); return x; }`
+
+genTry("f();", { bracket: false });
+// ~> `try f();`
+```
+
 ### `genTypeAlias(name, value, options, indent)`
 
-Create Type Alias. `value` can be a string or an object type shape (same as `genInterface`).
+Create Type Alias
 
 **Example:**
 
@@ -434,9 +613,7 @@ genTypeExport("@nuxt/utils", [{ name: "test", as: "value" }]);
 
 ### `genTypeObject(object, indent)`
 
-Generate typescript object type. Accepts either a `TypeObject` (record) or `TypeObjectField[]` (array of field descriptors).
-
-**TypeObjectField:** `{ name: string; type?: string; required?: boolean; jsdoc?: string | string[] }`
+Generate typescript object type.
 
 **Example:**
 
@@ -450,14 +627,11 @@ genTypeObject({ "key?": "boolean" });
 genTypeObject({ nested: { value: "string" } });
 // ~> `{ nested: { value: string } }`
 
-genTypeObject([
-  { name: "name", type: "string" },
-  { name: "count", type: "number", required: true },
-]);
+genTypeObject([{ name: "name", type: "string" }, { name: "count", type: "number", required: true }]);
 // ~> `{ name?: string, count: number }`
 
 genTypeObject([{ name: "id", type: "string", jsdoc: "Unique id" }]);
-// ~> `{ /** Unique id */ id?: string }`
+// ~> `{ /** Unique id *\/ id?: string }`
 ```
 
 ### `genVariable(name, value, options)`
@@ -481,6 +655,26 @@ genVariable("y", "2", { export: true });
 ```
 
 ## Utils
+
+### `genJSDocComment(jsdoc, indent)`
+
+Generate a JSDoc block comment from lines or a JSDoc object (typed interface).
+
+**Example:**
+
+```js
+genJSDocComment("Single line");
+// ~> block comment with one line
+
+genJSDocComment(["Line one", "@param x - number", "@returns void"]);
+// ~> multi-line block with those lines
+
+genJSDocComment({ description: "Fn", param: { x: "number" }, returns: "void" });
+// ~> block with description, @param {number} x, @returns {void}
+
+genJSDocComment("Indented", "  ");
+// ~> same block, each line prefixed with indent
+```
 
 ### `genObjectKey(key)`
 

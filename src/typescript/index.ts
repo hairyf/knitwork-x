@@ -14,6 +14,7 @@ export type {
   GenElseOptions,
   GenTryOptions,
   GenCatchOptions,
+  GenFinallyOptions,
 } from "./types";
 
 export {
@@ -32,4 +33,12 @@ export { genParam, genFunction, genBlock } from "./function";
 
 export { genAugmentation, genDeclareNamespace } from "./augmentation";
 
-export { genIf, genElseIf, genElse, genTry, genCatch } from "./control";
+export {
+  genPrefixedBlock,
+  genIf,
+  genElseIf,
+  genElse,
+  genTry,
+  genCatch,
+  genFinally,
+} from "./control";

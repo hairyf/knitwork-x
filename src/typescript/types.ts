@@ -111,3 +111,13 @@ export interface GenCatchOptions extends CodegenOptions {
   /** When false, emit single statement without braces: `catch (e) stmt`. Default true. */
   bracket?: boolean;
 }
+
+export interface GenFinallyOptions extends CodegenOptions {
+  /** When false, emit single statement without braces: `finally stmt`. Default true. */
+  bracket?: boolean;
+}
+
+export interface GenPrefixedBlockOptions extends CodegenOptions {
+  /** When false, emit single statement without braces: `prefix stmt`. Default true. */
+  bracket?: boolean;
+}
