@@ -2,7 +2,7 @@ import { _genStatement } from "./_utils";
 import { ESMCodeGenOptions, ESMImport, genDynamicImport } from "./esm";
 import { genString } from "./string";
 import type { CodegenOptions } from "./types";
-import { genObjectKey, wrapInDelimiters } from "./utils";
+import { genJSDocComment, genObjectKey, wrapInDelimiters } from "./utils";
 
 export interface SpecificGeneric {
   name: string;
@@ -66,7 +66,7 @@ export interface TypeObjectField {
 export interface GenInterfaceOptions {
   extends?: string | string[];
   export?: boolean;
-  jsdoc?: string | Record<string, unknown>;
+  jsdoc?: string | string[];
 }
 
 /**
@@ -258,13 +258,10 @@ export function genTypeObject(
     const lines = object.map((item) => {
       const optional = item.required ? "" : "?";
       const type = item.type ?? "any";
-      let jsdocComment = "";
-      if (item.jsdoc !== undefined) {
-        jsdocComment =
-          typeof item.jsdoc === "string"
-            ? `${newIndent}/** ${item.jsdoc} */\n${newIndent}`
-            : `${newIndent}/**\n${newIndent} * ${item.jsdoc.join(`\n${newIndent} * `)}\n${newIndent} */\n${newIndent}`;
-      }
+      const jsdocComment =
+        item.jsdoc === undefined
+          ? ""
+          : genJSDocComment(item.jsdoc, newIndent) + newIndent;
       const prefix = jsdocComment || newIndent;
       return `${prefix}${genObjectKey(item.name)}${optional}: ${type}`;
     });
@@ -330,18 +327,8 @@ export function genInterface(
   options: GenInterfaceOptions = {},
   indent = "",
 ): string {
-  let jsdocComment = "";
-
-  if (options.jsdoc && typeof options.jsdoc === "string") {
-    jsdocComment = `/** ${options.jsdoc} */\n`;
-  } else if (options.jsdoc && typeof options.jsdoc === "object") {
-    jsdocComment = `/**\n * ${options.jsdoc.description}\n${Object.entries(
-      options.jsdoc,
-    )
-      .filter(([key]) => key !== "description")
-      .map(([key, val]) => ` * @${key} ${val}`)
-      .join("\n")}\n */\n`;
-  }
+  const jsdocComment =
+    options.jsdoc === undefined ? "" : genJSDocComment(options.jsdoc);
 
   const interfaceParts = [
     options.export && "export",
@@ -478,12 +465,7 @@ export function genFunction(
     generics = [],
   } = options;
 
-  let jsdocComment = "";
-  if (jsdoc !== undefined) {
-    const lines = Array.isArray(jsdoc) ? jsdoc : [jsdoc];
-    jsdocComment =
-      `/**\n` + lines.map((line) => ` * ${line}`).join("\n") + "\n */\n";
-  }
+  const jsdocComment = jsdoc === undefined ? "" : genJSDocComment(jsdoc);
 
   const genericPart =
     generics.length > 0

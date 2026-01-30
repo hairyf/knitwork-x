@@ -14,7 +14,6 @@ import {
   genVariable,
 } from "../src";
 import { genTestTitle } from "./_utils";
-
 const genInterfaceTests: Array<{
   input: Parameters<typeof genInterface>;
   code: string;
@@ -48,18 +47,17 @@ const genInterfaceTests: Array<{
   },
   {
     input: ["FooInterface", {}, { jsdoc: "Simple description" }],
-    code: "/** Simple description */\ninterface FooInterface {}",
+    code: `/**
+ * Simple description
+ */
+interface FooInterface {}`,
   },
   {
     input: [
       "FooInterface",
       {},
       {
-        jsdoc: {
-          description: "Complex description",
-          param: "someParam",
-          returns: "void",
-        },
+        jsdoc: ["Complex description", "@param someParam", "@returns void"],
       },
     ],
     code: `/**
@@ -161,11 +159,7 @@ interface FooInterface {}`,
       },
       {
         export: true,
-        jsdoc: {
-          description: "Complex description",
-          param: "someParam",
-          returns: "void",
-        },
+        jsdoc: ["Complex description", "@param someParam", "@returns void"],
       },
     ],
     code: `/**
@@ -190,7 +184,6 @@ describe("genInterface", () => {
     });
   }
 });
-
 const genAugmentationTests: Array<{
   input: Parameters<typeof genAugmentation>;
   code: string;
@@ -427,7 +420,9 @@ const genTypeObjectTests: Array<{
   {
     input: [[{ name: "id", type: "string", jsdoc: "Unique id" }]],
     code: `{
-  /** Unique id */
+  /**
+   * Unique id
+   */
   id?: string
 }`,
   },

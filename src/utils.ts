@@ -2,6 +2,36 @@ import { VALID_IDENTIFIER_RE } from "./_utils";
 import { genString } from "./string";
 
 /**
+ * Generate a JSDoc block comment from lines.
+ *
+ * @example
+ *
+ * ```js
+ * genJSDocComment("Single line");
+ * // ~> block comment with one line
+ *
+ * genJSDocComment(["Line one", "@param x - number", "@returns void"]);
+ * // ~> multi-line block with those lines
+ *
+ * genJSDocComment("Indented", "  ");
+ * // ~> same block, each line prefixed with indent
+ * ```
+ *
+ * @group utils
+ */
+export function genJSDocComment(jsdoc: string | string[], indent = ""): string {
+  const lines = Array.isArray(jsdoc) ? jsdoc : [jsdoc];
+  return (
+    indent +
+    "/**\n" +
+    lines.map((line) => indent + " * " + line).join("\n") +
+    "\n" +
+    indent +
+    " */\n"
+  );
+}
+
+/**
  * Wrap an array of strings in delimiters.
  *
  * @group utils
