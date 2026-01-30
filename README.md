@@ -392,9 +392,9 @@ genInterface("FooInterface", {}, { export: true });
 // ~> `export interface FooInterface {}`
 ```
 
-### `genTypeAlias(name, value, options)`
+### `genTypeAlias(name, value, options, indent)`
 
-Create Type Alias
+Create Type Alias. `value` can be a string or an object type shape (same as `genInterface`).
 
 **Example:**
 
@@ -405,25 +405,11 @@ genTypeAlias("Foo", "string");
 genTypeAlias("Bar", "{ a: number; b: string }");
 // ~> `type Bar = { a: number; b: string }`
 
+genTypeAlias("FooType", { name: "string", count: "number" });
+// ~> `type FooType = { name: string, count: number }`
+
 genTypeAlias("Baz", "string", { export: true });
 // ~> `export type Baz = string`
-```
-
-### `genTypeAliasBlock(alias, indent)`
-
-Create Type Alias Block
-
-**Example:**
-
-```js
-genTypeAliasBlock([{ name: "a", type: "string" }]);
-// ~> `{ a: string }`
-
-genTypeAliasBlock([
-  { name: "name", type: "string" },
-  { name: "count", type: "number" },
-]);
-// ~> `{ name: string, count: number }`
 ```
 
 ### `genTypeExport(specifier, imports, options)`
@@ -442,7 +428,9 @@ genTypeExport("@nuxt/utils", [{ name: "test", as: "value" }]);
 
 ### `genTypeObject(object, indent)`
 
-Generate typescript object type.
+Generate typescript object type. Accepts either a `TypeObject` (record) or `TypeObjectField[]` (array of field descriptors).
+
+**TypeObjectField:** `{ name: string; type?: string; required?: boolean; jsdoc?: string | string[] }`
 
 **Example:**
 
@@ -455,6 +443,15 @@ genTypeObject({ "key?": "boolean" });
 
 genTypeObject({ nested: { value: "string" } });
 // ~> `{ nested: { value: string } }`
+
+genTypeObject([
+  { name: "name", type: "string" },
+  { name: "count", type: "number", required: true },
+]);
+// ~> `{ name?: string, count: number }`
+
+genTypeObject([{ name: "id", type: "string", jsdoc: "Unique id" }]);
+// ~> `{ /** Unique id */ id?: string }`
 ```
 
 ### `genVariable(name, value, options)`

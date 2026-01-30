@@ -10,7 +10,7 @@ import {
   genTypeImport,
   genTypeExport,
   genTypeAlias,
-  genTypeAliasBlock,
+  genTypeObject,
   genVariable,
 } from "../src";
 import { genTestTitle } from "./_utils";
@@ -367,46 +367,6 @@ describe("genTypeExport", () => {
   }
 });
 
-const genTypeAliasBlockTests: Array<{
-  input: Parameters<typeof genTypeAliasBlock>;
-  code: string;
-}> = [
-  { input: [[]], code: "{}" },
-  {
-    input: [[{ name: "a", type: "string" }]],
-    code: `{
-  a: string
-}`,
-  },
-  {
-    input: [
-      [
-        { name: "name", type: "string" },
-        { name: "count", type: "number" },
-      ],
-    ],
-    code: `{
-  name: string
-  count: number
-}`,
-  },
-  {
-    input: [[{ name: "key-with-dash", type: "boolean" }], "  "],
-    code: `{
-    "key-with-dash": boolean
-  }`,
-  },
-];
-
-describe("genTypeAliasBlock", () => {
-  for (const t of genTypeAliasBlockTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genTypeAliasBlock(...t.input);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
-
 const genTypeAliasTests: Array<{
   input: Parameters<typeof genTypeAlias>;
   code: string;
@@ -420,6 +380,13 @@ const genTypeAliasTests: Array<{
     code: "type Bar = { a: number; b: string }",
   },
   {
+    input: ["FooType", { name: "string", count: "number" }],
+    code: `type FooType = {
+  name: string
+  count: number
+}`,
+  },
+  {
     input: ["Baz", "string", { export: true }],
     code: "export type Baz = string",
   },
@@ -429,6 +396,66 @@ describe("genTypeAlias", () => {
   for (const t of genTypeAliasTests) {
     it(genTestTitle(t.code), () => {
       const code = genTypeAlias(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genTypeObjectTests: Array<{
+  input: Parameters<typeof genTypeObject>;
+  code: string;
+}> = [
+  {
+    input: [{ name: "string", count: "number" }],
+    code: `{
+  name: string
+  count: number
+}`,
+  },
+  {
+    input: [
+      [
+        { name: "name", type: "string" },
+        { name: "count", type: "number", required: true },
+      ],
+    ],
+    code: `{
+  name?: string
+  count: number
+}`,
+  },
+  {
+    input: [[{ name: "id", type: "string", jsdoc: "Unique id" }]],
+    code: `{
+  /** Unique id */
+  id?: string
+}`,
+  },
+  {
+    input: [
+      [
+        {
+          name: "prop",
+          type: "boolean",
+          required: true,
+          jsdoc: ["Line one", "Line two"],
+        },
+      ],
+    ],
+    code: `{
+  /**
+   * Line one
+   * Line two
+   */
+  prop: boolean
+}`,
+  },
+];
+
+describe("genTypeObject", () => {
+  for (const t of genTypeObjectTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genTypeObject(...t.input);
       expect(code).to.equal(t.code);
     });
   }
@@ -589,7 +616,7 @@ const genFunctionTests: Array<{
       {
         name: "foo",
         export: true,
-        comment: "Exported foo",
+        jsdoc: "Exported foo",
       },
     ],
     code: `/**
@@ -601,7 +628,7 @@ export function foo() {}`,
     input: [
       {
         name: "bar",
-        comment: ["Line one", "Line two"],
+        jsdoc: ["Line one", "Line two"],
         async: true,
         returnType: "Promise<void>",
       },

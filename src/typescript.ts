@@ -30,8 +30,8 @@ export interface SpecificFunction {
   body?: string[];
   /** is export */
   export?: boolean;
-  /** function comment */
-  comment?: string | string[];
+  /** function JSDoc */
+  jsdoc?: string | string[];
   /** async function */
   async?: boolean;
   /** generator function */
@@ -50,6 +50,18 @@ export type TypeObjectWithJSDoc = {
 export type TypeObject = {
   [key: string]: string | TypeObject | TypeObjectWithJSDoc;
 };
+
+/** Field descriptor for genTypeObject when called with an array. */
+export interface TypeObjectField {
+  /** property name */
+  name: string;
+  /** property type (default: "any") */
+  type?: string;
+  /** if false or omitted, property is optional (key?) */
+  required?: boolean;
+  /** JSDoc for this property */
+  jsdoc?: string | string[];
+}
 
 export interface GenInterfaceOptions {
   extends?: string | string[];
@@ -83,42 +95,6 @@ export interface GenTypeAliasOptions {
   export?: boolean;
 }
 
-export interface TypeAliasItem {
-  /** property name */
-  name: string;
-  /** type expression */
-  type: string;
-}
-
-/**
- * Create Type Alias Block
- *
- * @example
- *
- * ```js
- * genTypeAliasBlock([{ name: "a", type: "string" }]);
- * // ~> `{ a: string }`
- *
- * genTypeAliasBlock([
- *   { name: "name", type: "string" },
- *   { name: "count", type: "number" },
- * ]);
- * // ~> `{ name: string, count: number }`
- * ```
- *
- * @param alias - array of name-type pairs
- * @param indent - optional indent string
- * @returns object type block string
- * @group Typescript
- */
-export function genTypeAliasBlock(alias: TypeAliasItem[], indent = ""): string {
-  const newIndent = indent + "  ";
-  const lines = alias.map(
-    (item) => `${newIndent}${genObjectKey(item.name)}: ${item.type}`,
-  );
-  return wrapInDelimiters(lines, indent, "{}", false);
-}
-
 /**
  * Create Type Alias
  *
@@ -131,23 +107,29 @@ export function genTypeAliasBlock(alias: TypeAliasItem[], indent = ""): string {
  * genTypeAlias("Bar", "{ a: number; b: string }");
  * // ~> `type Bar = { a: number; b: string }`
  *
+ * genTypeAlias("FooType", { name: "string", count: "number" });
+ * // ~> `type FooType = { name: string, count: number }`
+ *
  * genTypeAlias("Baz", "string", { export: true });
  * // ~> `export type Baz = string`
  * ```
  *
  * @param name - alias name
- * @param value - type value (right-hand side)
+ * @param value - type value (right-hand side), string or object type shape
  * @group Typescript
  */
 export function genTypeAlias(
   name: string,
-  value: string,
+  value: string | TypeObject,
   options: GenTypeAliasOptions = {},
+  indent = "",
 ): string {
+  const typeValue =
+    typeof value === "string" ? value : genTypeObject(value, indent);
   const prefix = [options.export && "export", "type", name]
     .filter(Boolean)
     .join(" ");
-  return `${prefix} = ${value}`;
+  return `${prefix} = ${typeValue}`;
 }
 
 export interface GenVariableOptions {
@@ -256,12 +238,38 @@ export function genInlineTypeImport(
  *
  * genTypeObject({ nested: { value: "string" } });
  * // ~> `{ nested: { value: string } }`
+ *
+ * genTypeObject([{ name: "name", type: "string" }, { name: "count", type: "number", required: true }]);
+ * // ~> `{ name?: string, count: number }`
+ *
+ * genTypeObject([{ name: "id", type: "string", jsdoc: "Unique id" }]);
+ * // ~> `{ /** Unique id *\/ id?: string }`
  * ```
  *
  * @group Typescript
  */
-export function genTypeObject(object: TypeObject, indent = ""): string {
+export function genTypeObject(
+  object: TypeObject | TypeObjectField[],
+  indent = "",
+): string {
   const newIndent = indent + "  ";
+
+  if (Array.isArray(object)) {
+    const lines = object.map((item) => {
+      const optional = item.required ? "" : "?";
+      const type = item.type ?? "any";
+      let jsdocComment = "";
+      if (item.jsdoc !== undefined) {
+        jsdocComment =
+          typeof item.jsdoc === "string"
+            ? `${newIndent}/** ${item.jsdoc} */\n${newIndent}`
+            : `${newIndent}/**\n${newIndent} * ${item.jsdoc.join(`\n${newIndent} * `)}\n${newIndent} */\n${newIndent}`;
+      }
+      const prefix = jsdocComment || newIndent;
+      return `${prefix}${genObjectKey(item.name)}${optional}: ${type}`;
+    });
+    return wrapInDelimiters(lines, indent, "{}", false);
+  }
 
   return wrapInDelimiters(
     Object.entries(object).map(([key, value]) => {
@@ -463,7 +471,7 @@ export function genFunction(
     parameters = [],
     body = [],
     export: isExport,
-    comment,
+    jsdoc,
     async: isAsync,
     generator: isGenerator,
     returnType,
@@ -471,8 +479,8 @@ export function genFunction(
   } = options;
 
   let jsdocComment = "";
-  if (comment !== undefined) {
-    const lines = Array.isArray(comment) ? comment : [comment];
+  if (jsdoc !== undefined) {
+    const lines = Array.isArray(jsdoc) ? jsdoc : [jsdoc];
     jsdocComment =
       `/**\n` + lines.map((line) => ` * ${line}`).join("\n") + "\n */\n";
   }
