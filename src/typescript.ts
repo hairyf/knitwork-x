@@ -2,6 +2,7 @@ import { _genStatement } from "./_utils";
 import { ESMCodeGenOptions, ESMImport, genDynamicImport } from "./esm";
 import { genString } from "./string";
 import type { CodegenOptions } from "./types";
+import type { JSDoc } from "./utils";
 import { genJSDocComment, genObjectKey, wrapInDelimiters } from "./utils";
 
 export interface TypeGeneric {
@@ -10,13 +11,15 @@ export interface TypeGeneric {
   default?: string;
 }
 
-export interface Field {
+export interface TypeField {
   /** parameter name */
   name: string;
   /** parameter type */
   type?: string;
   /** optional parameter */
   optional?: boolean;
+  /** JSDoc for this field */
+  jsdoc?: JSDoc;
   /** default value (code string) */
   default?: string;
 }
@@ -25,13 +28,13 @@ export interface FunctionOpts {
   /** function name */
   name: string;
   /** function params */
-  parameters?: Field[];
+  parameters?: TypeField[];
   /** function block (each string is one statement) */
   body?: string[];
   /** is export */
   export?: boolean;
   /** function JSDoc */
-  jsdoc?: string | string[];
+  jsdoc?: JSDoc;
   /** async function */
   async?: boolean;
   /** generator function */
@@ -44,7 +47,7 @@ export interface FunctionOpts {
 
 export type TypeObjectWithJSDoc = {
   type: string;
-  jsdoc: string | Record<string, unknown>;
+  jsdoc: JSDoc;
 };
 
 export type TypeObject = {
@@ -60,13 +63,13 @@ export interface TypeObjectField {
   /** if false or omitted, property is optional (key?) */
   required?: boolean;
   /** JSDoc for this property */
-  jsdoc?: string | string[];
+  jsdoc?: JSDoc;
 }
 
 export interface GenInterfaceOptions {
   extends?: string | string[];
   export?: boolean;
-  jsdoc?: string | string[];
+  jsdoc?: JSDoc;
 }
 
 /**
@@ -275,14 +278,7 @@ export function genTypeObject(
 
       if (isTypeObjectWithJSDoc(value)) {
         const jsdocComment =
-          typeof value.jsdoc === "string"
-            ? `${newIndent}/** ${value.jsdoc} */\n${newIndent}`
-            : `${newIndent}/**\n${newIndent} * ${value.jsdoc.description}\n${Object.entries(
-                value.jsdoc,
-              )
-                .filter(([key]) => key !== "description")
-                .map(([key, val]) => `${newIndent} * @${key} ${val}`)
-                .join("\n")}\n${newIndent} */\n${newIndent}`;
+          genJSDocComment(value.jsdoc, newIndent) + newIndent;
         return `${jsdocComment}${genObjectKey(k)}${optional}: ${value.type}`;
       }
 
@@ -323,12 +319,26 @@ export function genTypeObject(
  */
 export function genInterface(
   name: string,
-  contents?: TypeObject,
+  contents?: TypeObject | TypeField[],
   options: GenInterfaceOptions = {},
   indent = "",
 ): string {
   const jsdocComment =
     options.jsdoc === undefined ? "" : genJSDocComment(options.jsdoc);
+
+  let normalizedContents: TypeObject | TypeObjectField[] | undefined;
+  if (contents === undefined) {
+    normalizedContents = undefined;
+  } else if (Array.isArray(contents)) {
+    normalizedContents = contents.map((f) => ({
+      name: f.name,
+      type: f.type ?? "any",
+      required: !f.optional,
+      jsdoc: f.jsdoc,
+    }));
+  } else {
+    normalizedContents = contents;
+  }
 
   const interfaceParts = [
     options.export && "export",
@@ -339,7 +349,7 @@ export function genInterface(
           ? options.extends.join(", ")
           : options.extends
       }`,
-    contents ? genTypeObject(contents, indent) : "{}",
+    normalizedContents ? genTypeObject(normalizedContents, indent) : "{}",
   ]
     .filter(Boolean)
     .join(" ");
@@ -448,7 +458,7 @@ export function genConstEnum(
  *
  * @group Typescript
  */
-export function genParam(p: Field): string {
+export function genParam(p: TypeField): string {
   let s = p.name;
   if (p.optional) s += "?";
   if (p.type) s += `: ${p.type}`;

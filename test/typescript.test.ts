@@ -48,9 +48,7 @@ const genInterfaceTests: Array<{
   },
   {
     input: ["FooInterface", {}, { jsdoc: "Simple description" }],
-    code: `/**
- * Simple description
- */
+    code: `/** Simple description */
 interface FooInterface {}`,
   },
   {
@@ -173,6 +171,29 @@ export interface FooInterface {
     /** Nested property */
     subProp: boolean
   }
+}`,
+  },
+  {
+    input: [
+      "FooInterface",
+      [
+        { name: "foo", type: "string" },
+        { name: "bar", type: "number", optional: true },
+      ],
+    ],
+    code: `interface FooInterface {
+  foo: string
+  bar?: number
+}`,
+  },
+  {
+    input: [
+      "FooInterface",
+      [{ name: "id", type: "string", jsdoc: "Unique id" }],
+    ],
+    code: `interface FooInterface {
+  /** Unique id */
+  id: string
 }`,
   },
 ];
@@ -424,9 +445,7 @@ const genTypeObjectTests: Array<{
   {
     input: [[{ name: "id", type: "string", jsdoc: "Unique id" }]],
     code: `{
-  /**
-   * Unique id
-   */
+  /** Unique id */
   id?: string
 }`,
   },
@@ -647,9 +666,7 @@ const genFunctionTests: Array<{
         jsdoc: "Exported foo",
       },
     ],
-    code: `/**
- * Exported foo
- */
+    code: `/** Exported foo */
 export function foo() {}`,
   },
   {
