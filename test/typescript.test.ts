@@ -2,6 +2,7 @@ import { expect, describe, it } from "vitest";
 import {
   genInterface,
   genAugmentation,
+  genDeclareNamespace,
   genEnum,
   genConstEnum,
   genInlineTypeImport,
@@ -236,6 +237,61 @@ describe("genAugmentation", () => {
   for (const t of genAugmentationTests) {
     it(genTestTitle(t.code), () => {
       const code = genAugmentation(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genDeclareNamespaceTests: Array<{
+  input: Parameters<typeof genDeclareNamespace>;
+  code: string;
+}> = [
+  { input: ["global"], code: "declare global {}" },
+  {
+    input: ["global", { Window: {} }],
+    code: `declare global {
+  interface Window {}
+}`,
+  },
+  {
+    input: ["global", { Window: {}, Document: {} }],
+    code: `declare global {
+  interface Window {}
+  interface Document {}
+}`,
+  },
+  {
+    input: [
+      "global",
+      {
+        Window: {
+          "customProp?": "string",
+        },
+      },
+    ],
+    code: `declare global {
+  interface Window {
+    customProp?: string
+  }
+}`,
+  },
+  {
+    input: [
+      "global",
+      {
+        Window: [{}, { extends: ["SomeMixin"] }],
+      },
+    ],
+    code: `declare global {
+  interface Window extends SomeMixin {}
+}`,
+  },
+];
+
+describe("genDeclareNamespace", () => {
+  for (const t of genDeclareNamespaceTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genDeclareNamespace(...t.input);
       expect(code).to.equal(t.code);
     });
   }

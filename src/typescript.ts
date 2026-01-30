@@ -230,3 +230,32 @@ export function genAugmentation(
     false,
   )}`;
 }
+
+/** Interfaces shape for declare namespace body (same as genAugmentation). */
+export type DeclareNamespaceInterfaces = Record<
+  string,
+  TypeObject | [TypeObject, Omit<GenInterfaceOptions, "export">]
+>;
+
+/**
+ * Generate typescript `declare <namespace>` block (e.g. `declare global {}`).
+ *
+ * @group Typescript
+ */
+export function genDeclareNamespace(
+  namespace: string,
+  interfaces?: DeclareNamespaceInterfaces,
+): string {
+  return `declare ${namespace} ${wrapInDelimiters(
+    Object.entries(interfaces || {}).map(
+      ([key, entry]) =>
+        "  " +
+        (Array.isArray(entry)
+          ? genInterface(key, ...entry)
+          : genInterface(key, entry, {}, "  ")),
+    ),
+    undefined,
+    undefined,
+    false,
+  )}`;
+}
