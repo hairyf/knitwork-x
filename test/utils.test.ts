@@ -43,6 +43,50 @@ const genJSDocCommentTests: Array<{
     ],
     code: "/**\n * Line one\n * Line two\n * @template T\n * @template K\n * @property {number} id\n * @property {string} name - label\n * @deprecated use other\n */\n",
   },
+  {
+    input: [
+      {
+        description: "Test",
+        since: ["1.0.0", "Added in v1"],
+      },
+    ],
+    code: "/**\n * Test\n * @since 1.0.0\n * @since Added in v1\n */\n",
+  },
+  {
+    input: [
+      {
+        param: { x: "number" },
+      },
+    ],
+    code: "/** @param {number} x */\n",
+  },
+  {
+    input: [
+      {
+        description: "Test",
+        returns: "void",
+      },
+    ],
+    code: "/**\n * Test\n * @returns {void}\n */\n",
+  },
+  {
+    input: [
+      {
+        description: "Test",
+        param: { x: "number - value" },
+      },
+    ],
+    code: "/**\n * Test\n * @param {number} x - value\n */\n",
+  },
+  {
+    input: [
+      {
+        description: "Test",
+        property: { id: "string" },
+      },
+    ],
+    code: "/**\n * Test\n * @property {string} id\n */\n",
+  },
 ];
 
 describe("genJSDocComment", () => {

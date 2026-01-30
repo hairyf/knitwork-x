@@ -229,6 +229,50 @@ const genClassMethodTests: Array<{
   return await Promise.resolve(1);
 }`,
   },
+  {
+    input: [
+      {
+        name: "identity",
+        generics: [{ name: "T", extends: "unknown" }],
+        parameters: [{ name: "x", type: "T" }],
+        returnType: "T",
+        body: ["return x;"],
+      },
+    ],
+    code: `identity<T extends unknown>(x: T): T {
+  return x;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "create",
+        generics: [
+          { name: "T", extends: "object", default: "Record<string, any>" },
+        ],
+        parameters: [{ name: "data", type: "Partial<T>" }],
+        returnType: "T",
+        body: ["return data as T;"],
+      },
+    ],
+    code: `create<T extends object = Record<string, any>>(data: Partial<T>): T {
+  return data as T;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "factory",
+        generics: [{ name: "T", default: "unknown" }],
+        parameters: [],
+        returnType: "T",
+        body: ["return null as T;"],
+      },
+    ],
+    code: `factory<T = unknown>(): T {
+  return null as T;
+}`,
+  },
 ];
 
 describe("genClassMethod", () => {

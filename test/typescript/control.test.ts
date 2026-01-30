@@ -53,6 +53,11 @@ describe("genPrefixedBlock", () => {
       "for (;;) break;",
     );
   });
+  it("if (x) line1\nline2 (bracket: false, multi-line)", () => {
+    expect(
+      genPrefixedBlock("if (x)", "line1\nline2", { bracket: false }),
+    ).to.equal("if (x) line1\nline2");
+  });
 });
 
 const genIfTests: Array<{
@@ -449,6 +454,10 @@ const genDoWhileTests: Array<{
     input: [[], "false", {}],
     code: "do {} while (false);",
   },
+  {
+    input: ["line1\nline2", "cond", { bracket: false }],
+    code: "do line1\nline2 while (cond);",
+  },
 ];
 
 describe("genDoWhile", () => {
@@ -484,6 +493,10 @@ const genCaseTests: Array<{
     code: `case Color.Red:
   return 'red';`,
   },
+  {
+    input: ["2", []],
+    code: "case 2:",
+  },
 ];
 
 describe("genCase", () => {
@@ -512,6 +525,10 @@ const genDefaultTests: Array<{
   },
   {
     input: [],
+    code: "default:",
+  },
+  {
+    input: [[]],
     code: "default:",
   },
 ];

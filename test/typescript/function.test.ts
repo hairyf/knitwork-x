@@ -193,6 +193,34 @@ async function bar(): Promise<void> {}`,
   return obj[key];
 }`,
   },
+  {
+    input: [
+      {
+        name: "identity",
+        generics: [{ name: "T", extends: "unknown" }],
+        parameters: [{ name: "x", type: "T" }],
+        returnType: "T",
+        body: ["return x;"],
+      },
+    ],
+    code: `function identity<T extends unknown>(x: T): T {
+  return x;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "create",
+        generics: [{ name: "T", default: "Record<string, any>" }],
+        parameters: [{ name: "data", type: "T" }],
+        returnType: "T",
+        body: ["return data;"],
+      },
+    ],
+    code: `function create<T = Record<string, any>>(data: T): T {
+  return data;
+}`,
+  },
 ];
 
 describe("genFunction", () => {
@@ -272,6 +300,28 @@ const genArrowFunctionTests: Array<{
   {
     input: [{ body: undefined }],
     code: "() => {}",
+  },
+  {
+    input: [
+      {
+        generics: [{ name: "T", extends: "object" }],
+        parameters: [{ name: "x", type: "T" }],
+        body: "x",
+        returnType: "T",
+      },
+    ],
+    code: "<T extends object>(x: T): T => x",
+  },
+  {
+    input: [
+      {
+        generics: [{ name: "T", default: "unknown" }],
+        parameters: [{ name: "x", type: "T" }],
+        body: "x",
+        returnType: "T",
+      },
+    ],
+    code: "<T = unknown>(x: T): T => x",
   },
 ];
 
@@ -380,6 +430,34 @@ test(x: number) {
       "  ",
     ],
     code: `  empty() {}`,
+  },
+  {
+    input: [
+      {
+        name: "identity",
+        generics: [{ name: "T", extends: "unknown" }],
+        parameters: [{ name: "x", type: "T" }],
+        returnType: "T",
+        body: ["return x;"],
+      },
+    ],
+    code: `identity<T extends unknown>(x: T): T {
+  return x;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "create",
+        generics: [{ name: "T", default: "Record<string, any>" }],
+        parameters: [{ name: "data", type: "T" }],
+        returnType: "T",
+        body: ["return data;"],
+      },
+    ],
+    code: `create<T = Record<string, any>>(data: T): T {
+  return data;
+}`,
   },
 ];
 

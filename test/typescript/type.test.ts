@@ -721,6 +721,10 @@ const genTemplateLiteralTypeTests: Array<{
     input: [["text"]],
     code: "`text`",
   },
+  {
+    input: [[]],
+    code: "``",
+  },
 ];
 
 describe("genTemplateLiteralType", () => {
