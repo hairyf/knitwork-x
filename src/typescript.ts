@@ -544,16 +544,7 @@ export function genFunction(options: FunctionOpts, indent = ""): string {
   const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
 
   const returnPart = returnType ? `: ${returnType}` : "";
-  const newIndent = indent + "  ";
-  const bodyContent =
-    body.length === 0
-      ? "{}"
-      : wrapInDelimiters(
-          body.map((line) => newIndent + line),
-          indent,
-          "{}",
-          false,
-        );
+  const bodyContent = genBlock(body, indent);
 
   const prefix = [
     isExport && "export",
@@ -567,18 +558,20 @@ export function genFunction(options: FunctionOpts, indent = ""): string {
   return `${jsdocComment}${prefix} ${bodyContent}`;
 }
 
-function _indentStatements(statements: string[]): string[] {
-  return statements.flatMap((s) => s.split("\n").map((line) => "  " + line));
-}
-
 /**
  * Generate a statement block `{ statements }`.
  *
  * @example
  *
  * ```js
+ * genBlock();
+ * // ~> `{}`
+ *
  * genBlock([]);
  * // ~> `{}`
+ *
+ * genBlock("return x;");
+ * // ~> `{\n  return x;\n}`
  *
  * genBlock(["return x;"]);
  * // ~> `{\n  return x;\n}`
@@ -592,15 +585,21 @@ function _indentStatements(statements: string[]): string[] {
  *
  * @group Typescript
  */
-export function genBlock(statements: string[], indent = ""): string {
+export function genBlock(statements?: string | string[], indent = ""): string {
+  let arr: string[];
+  if (statements === undefined) {
+    arr = [];
+  } else {
+    arr = Array.isArray(statements) ? statements : [statements];
+  }
   const newIndent = indent + "  ";
   const lines =
-    statements.length === 0
+    arr.length === 0
       ? []
-      : statements.flatMap((s) =>
-          s.split("\n").map((line) => newIndent + line),
-        );
-  return lines.length === 0 ? "{}" : wrapInDelimiters(lines, indent, "{}", false);
+      : arr.flatMap((s) => s.split("\n").map((line) => newIndent + line));
+  return lines.length === 0
+    ? "{}"
+    : wrapInDelimiters(lines, indent, "{}", false);
 }
 
 /**
@@ -628,18 +627,7 @@ export function genAugmentation(
   specifier: string,
   statements?: string | string[],
 ): string {
-  const lines =
-    statements === undefined
-      ? []
-      : _indentStatements(
-          Array.isArray(statements) ? statements : [statements],
-        );
-  return `declare module ${genString(specifier)} ${wrapInDelimiters(
-    lines,
-    undefined,
-    undefined,
-    false,
-  )}`;
+  return `declare module ${genString(specifier)} ${genBlock(statements)}`;
 }
 
 /**
@@ -667,18 +655,7 @@ export function genDeclareNamespace(
   namespace: string,
   statements?: string | string[],
 ): string {
-  const lines =
-    statements === undefined
-      ? []
-      : _indentStatements(
-          Array.isArray(statements) ? statements : [statements],
-        );
-  return `declare ${namespace} ${wrapInDelimiters(
-    lines,
-    undefined,
-    undefined,
-    false,
-  )}`;
+  return `declare ${namespace} ${genBlock(statements)}`;
 }
 
 export interface GenIfOptions extends CodegenOptions {
@@ -707,16 +684,7 @@ function _genConditional(
     const stmt = lines.length === 1 ? lines[0] : lines.join("\n");
     return `${indent}${prefix} ${stmt}`;
   }
-  const newIndent = indent + "  ";
-  const body =
-    lines.length === 0
-      ? "{}"
-      : wrapInDelimiters(
-          lines.map((line) => newIndent + line),
-          indent,
-          "{}",
-          false,
-        );
+  const body = genBlock(lines, indent);
   return `${indent}${prefix} ${body}`;
 }
 

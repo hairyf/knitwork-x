@@ -328,9 +328,16 @@ const genBlockTests: Array<{
   input: Parameters<typeof genBlock>;
   code: string;
 }> = [
+  { input: [], code: "{}" },
   { input: [[]], code: "{}" },
   {
     input: [["return x;"]],
+    code: `{
+  return x;
+}`,
+  },
+  {
+    input: ["return x;"],
     code: `{
   return x;
 }`,
