@@ -3,6 +3,7 @@ import {
   genObjectFromRaw,
   genObjectFromRawEntries,
   genObjectFromValues,
+  genObjectLiteral,
 } from "../src";
 import { genTestTitle } from "./_utils";
 
@@ -111,4 +112,27 @@ describe("genObjectFromValues", () => {
       expect(code).to.equal(t.code);
     });
   }
+});
+
+describe("genObjectLiteral", () => {
+  it("shorthand: 'a' → { a }", () => {
+    expect(genObjectLiteral(["a"])).to.equal("{\n  a\n}");
+  });
+
+  it("key-value: ['a', 'b'] → { a: b }", () => {
+    expect(genObjectLiteral([["a", "b"]])).to.equal("{\n  a: b\n}");
+  });
+
+  it("spread: ['...', 'c'] → { ...c }", () => {
+    expect(genObjectLiteral([["...", "c"]])).to.equal("{\n  ...c\n}");
+  });
+
+  it("mixed: config, type: 'A', ...b", () => {
+    const code = genObjectLiteral(["config", ["type", "'A'"], ["...", "b"]]);
+    expect(code).to.equal("{\n  config,\n  type: 'A',\n  ...b\n}");
+  });
+
+  it("non-identifier key uses quoted key", () => {
+    expect(genObjectLiteral([["obj 1", "x"]])).to.equal('{\n  "obj 1": x\n}');
+  });
 });

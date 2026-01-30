@@ -6,6 +6,15 @@ export interface GenObjectOptions extends CodegenOptions {
 }
 
 /**
+ * Object literal field descriptor.
+ *
+ * @example `'a'` → `{ a }` (shorthand property)
+ * @example `['a', 'b']` → `{ a: b }` (key-value)
+ * @example `['...', 'c']` → `{ ...c }` (spread)
+ */
+export type LiteralField = string | [string | "...", string];
+
+/**
  * Serialize an object to a string.
  *
  * Values are not escaped or quoted.
@@ -97,6 +106,38 @@ export function genObjectFromRawEntries(
     indent,
     "{}",
   );
+}
+
+/**
+ * Create object literal from field descriptors.
+ *
+ * @example
+ *
+ * ```js
+ * genObjectLiteral(['type', ['type', 'A'], ['...', 'b']])
+ * // ~> `{ type, type: A, ...b }`
+ * ```
+ *
+ * @param fields - Array of LiteralField: shorthand (string), key-value ([key, value]), or spread (['...', name])
+ * @group serialization
+ */
+export function genObjectLiteral(
+  fields: LiteralField[],
+  indent = "",
+  _options: GenObjectOptions = {},
+): string {
+  const newIndent = indent + "  ";
+  const lines = fields.map((field) => {
+    if (typeof field === "string") {
+      return `${newIndent}${genObjectKey(field)}`;
+    }
+    const [key, value] = field;
+    if (key === "...") {
+      return `${newIndent}...${value}`;
+    }
+    return `${newIndent}${genObjectKey(key)}: ${value}`;
+  });
+  return wrapInDelimiters(lines, indent, "{}");
 }
 
 // --- Internals ---
