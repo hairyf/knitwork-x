@@ -183,18 +183,11 @@ export function genEnum(
     lastNumeric = 0;
     return `${newIndent}${k}`;
   });
-  const prefix = [
-    isExport && "export",
-    isConst && "const",
-    "enum",
-    name,
-  ]
+  const prefix = [isExport && "export", isConst && "const", "enum", name]
     .filter(Boolean)
     .join(" ");
   const body =
-    lines.length === 0
-      ? "{}"
-      : wrapInDelimiters(lines, indent, "{}", true);
+    lines.length === 0 ? "{}" : wrapInDelimiters(lines, indent, "{}", true);
   return `${prefix} ${body}`;
 }
 

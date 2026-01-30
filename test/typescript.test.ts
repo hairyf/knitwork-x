@@ -133,8 +133,8 @@ interface FooInterface {}`,
         },
       },
       {
-        export: true
-      }
+        export: true,
+      },
     ],
     code: `export interface FooInterface {
   nested: {
@@ -161,7 +161,7 @@ interface FooInterface {}`,
           param: "someParam",
           returns: "void",
         },
-      }
+      },
     ],
     code: `/**
  * Complex description
@@ -335,7 +335,11 @@ const genEnumTests: Array<{
 }`,
   },
   {
-    input: ["E", { A: 1, B: undefined, C: undefined }, { const: true, export: true }],
+    input: [
+      "E",
+      { A: 1, B: undefined, C: undefined },
+      { const: true, export: true },
+    ],
     code: `export const enum E {
   A = 1,
   B = 2,
