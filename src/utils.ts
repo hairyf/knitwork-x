@@ -61,10 +61,7 @@ function formatTypedTag(
  *
  * @group utils
  */
-export function genJSDocComment(
-  jsdoc: JSDoc,
-  indent = "",
-): string {
+export function genJSDocComment(jsdoc: JSDoc, indent = ""): string {
   const lines: string[] = [];
 
   if (typeof jsdoc === "string") {

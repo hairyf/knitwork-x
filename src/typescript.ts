@@ -623,3 +623,119 @@ export function genDeclareNamespace(
     false,
   )}`;
 }
+
+export interface GenIfOptions extends CodegenOptions {
+  /** When false, emit single statement without braces: `if (cond) stmt`. Default true. */
+  bracket?: boolean;
+}
+
+export interface GenElseOptions extends CodegenOptions {
+  /** When false, emit single statement without braces: `else stmt`. Default true. */
+  bracket?: boolean;
+}
+
+interface GenConditionalOptions {
+  bracket?: boolean;
+}
+
+function _genConditional(
+  prefix: string,
+  statements: string | string[],
+  options: GenConditionalOptions,
+  indent: string,
+): string {
+  const { bracket = true } = options;
+  const lines = Array.isArray(statements) ? statements : [statements];
+  if (!bracket) {
+    const stmt = lines.length === 1 ? lines[0] : lines.join("\n");
+    return `${indent}${prefix} ${stmt}`;
+  }
+  const newIndent = indent + "  ";
+  const body =
+    lines.length === 0
+      ? "{}"
+      : wrapInDelimiters(
+          lines.map((line) => newIndent + line),
+          indent,
+          "{}",
+          false,
+        );
+  return `${indent}${prefix} ${body}`;
+}
+
+/**
+ * Generate `if (cond) { statements }` or `if (cond) statement`.
+ *
+ * @example
+ *
+ * ```js
+ * genIf("x > 0", "return x;");
+ * // ~> `if (x > 0) { return x; }`
+ *
+ * genIf("ok", ["doA();", "doB();"]);
+ * // ~> `if (ok) { doA(); doB(); }`
+ *
+ * genIf("x", "console.log(x);", { bracket: false });
+ * // ~> `if (x) console.log(x);`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genIf(
+  cond: string,
+  statements: string | string[],
+  options: GenIfOptions = {},
+  indent = "",
+): string {
+  return _genConditional(`if (${cond})`, statements, options, indent);
+}
+
+/**
+ * Generate `else if (cond) { statements }` or `else if (cond) statement`.
+ *
+ * @example
+ *
+ * ```js
+ * genElseIf("x < 0", "return -x;");
+ * // ~> `else if (x < 0) { return -x; }`
+ *
+ * genElseIf("ok", "doIt();", { bracket: false });
+ * // ~> `else if (ok) doIt();`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genElseIf(
+  cond: string,
+  statements: string | string[],
+  options: GenIfOptions = {},
+  indent = "",
+): string {
+  return _genConditional(`else if (${cond})`, statements, options, indent);
+}
+
+/**
+ * Generate `else { statements }` or `else statement`.
+ *
+ * @example
+ *
+ * ```js
+ * genElse(["return 0;"]);
+ * // ~> `else { return 0; }`
+ *
+ * genElse("fallback();");
+ * // ~> `else { fallback(); }`
+ *
+ * genElse("doIt();", { bracket: false });
+ * // ~> `else doIt();`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genElse(
+  statements: string | string[],
+  options: GenElseOptions = {},
+  indent = "",
+): string {
+  return _genConditional("else", statements, options, indent);
+}
