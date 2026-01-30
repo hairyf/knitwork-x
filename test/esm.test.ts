@@ -5,6 +5,9 @@ import {
   genDynamicImport,
   genSafeVariableName,
   genDynamicTypeImport,
+  genDefaultExport,
+  genExportStar,
+  genExportStarAs,
 } from "../src";
 import { genTestTitle } from "./_utils";
 
@@ -154,6 +157,113 @@ describe("genSafeVariableName", () => {
   for (const t of genSafeVariableNameTests) {
     it(genTestTitle(t.code), () => {
       const code = genSafeVariableName(t.key);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genDefaultExportTests = [
+  { value: "foo", code: "export default foo;" },
+  { value: "42", code: "export default 42;" },
+  {
+    value: "foo",
+    options: { singleQuotes: true },
+    code: "export default foo;",
+  },
+  {
+    value: { name: "bar", parameters: [{ name: "x", type: "string" }] },
+    code: "export default function bar(x: string) {};",
+  },
+  {
+    value: {
+      name: "add",
+      parameters: [
+        { name: "a", type: "number" },
+        { name: "b", type: "number" },
+      ],
+      returnType: "number",
+      body: ["return a + b;"],
+    },
+    code: "export default function add(a: number, b: number): number {\n  return a + b;\n};",
+  },
+  {
+    value: {
+      name: "fetch",
+      async: true,
+      parameters: [{ name: "url", type: "string" }],
+      body: ["return await fetch(url);"],
+    },
+    code: "export default async function fetch(url: string) {\n  return await fetch(url);\n};",
+  },
+];
+
+describe("genDefaultExport", () => {
+  for (const t of genDefaultExportTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genDefaultExport(t.value, t.options);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genExportStarTests = [
+  { specifier: "pkg", code: 'export * from "pkg";' },
+  {
+    specifier: "./utils",
+    options: { singleQuotes: true },
+    code: "export * from './utils';",
+  },
+  {
+    specifier: "pkg",
+    options: { attributes: { type: "json" } },
+    code: 'export * from "pkg" with { type: "json" };',
+  },
+  {
+    specifier: "pkg",
+    options: { assert: { type: "json" } },
+    code: 'export * from "pkg" assert { type: "json" };',
+  },
+];
+
+describe("genExportStar", () => {
+  for (const t of genExportStarTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genExportStar(t.specifier, t.options);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genExportStarAsTests = [
+  {
+    specifier: "pkg",
+    namespace: "utils",
+    code: 'export * as utils from "pkg";',
+  },
+  {
+    specifier: "./helpers",
+    namespace: "Helpers",
+    options: { singleQuotes: true },
+    code: "export * as Helpers from './helpers';",
+  },
+  {
+    specifier: "pkg",
+    namespace: "ns",
+    options: { attributes: { type: "json" } },
+    code: 'export * as ns from "pkg" with { type: "json" };',
+  },
+  {
+    specifier: "pkg",
+    namespace: "ns",
+    options: { assert: { type: "json" } },
+    code: 'export * as ns from "pkg" assert { type: "json" };',
+  },
+];
+
+describe("genExportStarAs", () => {
+  for (const t of genExportStarAsTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genExportStarAs(t.specifier, t.namespace, t.options);
       expect(code).to.equal(t.code);
     });
   }

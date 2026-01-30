@@ -82,6 +82,71 @@ export function genSafeVariableName(name: string) {
   /* eslint-enable unicorn/prefer-code-point */
 }
 
+/**
+ * Generate regex literal from pattern and flags.
+ *
+ * @example
+ *
+ * ```js
+ * genRegExp("foo");
+ * // ~> `/foo/`
+ *
+ * genRegExp("foo", "gi");
+ * // ~> `/foo/gi`
+ *
+ * genRegExp("foo\\d+");
+ * // ~> `/foo\d+/`
+ * ```
+ *
+ * @group string
+ */
+export function genRegExp(pattern: string, flags?: string): string {
+  // Escape forward slashes in the pattern
+  const escapedPattern = pattern.replace(/\//g, "\\/");
+  return flags ? `/${escapedPattern}/${flags}` : `/${escapedPattern}/`;
+}
+
+/**
+ * Generate runtime template literal: `` `hello ${x}` `` (value, not type).
+ *
+ * @example
+ *
+ * ```js
+ * genTemplateLiteral(["hello ", "x"]);
+ * // ~> `` `hello ${x}` ``
+ *
+ * genTemplateLiteral(["prefix", "expr", "suffix"]);
+ * // ~> `` `prefix${expr}suffix` ``
+ *
+ * genTemplateLiteral(["", "value"]);
+ * // ~> `` `${value}` ``
+ *
+ * genTemplateLiteral(["text"]);
+ * // ~> `` `text` ``
+ * ```
+ *
+ * @param parts - array of parts: even indices are string literals, odd indices are expressions
+ * @group string
+ */
+export function genTemplateLiteral(parts: string[]): string {
+  if (parts.length === 0) {
+    return "``";
+  }
+  // Escape backticks and ${ in string parts
+  const escapeTemplateString = (str: string): string => {
+    return str
+      .replace(/\\/g, "\\\\")
+      .replace(/`/g, "\\`")
+      .replace(/\$\{/g, "\\${");
+  };
+  let result = "`";
+  for (const [i, part] of parts.entries()) {
+    result += i % 2 === 0 ? escapeTemplateString(part) : `\${${part}}`;
+  }
+  result += "`";
+  return result;
+}
+
 // -- internal --
 
 // Credit: https://mathiasbynens.be/notes/reserved-keywords

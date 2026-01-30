@@ -163,3 +163,52 @@ export function wrapInDelimiters(
 export function genObjectKey(key: string) {
   return VALID_IDENTIFIER_RE.test(key) ? key : genString(key);
 }
+
+/**
+ * Generate comment: single-line `//` or block comment (non-JSDoc).
+ *
+ * @example
+ *
+ * ```js
+ * genComment("Single line comment");
+ * // ~> `// Single line comment`
+ *
+ * genComment("Multi-line\ncomment", { block: true });
+ * // ~> block comment format
+ *
+ * genComment("Block comment", { block: true });
+ * // ~> block comment format
+ *
+ * genComment("Indented", "  ");
+ * // ~> `  // Indented`
+ * ```
+ *
+ * @param text - comment text (can be multi-line)
+ * @param options - block: use block comment instead of `//`
+ * @param indent - base indent
+ * @group utils
+ */
+export function genComment(
+  text: string,
+  options: { block?: boolean } = {},
+  indent = "",
+): string {
+  const { block = false } = options;
+  if (block) {
+    // Block comment: /* ... */
+    const lines = text.split("\n");
+    if (lines.length === 1) {
+      return `${indent}/* ${lines[0]} */`;
+    }
+    return (
+      `${indent}/*\n` +
+      lines.map((line) => `${indent} * ${line}`).join("\n") +
+      `\n${indent} */`
+    );
+  }
+  // Single-line comment: // ...
+  return text
+    .split("\n")
+    .map((line) => `${indent}// ${line}`)
+    .join("\n");
+}

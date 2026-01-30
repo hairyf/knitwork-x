@@ -1,6 +1,7 @@
 import { _genStatement } from "../_utils";
 import { ESMCodeGenOptions, ESMImport, genDynamicImport } from "../esm";
 import { genJSDocComment, genObjectKey, wrapInDelimiters } from "../utils";
+import { genParam } from "./function";
 import type {
   GenInterfaceOptions,
   GenTypeAliasOptions,
@@ -9,6 +10,8 @@ import type {
   TypeObjectField,
   TypeObjectWithJSDoc,
   TypeField,
+  GenCallSignatureOptions,
+  GenConstructSignatureOptions,
 } from "./types";
 
 /**
@@ -298,4 +301,349 @@ export function genInterface(
     .join(" ");
 
   return `${jsdocComment}${interfaceParts}`;
+}
+
+/**
+ * Generate union type.
+ *
+ * @example
+ *
+ * ```js
+ * genUnion(["string", "number"]);
+ * // ~> `string | number`
+ *
+ * genUnion(["A", "B", "C"]);
+ * // ~> `A | B | C`
+ *
+ * genUnion("string");
+ * // ~> `string`
+ * ```
+ *
+ * @param types - array of type strings or single type string
+ * @group Typescript
+ */
+export function genUnion(types: string | string[]): string {
+  const typeArray = Array.isArray(types) ? types : [types];
+  if (typeArray.length === 0) {
+    return "never";
+  }
+  if (typeArray.length === 1) {
+    return typeArray[0]!;
+  }
+  return typeArray.join(" | ");
+}
+
+/**
+ * Generate intersection type.
+ *
+ * @example
+ *
+ * ```js
+ * genIntersection(["A", "B"]);
+ * // ~> `A & B`
+ *
+ * genIntersection(["A", "B", "C"]);
+ * // ~> `A & B & C`
+ *
+ * genIntersection("string");
+ * // ~> `string`
+ * ```
+ *
+ * @param types - array of type strings or single type string
+ * @group Typescript
+ */
+export function genIntersection(types: string | string[]): string {
+  const typeArray = Array.isArray(types) ? types : [types];
+  if (typeArray.length === 0) {
+    return "never";
+  }
+  if (typeArray.length === 1) {
+    return typeArray[0]!;
+  }
+  return typeArray.join(" & ");
+}
+
+/**
+ * Generate mapped type.
+ *
+ * @example
+ *
+ * ```js
+ * genMappedType("K", "keyof T", "U");
+ * // ~> `{ [K in keyof T]: U }`
+ *
+ * genMappedType("P", "keyof T", "T[P]");
+ * // ~> `{ [P in keyof T]: T[P] }`
+ * ```
+ *
+ * @param keyName - key variable name (e.g. "K", "P")
+ * @param keyType - key type constraint (e.g. "keyof T", "string")
+ * @param valueType - value type expression
+ * @group Typescript
+ */
+export function genMappedType(
+  keyName: string,
+  keyType: string,
+  valueType: string,
+): string {
+  return `{ [${keyName} in ${keyType}]: ${valueType} }`;
+}
+
+/**
+ * Generate conditional type.
+ *
+ * @example
+ *
+ * ```js
+ * genConditionalType("T", "U", "X", "Y");
+ * // ~> `T extends U ? X : Y`
+ *
+ * genConditionalType("T", "null", "never", "T");
+ * // ~> `T extends null ? never : T`
+ * ```
+ *
+ * @param checkType - type to check (e.g. "T")
+ * @param extendsType - type to extend (e.g. "U")
+ * @param trueType - type when condition is true (e.g. "X")
+ * @param falseType - type when condition is false (e.g. "Y")
+ * @group Typescript
+ */
+export function genConditionalType(
+  checkType: string,
+  extendsType: string,
+  trueType: string,
+  falseType: string,
+): string {
+  return `${checkType} extends ${extendsType} ? ${trueType} : ${falseType}`;
+}
+
+/**
+ * Generate index signature.
+ *
+ * @example
+ *
+ * ```js
+ * genIndexSignature("string", "number");
+ * // ~> `[key: string]: number`
+ *
+ * genIndexSignature("number", "string");
+ * // ~> `[key: number]: string`
+ *
+ * genIndexSignature("key", "string", "any");
+ * // ~> `[key: string]: any`
+ * ```
+ *
+ * @param keyName - index key name (default: "key")
+ * @param keyType - index key type (e.g. "string", "number")
+ * @param valueType - value type
+ * @group Typescript
+ */
+export function genIndexSignature(
+  keyType: string,
+  valueType: string,
+  keyName = "key",
+): string {
+  return `[${keyName}: ${keyType}]: ${valueType}`;
+}
+
+/**
+ * Generate call signature for interfaces.
+ *
+ * @example
+ *
+ * ```js
+ * genCallSignature({ parameters: [{ name: "x", type: "string" }], returnType: "number" });
+ * // ~> `(x: string): number`
+ *
+ * genCallSignature({ parameters: [{ name: "a", type: "number" }, { name: "b", type: "number", optional: true }], returnType: "void" });
+ * // ~> `(a: number, b?: number): void`
+ *
+ * genCallSignature({ generics: [{ name: "T" }], parameters: [{ name: "x", type: "T" }], returnType: "T" });
+ * // ~> `<T>(x: T): T`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genCallSignature(
+  options: GenCallSignatureOptions = {},
+): string {
+  const { parameters = [], returnType, generics = [] } = options;
+
+  const genericPart =
+    generics.length > 0
+      ? "<" +
+        generics
+          .map((g) => {
+            let s = g.name;
+            if (g.extends) s += ` extends ${g.extends}`;
+            if (g.default) s += ` = ${g.default}`;
+            return s;
+          })
+          .join(", ") +
+        ">"
+      : "";
+
+  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
+  const returnPart = returnType ? `: ${returnType}` : "";
+
+  return `${genericPart}${paramsPart}${returnPart}`;
+}
+
+/**
+ * Generate construct signature for interfaces.
+ *
+ * @example
+ *
+ * ```js
+ * genConstructSignature({ parameters: [{ name: "x", type: "string" }], returnType: "MyClass" });
+ * // ~> `new (x: string): MyClass`
+ *
+ * genConstructSignature({ parameters: [{ name: "value", type: "number" }], returnType: "Instance" });
+ * // ~> `new (value: number): Instance`
+ *
+ * genConstructSignature({ generics: [{ name: "T" }], parameters: [{ name: "x", type: "T" }], returnType: "T" });
+ * // ~> `new <T>(x: T): T`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genConstructSignature(
+  options: GenConstructSignatureOptions = {},
+): string {
+  const { parameters = [], returnType, generics = [] } = options;
+
+  const genericPart =
+    generics.length > 0
+      ? "<" +
+        generics
+          .map((g) => {
+            let s = g.name;
+            if (g.extends) s += ` extends ${g.extends}`;
+            if (g.default) s += ` = ${g.default}`;
+            return s;
+          })
+          .join(", ") +
+        ">"
+      : "";
+
+  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
+  const returnPart = returnType ? `: ${returnType}` : "";
+
+  return `new ${genericPart}${paramsPart}${returnPart}`;
+}
+
+/**
+ * Generate template literal type.
+ *
+ * @example
+ *
+ * ```js
+ * genTemplateLiteralType(["prefix", "T", "suffix"]);
+ * // ~> `` `prefix${T}suffix` ``
+ *
+ * genTemplateLiteralType(["Hello ", "T", ""]);
+ * // ~> `` `Hello ${T}` ``
+ *
+ * genTemplateLiteralType(["", "K", "Key"]);
+ * // ~> `` `${K}Key` ``
+ *
+ * genTemplateLiteralType(["prefix", "T1", "middle", "T2", "suffix"]);
+ * // ~> `` `prefix${T1}middle${T2}suffix` ``
+ * ```
+ *
+ * @param parts - array of parts: even indices are string literals, odd indices are type expressions
+ * @group Typescript
+ */
+export function genTemplateLiteralType(parts: string[]): string {
+  if (parts.length === 0) {
+    return "``";
+  }
+  let result = "`";
+  for (const [i, part] of parts.entries()) {
+    result += i % 2 === 0 ? part : `\${${part}}`;
+  }
+  result += "`";
+  return result;
+}
+
+/**
+ * Generate keyof type.
+ *
+ * @example
+ *
+ * ```js
+ * genKeyOf("T");
+ * // ~> `keyof T`
+ *
+ * genKeyOf("MyObject");
+ * // ~> `keyof MyObject`
+ * ```
+ *
+ * @param type - type name
+ * @group Typescript
+ */
+export function genKeyOf(type: string): string {
+  return `keyof ${type}`;
+}
+
+/**
+ * Generate typeof type.
+ *
+ * @example
+ *
+ * ```js
+ * genTypeof("someVar");
+ * // ~> `typeof someVar`
+ *
+ * genTypeof("myFunction");
+ * // ~> `typeof myFunction`
+ * ```
+ *
+ * @param expr - expression (variable name or expression)
+ * @group Typescript
+ */
+export function genTypeof(expr: string): string {
+  return `typeof ${expr}`;
+}
+
+/**
+ * Generate type assertion: `expr as Type`.
+ *
+ * @example
+ *
+ * ```js
+ * genTypeAssertion("value", "string");
+ * // ~> `value as string`
+ *
+ * genTypeAssertion("obj", "MyType");
+ * // ~> `obj as MyType`
+ * ```
+ *
+ * @param expr - expression to assert
+ * @param type - target type
+ * @group Typescript
+ */
+export function genTypeAssertion(expr: string, type: string): string {
+  return `${expr} as ${type}`;
+}
+
+/**
+ * Generate satisfies expression: `expr satisfies Type` (TS 4.9+).
+ *
+ * @example
+ *
+ * ```js
+ * genSatisfies("{ a: 1 }", "{ a: number }");
+ * // ~> `{ a: 1 } satisfies { a: number }`
+ *
+ * genSatisfies("config", "ConfigType");
+ * // ~> `config satisfies ConfigType`
+ * ```
+ *
+ * @param expr - expression to check
+ * @param type - type to satisfy
+ * @group Typescript
+ */
+export function genSatisfies(expr: string, type: string): string {
+  return `${expr} satisfies ${type}`;
 }

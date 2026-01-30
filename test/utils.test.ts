@@ -1,5 +1,5 @@
 import { expect, describe, it } from "vitest";
-import { genJSDocComment } from "../src";
+import { genJSDocComment, genComment } from "../src";
 import { genTestTitle } from "./_utils";
 
 const genJSDocCommentTests: Array<{
@@ -49,6 +49,44 @@ describe("genJSDocComment", () => {
   for (const t of genJSDocCommentTests) {
     it(genTestTitle(t.code), () => {
       expect(genJSDocComment(...t.input)).to.equal(t.code);
+    });
+  }
+});
+
+const genCommentTests: Array<{
+  input: Parameters<typeof genComment>;
+  code: string;
+}> = [
+  {
+    input: ["Single line comment"],
+    code: "// Single line comment",
+  },
+  {
+    input: ["Multi-line\ncomment", { block: true }],
+    code: "/*\n * Multi-line\n * comment\n */",
+  },
+  {
+    input: ["Block comment", { block: true }],
+    code: "/* Block comment */",
+  },
+  {
+    input: ["Indented", {}, "  "],
+    code: "  // Indented",
+  },
+  {
+    input: ["Line 1\nLine 2"],
+    code: "// Line 1\n// Line 2",
+  },
+  {
+    input: ["Multi\nline\nblock", { block: true }, "  "],
+    code: "  /*\n   * Multi\n   * line\n   * block\n   */",
+  },
+];
+
+describe("genComment", () => {
+  for (const t of genCommentTests) {
+    it(genTestTitle(t.code), () => {
+      expect(genComment(...t.input)).to.equal(t.code);
     });
   }
 });

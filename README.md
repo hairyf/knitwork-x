@@ -62,6 +62,23 @@ import {} from "https://esm.sh/knitwork";
 
 ## ESM
 
+### `genDefaultExport(value, _options)`
+
+Generate an ESM `export default` statement.
+
+**Example:**
+
+```js
+genDefaultExport("foo");
+// ~> `export default foo;`
+
+genDefaultExport({ name: "bar", parameters: [{ name: "x", type: "string" }] });
+// ~> `export default function bar(x: string) {}`
+
+genDefaultExport("42", { singleQuotes: true });
+// ~> `export default 42;`
+```
+
 ### `genDynamicImport(specifier, options)`
 
 Generate an ESM dynamic `import()` statement.
@@ -111,6 +128,40 @@ genExport("pkg", ["a", "b"]);
 
 genExport("pkg", { name: "*", as: "bar" });
 // ~> `export * as bar from "pkg";`
+```
+
+### `genExportStar(specifier, options)`
+
+Generate an ESM `export *` statement (re-export all).
+
+**Example:**
+
+```js
+genExportStar("pkg");
+// ~> `export * from "pkg";`
+
+genExportStar("./utils", { singleQuotes: true });
+// ~> `export * from './utils';`
+
+genExportStar("pkg", { attributes: { type: "json" } });
+// ~> `export * from "pkg" with { type: "json" };`
+```
+
+### `genExportStarAs(specifier, namespace, options)`
+
+Generate an ESM `export * as` statement (re-export all as namespace).
+
+**Example:**
+
+```js
+genExportStarAs("pkg", "utils");
+// ~> `export * as utils from "pkg";`
+
+genExportStarAs("./helpers", "Helpers", { singleQuotes: true });
+// ~> `export * as Helpers from './helpers';`
+
+genExportStarAs("pkg", "ns", { attributes: { type: "json" } });
+// ~> `export * as ns from "pkg" with { type: "json" };`
 ```
 
 ### `genImport(specifier, imports?, options)`
@@ -168,6 +219,19 @@ genArrayFromRaw([1, 2, 3])
 // ~> `[1, 2, 3]`
 ```
 
+### `genMapFromRaw(entries, indent, options)`
+
+Serialize a Map to a string from raw entries.
+
+Values are escaped and quoted if necessary (strings, etc.).
+
+**Example:**
+
+```js
+genMapFromRaw([["foo", "bar"], ["baz", 1]]);
+// ~> `new Map([["foo", "bar"], ["baz", 1]])`
+```
+
 ### `genObjectFromRaw(object, indent, options)`
 
 Serialize an object to a string.
@@ -218,6 +282,19 @@ genObjectLiteral(['type', ['type', 'A'], ['...', 'b']])
 // ~> `{ type, type: A, ...b }`
 ```
 
+### `genSetFromRaw(values, indent, options)`
+
+Serialize a Set to a string from raw values.
+
+Values are escaped and quoted if necessary (strings, etc.).
+
+**Example:**
+
+```js
+genSetFromRaw(["foo", "bar", 1]);
+// ~> `new Set(["foo", "bar", 1])`
+```
+
 ## String
 
 ### `escapeString(id)`
@@ -232,6 +309,23 @@ escapeString("foo'bar");
 
 escapeString("foo\nbar");
 // ~> `foo\nbar`
+```
+
+### `genRegExp(pattern, flags?)`
+
+Generate regex literal from pattern and flags.
+
+**Example:**
+
+```js
+genRegExp("foo");
+// ~> `/foo/`
+
+genRegExp("foo", "gi");
+// ~> `/foo/gi`
+
+genRegExp("foo\\d+");
+// ~> `/foo\d+/`
 ```
 
 ### `genSafeVariableName(name)`
@@ -268,7 +362,50 @@ genString("foo\nbar");
 // ~> `"foo\nbar"`
 ```
 
+### `genTemplateLiteral(parts)`
+
+Generate runtime template literal: `` `hello ${x}` `` (value, not type).
+
+**Example:**
+
+```js
+genTemplateLiteral(["hello ", "x"]);
+// ~> `` `hello ${x}` ``
+
+genTemplateLiteral(["prefix", "expr", "suffix"]);
+// ~> `` `prefix${expr}suffix` ``
+
+genTemplateLiteral(["", "value"]);
+// ~> `` `${value}` ``
+
+genTemplateLiteral(["text"]);
+// ~> `` `text` ``
+```
+
 ## Typescript
+
+### `genArrowFunction(options)`
+
+Generate arrow function: `(params) => body` or `(params) => { statements }`.
+
+**Example:**
+
+```js
+genArrowFunction({ body: "x + 1" });
+// ~> `() => x + 1`
+
+genArrowFunction({ parameters: [{ name: "x", type: "number" }], body: "x * 2" });
+// ~> `(x: number) => x * 2`
+
+genArrowFunction({ parameters: [{ name: "x" }], body: ["return x + 1;"] });
+// ~> `(x) => {\n  return x + 1;\n}`
+
+genArrowFunction({ parameters: [{ name: "x", type: "string" }], body: "x.length", returnType: "number" });
+// ~> `(x: string): number => x.length`
+
+genArrowFunction({ async: true, parameters: [{ name: "url", type: "string" }], body: ["return fetch(url);"] });
+// ~> `async (url: string) => {\n  return fetch(url);\n}`
+```
 
 ### `genAugmentation(specifier, statements?)`
 
@@ -316,6 +453,40 @@ genBlock(["return x;"], "  ");
 // ~> `{\n    return x;\n  }`
 ```
 
+### `genCallSignature(options)`
+
+Generate call signature for interfaces.
+
+**Example:**
+
+```js
+genCallSignature({ parameters: [{ name: "x", type: "string" }], returnType: "number" });
+// ~> `(x: string): number`
+
+genCallSignature({ parameters: [{ name: "a", type: "number" }, { name: "b", type: "number", optional: true }], returnType: "void" });
+// ~> `(a: number, b?: number): void`
+
+genCallSignature({ generics: [{ name: "T" }], parameters: [{ name: "x", type: "T" }], returnType: "T" });
+// ~> `<T>(x: T): T`
+```
+
+### `genCase(value, statements?, indent)`
+
+Generate `case value:` optionally followed by indented statements (fall-through when omitted).
+
+**Example:**
+
+```js
+genCase("1", "break;");
+// ~> `case 1:\n  break;`
+
+genCase("'a'", ["doA();", "break;"]);
+// ~> `case 'a':\n  doA();\n  break;`
+
+genCase("0");
+// ~> `case 0:` (fall-through)
+```
+
 ### `genCatch(statements, options, indent)`
 
 Generate `catch (binding) { statements }`, `catch { statements }`, or single-statement form.
@@ -333,6 +504,80 @@ genCatch("handle(e);", { binding: "e", bracket: false });
 // ~> `catch (e) handle(e);`
 ```
 
+### `genClass(name, members, options, indent)`
+
+Generate `class Name [extends Base] [implements I1, I2] { ... }`.
+
+**Example:**
+
+```js
+genClass("Foo");
+// ~> `class Foo {}`
+
+genClass("Bar", [genConstructor([], ["super();"])]);
+// ~> `class Bar { constructor() { super(); } }`
+
+genClass("Baz", [], { extends: "Base", implements: ["I1", "I2"] });
+// ~> `class Baz extends Base implements I1, I2 {}`
+
+genClass("Exported", [], { export: true });
+// ~> `export class Exported {}`
+```
+
+### `genClassMethod(options, indent)`
+
+Generate class method (including get/set) with optional async/generator.
+
+**Example:**
+
+```js
+genClassMethod({ name: "foo" });
+// ~> `foo() {}`
+
+genClassMethod({ name: "bar", parameters: [{ name: "x", type: "string" }], body: ["return x;"], returnType: "string" });
+// ~> `bar(x: string): string { return x; }`
+
+genClassMethod({ name: "value", kind: "get", body: ["return this._v;"], returnType: "number" });
+// ~> `get value(): number { return this._v; }`
+
+genClassMethod({ name: "value", kind: "set", parameters: [{ name: "v", type: "number" }], body: ["this._v = v;"] });
+// ~> `set value(v: number) { this._v = v; }`
+```
+
+### `genClassProperty(name, options, indent)`
+
+Generate class property: `name: Type` or `name = value` (with optional modifiers).
+
+**Example:**
+
+```js
+genClassProperty("x", { type: "number" });
+// ~> `x: number`
+
+genClassProperty("y", { value: "0" });
+// ~> `y = 0`
+
+genClassProperty("z", { type: "string", value: "'z'" });
+// ~> `z: string = 'z'`
+
+genClassProperty("id", { type: "string", readonly: true, static: true });
+// ~> `static readonly id: string`
+```
+
+### `genConditionalType(checkType, extendsType, trueType, falseType)`
+
+Generate conditional type.
+
+**Example:**
+
+```js
+genConditionalType("T", "U", "X", "Y");
+// ~> `T extends U ? X : Y`
+
+genConditionalType("T", "null", "never", "T");
+// ~> `T extends null ? never : T`
+```
+
 ### `genConstEnum(name, members, options, indent)`
 
 Generate typescript const enum (shorthand for `genEnum` with `const: true`).
@@ -345,6 +590,40 @@ genConstEnum("Direction", { Up: 1, Down: 2 });
 
 genConstEnum("Mode", { Read: 0, Write: 1 }, { export: true });
 // ~> `export const enum Mode { Read = 0, Write = 1 }`
+```
+
+### `genConstructor(parameters, body, options, indent)`
+
+Generate constructor(params) { [super(...);] ... }.
+
+**Example:**
+
+```js
+genConstructor();
+// ~> `constructor() {}`
+
+genConstructor([{ name: "x", type: "string" }], ["super();", "this.x = x;"]);
+// ~> `constructor(x: string) { super(); this.x = x; }`
+
+genConstructor([{ name: "a", type: "number" }, { name: "b", type: "number" }], ["super(a, b);"]);
+// ~> `constructor(a: number, b: number) { super(a, b); }`
+```
+
+### `genConstructSignature(options)`
+
+Generate construct signature for interfaces.
+
+**Example:**
+
+```js
+genConstructSignature({ parameters: [{ name: "x", type: "string" }], returnType: "MyClass" });
+// ~> `new (x: string): MyClass`
+
+genConstructSignature({ parameters: [{ name: "value", type: "number" }], returnType: "Instance" });
+// ~> `new (value: number): Instance`
+
+genConstructSignature({ generics: [{ name: "T" }], parameters: [{ name: "x", type: "T" }], returnType: "T" });
+// ~> `new <T>(x: T): T`
 ```
 
 ### `genDeclareNamespace(namespace, statements?)`
@@ -365,6 +644,60 @@ genDeclareNamespace("global", [
   "const foo: string",
 ]);
 // ~> `declare global { interface Window {...} const foo: string }`
+```
+
+### `genDecorator(name, args?, indent)`
+
+Generate decorator: `@decorator` or `@decorator(args)`.
+
+**Example:**
+
+```js
+genDecorator("Component");
+// ~> `@Component`
+
+genDecorator("Injectable", "()");
+// ~> `@Injectable()`
+
+genDecorator("Route", '("/api")');
+// ~> `@Route("/api")`
+
+genDecorator("Validate", "(min: 0, max: 100)");
+// ~> `@Validate(min: 0, max: 100)`
+```
+
+### `genDefault(statements?, indent)`
+
+Generate `default:` optionally followed by indented statements.
+
+**Example:**
+
+```js
+genDefault("return 0;");
+// ~> `default:\n  return 0;`
+
+genDefault(["log('default');", "break;"]);
+// ~> `default:\n  log('default');\n  break;`
+
+genDefault();
+// ~> `default:` (fall-through)
+```
+
+### `genDoWhile(statements, cond, options, indent)`
+
+Generate `do { body } while (cond);` or single-statement form.
+
+**Example:**
+
+```js
+genDoWhile("step();", "!done");
+// ~> `do { step(); } while (!done);`
+
+genDoWhile(["read();", "check();"], "eof");
+// ~> `do { read(); check(); } while (eof);`
+
+genDoWhile("next();", "hasMore", { bracket: false });
+// ~> `do next(); while (hasMore);`
 ```
 
 ### `genElse(statements, options, indent)`
@@ -435,6 +768,57 @@ genFinally("cleanup();", { bracket: false });
 // ~> `finally cleanup();`
 ```
 
+### `genFor(init, test, update, statements, options, indent)`
+
+Generate C-style `for (init; test; update) { body }` or single-statement form.
+
+**Example:**
+
+```js
+genFor("let i = 0", "i < n", "i++", "console.log(i);");
+// ~> `for (let i = 0; i < n; i++) { console.log(i); }`
+
+genFor("", "true", "", ["doWork();", "if (done) break;"]);
+// ~> `for (; true; ) { doWork(); if (done) break; }`
+
+genFor("i = 0", "i < 10", "i++", "sum += i;", { bracket: false });
+// ~> `for (i = 0; i < 10; i++) sum += i;`
+```
+
+### `genForIn(left, obj, statements, options, indent)`
+
+Generate `for (left in obj) { body }` or single-statement form.
+
+**Example:**
+
+```js
+genForIn("const key", "obj", "console.log(key, obj[key]);");
+// ~> `for (const key in obj) { console.log(key, obj[key]); }`
+
+genForIn("const k", "o", ["sum += o[k];"]);
+// ~> `for (const k in o) { sum += o[k]; }`
+
+genForIn("let p", "obj", "visit(p);", { bracket: false });
+// ~> `for (let p in obj) visit(p);`
+```
+
+### `genForOf(left, iterable, statements, options, indent)`
+
+Generate `for (left of iterable) { body }` or single-statement form.
+
+**Example:**
+
+```js
+genForOf("const x", "items", "console.log(x);");
+// ~> `for (const x of items) { console.log(x); }`
+
+genForOf("let [k, v]", "Object.entries(obj)", ["process(k, v);"]);
+// ~> `for (let [k, v] of Object.entries(obj)) { process(k, v); }`
+
+genForOf("const item", "list", "yield item;", { bracket: false });
+// ~> `for (const item of list) yield item;`
+```
+
 ### `genFunction(options, indent)`
 
 Generate typescript function declaration from Function.
@@ -455,6 +839,20 @@ genFunction({ name: "foo", export: true });
 // ~> `export function foo() {}`
 ```
 
+### `genGetter(name, body, options, indent)`
+
+Generate getter: `get name() { ... }` (for class or object literal).
+
+**Example:**
+
+```js
+genGetter("value", ["return this._v;"]);
+// ~> `get value() { return this._v; }`
+
+genGetter("id", ["return this._id;"], { returnType: "string" });
+// ~> `get id(): string { return this._id; }`
+```
+
 ### `genIf(cond, statements, options, indent)`
 
 Generate `if (cond) { statements }` or `if (cond) statement`.
@@ -470,6 +868,23 @@ genIf("ok", ["doA();", "doB();"]);
 
 genIf("x", "console.log(x);", { bracket: false });
 // ~> `if (x) console.log(x);`
+```
+
+### `genIndexSignature(keyType, valueType, keyName)`
+
+Generate index signature.
+
+**Example:**
+
+```js
+genIndexSignature("string", "number");
+// ~> `[key: string]: number`
+
+genIndexSignature("number", "string");
+// ~> `[key: number]: string`
+
+genIndexSignature("key", "string", "any");
+// ~> `[key: string]: any`
 ```
 
 ### `genInlineTypeImport(specifier, name, options)`
@@ -504,6 +919,107 @@ genInterface("FooInterface", undefined, { extends: "Other" });
 
 genInterface("FooInterface", {}, { export: true });
 // ~> `export interface FooInterface {}`
+```
+
+### `genIntersection(types)`
+
+Generate intersection type.
+
+**Example:**
+
+```js
+genIntersection(["A", "B"]);
+// ~> `A & B`
+
+genIntersection(["A", "B", "C"]);
+// ~> `A & B & C`
+
+genIntersection("string");
+// ~> `string`
+```
+
+### `genKeyOf(type)`
+
+Generate keyof type.
+
+**Example:**
+
+```js
+genKeyOf("T");
+// ~> `keyof T`
+
+genKeyOf("MyObject");
+// ~> `keyof MyObject`
+```
+
+### `genMappedType(keyName, keyType, valueType)`
+
+Generate mapped type.
+
+**Example:**
+
+```js
+genMappedType("K", "keyof T", "U");
+// ~> `{ [K in keyof T]: U }`
+
+genMappedType("P", "keyof T", "T[P]");
+// ~> `{ [P in keyof T]: T[P] }`
+```
+
+### `genMethod(options, indent)`
+
+Generate shorthand object method: `name(params) { body }` (no `function` keyword).
+
+**Example:**
+
+```js
+genMethod({ name: "foo" });
+// ~> `foo() {}`
+
+genMethod({ name: "bar", parameters: [{ name: "x", type: "string" }], body: ["return x;"] });
+// ~> `bar(x: string) {\n  return x;\n}`
+
+genMethod({ name: "add", parameters: [{ name: "a", type: "number" }, { name: "b", type: "number" }], returnType: "number", body: ["return a + b;"] });
+// ~> `add(a: number, b: number): number {\n  return a + b;\n}`
+
+genMethod({ name: "fetch", async: true, parameters: [{ name: "url", type: "string" }], body: ["return await fetch(url);"] });
+// ~> `async fetch(url: string) {\n  return await fetch(url);\n}`
+```
+
+### `genModule(specifier, statements?)`
+
+Generate typescript `declare module` block.
+
+This is an alias for `genAugmentation` for consistency with TypeScript terminology.
+
+**Example:**
+
+```js
+genModule("@nuxt/utils");
+// ~> `declare module "@nuxt/utils" {}`
+
+genModule("@nuxt/utils", "interface MyInterface {}");
+// ~> `declare module "@nuxt/utils" { interface MyInterface {} }`
+```
+
+### `genNamespace(name, statements?)`
+
+Generate typescript `namespace` block (non-declare; TS namespace).
+
+**Example:**
+
+```js
+genNamespace("MyNamespace");
+// ~> `namespace MyNamespace {}`
+
+genNamespace("MyNamespace", "interface MyInterface {}");
+// ~> `namespace MyNamespace { interface MyInterface {} }`
+
+genNamespace("MyNamespace", [
+  "interface MyInterface { test?: string }",
+  "const foo: string",
+]);
+// ~> `namespace MyNamespace { interface MyInterface {...} const foo: string }`
 ```
 
 ### `genParam(p)`
@@ -560,6 +1076,116 @@ genProperty({ name: "id", type: "string", jsdoc: "Unique id" }, "  ");
 // ~> `/** Unique id *\/\n  id: string`
 ```
 
+### `genReturn(expr?, indent)`
+
+Generate `return expr;` or `return;`.
+
+**Example:**
+
+```js
+genReturn("x");
+// ~> `return x;`
+
+genReturn();
+// ~> `return;`
+
+genReturn("a + b");
+// ~> `return a + b;`
+```
+
+### `genSatisfies(expr, type)`
+
+Generate satisfies expression: `expr satisfies Type` (TS 4.9+).
+
+**Example:**
+
+```js
+genSatisfies("{ a: 1 }", "{ a: number }");
+// ~> `{ a: 1 } satisfies { a: number }`
+
+genSatisfies("config", "ConfigType");
+// ~> `config satisfies ConfigType`
+```
+
+### `genSetter(name, paramName, body, options, indent)`
+
+Generate setter: `set name(param) { ... }` (for class or object literal).
+
+**Example:**
+
+```js
+genSetter("value", "v", ["this._v = v;"]);
+// ~> `set value(v) { this._v = v; }`
+
+genSetter("id", "x", ["this._id = x;"], { paramType: "string" });
+// ~> `set id(x: string) { this._id = x; }`
+```
+
+### `genSwitch(expr, cases, options, indent)`
+
+Generate `switch (expr) { cases }`.
+
+**Example:**
+
+```js
+genSwitch("x", [genCase("1", "break;"), genDefault("return 0;")]);
+// ~> `switch (x) {\n  case 1:\n    break;\n  default:\n    return 0;\n}`
+
+genSwitch("key", []);
+// ~> `switch (key) {}`
+
+genSwitch("n", [genCase("0"), genCase("1", "return 1;")]);
+// ~> switch with fall-through case 0
+```
+
+### `genTemplateLiteralType(parts)`
+
+Generate template literal type.
+
+**Example:**
+
+```js
+genTemplateLiteralType(["prefix", "T", "suffix"]);
+// ~> `` `prefix${T}suffix` ``
+
+genTemplateLiteralType(["Hello ", "T", ""]);
+// ~> `` `Hello ${T}` ``
+
+genTemplateLiteralType(["", "K", "Key"]);
+// ~> `` `${K}Key` ``
+
+genTemplateLiteralType(["prefix", "T1", "middle", "T2", "suffix"]);
+// ~> `` `prefix${T1}middle${T2}suffix` ``
+```
+
+### `genTernary(cond, whenTrue, whenFalse)`
+
+Generate ternary expression `cond ? whenTrue : whenFalse`.
+
+**Example:**
+
+```js
+genTernary("x > 0", "x", "-x");
+// ~> `x > 0 ? x : -x`
+
+genTernary("ok", "'yes'", "'no'");
+// ~> `ok ? 'yes' : 'no'`
+```
+
+### `genThrow(expr, indent)`
+
+Generate `throw expr;`.
+
+**Example:**
+
+```js
+genThrow("new Error('failed')");
+// ~> `throw new Error('failed');`
+
+genThrow("e");
+// ~> `throw e;`
+```
+
 ### `genTry(statements, options, indent)`
 
 Generate `try { statements }` or `try statement`.
@@ -595,6 +1221,20 @@ genTypeAlias("FooType", { name: "string", count: "number" });
 
 genTypeAlias("Baz", "string", { export: true });
 // ~> `export type Baz = string`
+```
+
+### `genTypeAssertion(expr, type)`
+
+Generate type assertion: `expr as Type`.
+
+**Example:**
+
+```js
+genTypeAssertion("value", "string");
+// ~> `value as string`
+
+genTypeAssertion("obj", "MyType");
+// ~> `obj as MyType`
 ```
 
 ### `genTypeExport(specifier, imports, options)`
@@ -634,6 +1274,37 @@ genTypeObject([{ name: "id", type: "string", jsdoc: "Unique id" }]);
 // ~> `{ /** Unique id *\/ id?: string }`
 ```
 
+### `genTypeof(expr)`
+
+Generate typeof type.
+
+**Example:**
+
+```js
+genTypeof("someVar");
+// ~> `typeof someVar`
+
+genTypeof("myFunction");
+// ~> `typeof myFunction`
+```
+
+### `genUnion(types)`
+
+Generate union type.
+
+**Example:**
+
+```js
+genUnion(["string", "number"]);
+// ~> `string | number`
+
+genUnion(["A", "B", "C"]);
+// ~> `A | B | C`
+
+genUnion("string");
+// ~> `string`
+```
+
 ### `genVariable(name, value, options)`
 
 Create variable declaration.
@@ -654,7 +1325,44 @@ genVariable("y", "2", { export: true });
 // ~> `export const y = 2`
 ```
 
+### `genWhile(cond, statements, options, indent)`
+
+Generate `while (cond) { body }` or single-statement form.
+
+**Example:**
+
+```js
+genWhile("running", "step();");
+// ~> `while (running) { step(); }`
+
+genWhile("i > 0", ["process();", "i--;"]);
+// ~> `while (i > 0) { process(); i--; }`
+
+genWhile("ok", "doIt();", { bracket: false });
+// ~> `while (ok) doIt();`
+```
+
 ## Utils
+
+### `genComment(text, options: { block? }, indent)`
+
+Generate comment: single-line `//` or block comment (non-JSDoc).
+
+**Example:**
+
+```js
+genComment("Single line comment");
+// ~> `// Single line comment`
+
+genComment("Multi-line\ncomment", { block: true });
+// ~> block comment format
+
+genComment("Block comment", { block: true });
+// ~> block comment format
+
+genComment("Indented", "  ");
+// ~> `  // Indented`
+```
 
 ### `genJSDocComment(jsdoc, indent)`
 

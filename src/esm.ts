@@ -1,6 +1,8 @@
 import { CodegenOptions } from "./types";
 import { genString } from "./string";
 import { _genStatement, VALID_IDENTIFIER_RE } from "./_utils";
+import { genFunction } from "./typescript/function";
+import type { FunctionOpts } from "./typescript/types";
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
 export type ESMImport = string | { name: string; as?: string };
@@ -178,7 +180,110 @@ export function genDynamicTypeImport(
   )}${commentString}${optionsString})${nameString}`;
 }
 
+/**
+ * Generate an ESM `export default` statement.
+ *
+ * @example
+ *
+ * ```js
+ * genDefaultExport("foo");
+ * // ~> `export default foo;`
+ *
+ * genDefaultExport({ name: "bar", parameters: [{ name: "x", type: "string" }] });
+ * // ~> `export default function bar(x: string) {}`
+ *
+ * genDefaultExport("42", { singleQuotes: true });
+ * // ~> `export default 42;`
+ * ```
+ *
+ * @group ESM
+ */
+export function genDefaultExport(
+  value: string | FunctionOpts,
+  _options: CodegenOptions = {},
+) {
+  // If value is a function descriptor object, generate function declaration
+  if (typeof value === "object" && value !== null && "name" in value) {
+    // Generate function without export modifier, then add export default
+    const functionCode = genFunction({ ...value, export: false }, "");
+    // Remove trailing semicolon if present (genFunction doesn't add one)
+    const functionBody = functionCode.trim().endsWith(";")
+      ? functionCode.trim().slice(0, -1)
+      : functionCode.trim();
+    return `export default ${functionBody};`;
+  }
+
+  // Otherwise, treat as expression
+  return `export default ${value};`;
+}
+
+/**
+ * Generate an ESM `export *` statement (re-export all).
+ *
+ * @example
+ *
+ * ```js
+ * genExportStar("pkg");
+ * // ~> `export * from "pkg";`
+ *
+ * genExportStar("./utils", { singleQuotes: true });
+ * // ~> `export * from './utils';`
+ *
+ * genExportStar("pkg", { attributes: { type: "json" } });
+ * // ~> `export * from "pkg" with { type: "json" };`
+ * ```
+ *
+ * @group ESM
+ */
+export function genExportStar(
+  specifier: string,
+  options: ESMCodeGenOptions = {},
+) {
+  const specifierString = genString(specifier, options);
+  return `export * from ${specifierString}${_genExportImportAttributes(options)};`;
+}
+
+/**
+ * Generate an ESM `export * as` statement (re-export all as namespace).
+ *
+ * @example
+ *
+ * ```js
+ * genExportStarAs("pkg", "utils");
+ * // ~> `export * as utils from "pkg";`
+ *
+ * genExportStarAs("./helpers", "Helpers", { singleQuotes: true });
+ * // ~> `export * as Helpers from './helpers';`
+ *
+ * genExportStarAs("pkg", "ns", { attributes: { type: "json" } });
+ * // ~> `export * as ns from "pkg" with { type: "json" };`
+ * ```
+ *
+ * @group ESM
+ */
+export function genExportStarAs(
+  specifier: string,
+  namespace: string,
+  options: ESMCodeGenOptions = {},
+) {
+  const specifierString = genString(specifier, options);
+  return `export * as ${namespace} from ${specifierString}${_genExportImportAttributes(options)};`;
+}
+
 // --- internal ---
+
+function _genExportImportAttributes(options: ESMCodeGenOptions = {}) {
+  if (typeof options.attributes?.type === "string") {
+    return ` with { type: ${genString(options.attributes.type)} }`;
+  }
+
+  // TODO: Remove deprecated `assert` in the next major release
+  if (typeof options.assert?.type === "string") {
+    return ` assert { type: ${genString(options.assert.type)} }`;
+  }
+
+  return "";
+}
 
 function _genDynamicImportAttributes(options: DynamicImportOptions = {}) {
   // TODO: Remove deprecated `assert` in the next major release

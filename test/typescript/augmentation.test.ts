@@ -1,5 +1,6 @@
 import { expect, describe, it } from "vitest";
 import { genAugmentation, genDeclareNamespace, genInterface } from "../../src";
+import { genNamespace, genModule } from "../../src/typescript/augmentation";
 import { genTestTitle } from "../_utils";
 
 const genAugmentationTests: Array<{
@@ -110,6 +111,75 @@ describe("genDeclareNamespace", () => {
   for (const t of genDeclareNamespaceTests) {
     it(genTestTitle(t.code), () => {
       const code = genDeclareNamespace(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genNamespaceTests: Array<{
+  input: Parameters<typeof genNamespace>;
+  code: string;
+}> = [
+  { input: ["MyNamespace"], code: "namespace MyNamespace {}" },
+  {
+    input: ["MyNamespace", genInterface("MyInterface", {})],
+    code: `namespace MyNamespace {
+  interface MyInterface {}
+}`,
+  },
+  {
+    input: [
+      "MyNamespace",
+      [genInterface("MyInterface", {}), genInterface("MyOtherInterface", {})],
+    ],
+    code: `namespace MyNamespace {
+  interface MyInterface {}
+  interface MyOtherInterface {}
+}`,
+  },
+  {
+    input: ["MyNamespace", genInterface("MyInterface", { "test?": "string" })],
+    code: `namespace MyNamespace {
+  interface MyInterface {
+    test?: string
+  }
+}`,
+  },
+  {
+    input: ["MyNamespace", ["const foo: string", "function bar(): void"]],
+    code: `namespace MyNamespace {
+  const foo: string
+  function bar(): void
+}`,
+  },
+];
+
+describe("genNamespace", () => {
+  for (const t of genNamespaceTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genNamespace(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genModuleTests: Array<{
+  input: Parameters<typeof genModule>;
+  code: string;
+}> = [
+  { input: ["@nuxt/utils"], code: 'declare module "@nuxt/utils" {}' },
+  {
+    input: ["@nuxt/utils", genInterface("MyInterface", {})],
+    code: `declare module "@nuxt/utils" {
+  interface MyInterface {}
+}`,
+  },
+];
+
+describe("genModule", () => {
+  for (const t of genModuleTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genModule(...t.input);
       expect(code).to.equal(t.code);
     });
   }

@@ -1,5 +1,11 @@
 import { expect, describe, it } from "vitest";
-import { genBlock, genParam, genFunction } from "../../src";
+import {
+  genBlock,
+  genParam,
+  genFunction,
+  genArrowFunction,
+  genMethod,
+} from "../../src";
 import { genTestTitle } from "../_utils";
 
 const genBlockTests: Array<{
@@ -193,6 +199,194 @@ describe("genFunction", () => {
   for (const t of genFunctionTests) {
     it(genTestTitle(t.code), () => {
       const code = genFunction(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genArrowFunctionTests: Array<{
+  input: Parameters<typeof genArrowFunction>;
+  code: string;
+}> = [
+  { input: [{ body: "x + 1" }], code: "() => x + 1" },
+  {
+    input: [{ parameters: [{ name: "x", type: "number" }], body: "x * 2" }],
+    code: "(x: number) => x * 2",
+  },
+  {
+    input: [{ parameters: [{ name: "x" }], body: ["return x + 1;"] }],
+    code: `(x) => {
+  return x + 1;
+}`,
+  },
+  {
+    input: [
+      {
+        parameters: [{ name: "x", type: "string" }],
+        body: "x.length",
+        returnType: "number",
+      },
+    ],
+    code: "(x: string): number => x.length",
+  },
+  {
+    input: [
+      {
+        async: true,
+        parameters: [{ name: "url", type: "string" }],
+        body: ["return fetch(url);"],
+      },
+    ],
+    code: `async (url: string) => {
+  return fetch(url);
+}`,
+  },
+  {
+    input: [
+      {
+        parameters: [
+          { name: "a", type: "number" },
+          { name: "b", type: "number" },
+        ],
+        body: "a + b",
+        returnType: "number",
+      },
+    ],
+    code: "(a: number, b: number): number => a + b",
+  },
+  {
+    input: [
+      {
+        generics: [{ name: "T" }],
+        parameters: [{ name: "x", type: "T" }],
+        body: "x",
+        returnType: "T",
+      },
+    ],
+    code: "<T>(x: T): T => x",
+  },
+  {
+    input: [{ parameters: [{ name: "x", optional: true }], body: "x ?? 0" }],
+    code: "(x?) => x ?? 0",
+  },
+  {
+    input: [{ body: undefined }],
+    code: "() => {}",
+  },
+];
+
+describe("genArrowFunction", () => {
+  for (const t of genArrowFunctionTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genArrowFunction(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genMethodTests: Array<{
+  input: Parameters<typeof genMethod>;
+  code: string;
+}> = [
+  { input: [{ name: "foo" }], code: "foo() {}" },
+  {
+    input: [
+      {
+        name: "bar",
+        parameters: [{ name: "x", type: "string" }],
+        body: ["return x;"],
+      },
+    ],
+    code: `bar(x: string) {
+  return x;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "add",
+        parameters: [
+          { name: "a", type: "number" },
+          { name: "b", type: "number" },
+        ],
+        returnType: "number",
+        body: ["return a + b;"],
+      },
+    ],
+    code: `add(a: number, b: number): number {
+  return a + b;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "fetch",
+        async: true,
+        parameters: [{ name: "url", type: "string" }],
+        body: ["return await fetch(url);"],
+      },
+    ],
+    code: `async fetch(url: string) {
+  return await fetch(url);
+}`,
+  },
+  {
+    input: [
+      {
+        name: "gen",
+        generator: true,
+        parameters: [{ name: "max", type: "number" }],
+        returnType: "Generator<number>",
+        body: ["for (let i = 0; i < max; i++) yield i;"],
+      },
+    ],
+    code: `gen*(max: number): Generator<number> {
+  for (let i = 0; i < max; i++) yield i;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "id",
+        generics: [{ name: "T" }],
+        parameters: [{ name: "x", type: "T" }],
+        returnType: "T",
+        body: ["return x;"],
+      },
+    ],
+    code: `id<T>(x: T): T {
+  return x;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "test",
+        jsdoc: "Test method",
+        parameters: [{ name: "x", type: "number" }],
+        body: ["return x;"],
+      },
+    ],
+    code: `/** Test method */
+test(x: number) {
+  return x;
+}`,
+  },
+  {
+    input: [
+      {
+        name: "empty",
+      },
+      "  ",
+    ],
+    code: `  empty() {}`,
+  },
+];
+
+describe("genMethod", () => {
+  for (const t of genMethodTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genMethod(...t.input);
       expect(code).to.equal(t.code);
     });
   }

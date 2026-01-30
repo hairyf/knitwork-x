@@ -121,3 +121,128 @@ export interface GenPrefixedBlockOptions extends CodegenOptions {
   /** When false, emit single statement without braces: `prefix stmt`. Default true. */
   bracket?: boolean;
 }
+
+export interface GenSwitchOptions extends CodegenOptions {
+  /** When false, emit body without braces. Default true. (Rarely used; switch body is typically braced.) */
+  bracket?: boolean;
+}
+
+export interface GenClassOptions {
+  /** Base class to extend. */
+  extends?: string;
+  /** Interface(s) to implement (single string or array). */
+  implements?: string | string[];
+  /** Add `export` modifier. */
+  export?: boolean;
+  /** JSDoc for the class. */
+  jsdoc?: JSDoc;
+}
+
+export interface GenConstructorOptions {
+  /** Super call argument list (e.g. `"a, b"`). Omit for no super call. */
+  super?: string;
+}
+
+export interface GenClassPropertyOptions {
+  /** Property type (for `name: Type`). */
+  type?: string;
+  /** Initializer (for `name = value`). Mutually exclusive with type-only form; can combine as `name: Type = value`. */
+  value?: string;
+  /** Emit `static` modifier. */
+  static?: boolean;
+  /** Emit `readonly` modifier. */
+  readonly?: boolean;
+  /** Emit `public` modifier (default in TS). */
+  public?: boolean;
+  /** Emit `private` modifier. */
+  private?: boolean;
+  /** Emit `protected` modifier. */
+  protected?: boolean;
+  /** Emit optional `name?`. */
+  optional?: boolean;
+}
+
+export interface GenClassMethodOptions {
+  /** Method parameters. */
+  parameters?: TypeField[];
+  /** Method body statements. */
+  body?: string[];
+  /** Emit `static` modifier. */
+  static?: boolean;
+  /** Emit `async` modifier. */
+  async?: boolean;
+  /** Emit generator (`*`). */
+  generator?: boolean;
+  /** Return type. */
+  returnType?: string;
+  /** Generics. */
+  generics?: TypeGeneric[];
+  /** Kind: regular method, getter, or setter. */
+  kind?: "method" | "get" | "set";
+  /** JSDoc for the method. */
+  jsdoc?: JSDoc;
+}
+
+export interface GenGetterOptions extends CodegenOptions {
+  /** Return type. */
+  returnType?: string;
+  /** JSDoc for the getter. */
+  jsdoc?: JSDoc;
+}
+
+export interface GenSetterOptions extends CodegenOptions {
+  /** Parameter type (e.g. `"string"`). */
+  paramType?: string;
+  /** JSDoc for the setter. */
+  jsdoc?: JSDoc;
+}
+
+export interface GenArrowFunctionOptions {
+  /** Function parameters. */
+  parameters?: TypeField[];
+  /** Function body: single expression string (e.g. `"x + 1"`) or array of statements (e.g. `["return x + 1;"]`). */
+  body?: string | string[];
+  /** Async function. */
+  async?: boolean;
+  /** Return type. */
+  returnType?: string;
+  /** Generics. */
+  generics?: TypeGeneric[];
+}
+
+export interface GenMethodOptions {
+  /** Method name. */
+  name: string;
+  /** Method parameters. */
+  parameters?: TypeField[];
+  /** Method body statements. */
+  body?: string[];
+  /** Emit `async` modifier. */
+  async?: boolean;
+  /** Emit generator (`*`). */
+  generator?: boolean;
+  /** Return type. */
+  returnType?: string;
+  /** Generics. */
+  generics?: TypeGeneric[];
+  /** JSDoc for the method. */
+  jsdoc?: JSDoc;
+}
+
+export interface GenCallSignatureOptions {
+  /** Function parameters. */
+  parameters?: TypeField[];
+  /** Return type. */
+  returnType?: string;
+  /** Generics. */
+  generics?: TypeGeneric[];
+}
+
+export interface GenConstructSignatureOptions {
+  /** Constructor parameters. */
+  parameters?: TypeField[];
+  /** Instance type. */
+  returnType?: string;
+  /** Generics. */
+  generics?: TypeGeneric[];
+}
