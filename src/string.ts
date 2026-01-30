@@ -3,6 +3,19 @@ import type { CodegenOptions } from "./types";
 /**
  * Generate a string with double or single quotes and handle escapes.
  *
+ * @example
+ *
+ * ```js
+ * genString("foo");
+ * // ~> `"foo"`
+ *
+ * genString("foo", { singleQuotes: true });
+ * // ~> `'foo'`
+ *
+ * genString("foo\nbar");
+ * // ~> `"foo\nbar"`
+ * ```
+ *
  * @group string
  */
 export function genString(input: string, options: CodegenOptions = {}) {
@@ -21,6 +34,16 @@ const BACKSLASH_RE = /\\/g;
 /**
  * Escape a string for use in a javascript string.
  *
+ * @example
+ *
+ * ```js
+ * escapeString("foo'bar");
+ * // ~> `foo\'bar`
+ *
+ * escapeString("foo\nbar");
+ * // ~> `foo\nbar`
+ * ```
+ *
  * @group string
  */
 export function escapeString(id: string): string {
@@ -32,6 +55,19 @@ export function escapeString(id: string): string {
 
 /**
  * Generate a safe javascript variable name.
+ *
+ * @example
+ *
+ * ```js
+ * genSafeVariableName("valid_import");
+ * // ~> `valid_import`
+ *
+ * genSafeVariableName("for");
+ * // ~> `_for`
+ *
+ * genSafeVariableName("with space");
+ * // ~> `with_32space`
+ * ```
  *
  * @group string
  */

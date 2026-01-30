@@ -93,7 +93,19 @@ export interface TypeAliasItem {
 /**
  * Create Type Alias Block
  *
- * @example { [item.name]: [item.type], ... }
+ * @example
+ *
+ * ```js
+ * genTypeAliasBlock([{ name: "a", type: "string" }]);
+ * // ~> `{ a: string }`
+ *
+ * genTypeAliasBlock([
+ *   { name: "name", type: "string" },
+ *   { name: "count", type: "number" },
+ * ]);
+ * // ~> `{ name: string, count: number }`
+ * ```
+ *
  * @param alias - array of name-type pairs
  * @param indent - optional indent string
  * @returns object type block string
@@ -110,7 +122,19 @@ export function genTypeAliasBlock(alias: TypeAliasItem[], indent = ""): string {
 /**
  * Create Type Alias
  *
- * @example type [name] = [value]
+ * @example
+ *
+ * ```js
+ * genTypeAlias("Foo", "string");
+ * // ~> `type Foo = string`
+ *
+ * genTypeAlias("Bar", "{ a: number; b: string }");
+ * // ~> `type Bar = { a: number; b: string }`
+ *
+ * genTypeAlias("Baz", "string", { export: true });
+ * // ~> `export type Baz = string`
+ * ```
+ *
  * @param name - alias name
  * @param value - type value (right-hand side)
  * @group Typescript
@@ -136,8 +160,22 @@ export interface GenVariableOptions {
 /**
  * Create variable declaration.
  *
- * @example [flag] [name] = [value]
- * @example const a = 2
+ * @example
+ *
+ * ```js
+ * genVariable("a", "2");
+ * // ~> `const a = 2`
+ *
+ * genVariable("foo", "'bar'");
+ * // ~> `const foo = 'bar'`
+ *
+ * genVariable("x", "1", { kind: "let" });
+ * // ~> `let x = 1`
+ *
+ * genVariable("y", "2", { export: true });
+ * // ~> `export const y = 2`
+ * ```
+ *
  * @param name - variable name
  * @param value - initializer (right-hand side expression)
  * @param options - optional { export?, kind? }
@@ -158,6 +196,16 @@ export function genVariable(
 /**
  * Generate a typescript `export type` statement.
  *
+ * @example
+ *
+ * ```js
+ * genTypeExport("@nuxt/utils", ["test"]);
+ * // ~> `export type { test } from "@nuxt/utils";`
+ *
+ * genTypeExport("@nuxt/utils", [{ name: "test", as: "value" }]);
+ * // ~> `export type { test as value } from "@nuxt/utils";`
+ * ```
+ *
  * @group Typescript
  */
 export function genTypeExport(
@@ -170,6 +218,16 @@ export function genTypeExport(
 
 /**
  * Generate an typescript `typeof import()` statement for default import.
+ *
+ * @example
+ *
+ * ```js
+ * genInlineTypeImport("@nuxt/utils");
+ * // ~> `typeof import("@nuxt/utils").default`
+ *
+ * genInlineTypeImport("@nuxt/utils", "genString");
+ * // ~> `typeof import("@nuxt/utils").genString`
+ * ```
  *
  * @group Typescript
  */
@@ -186,6 +244,19 @@ export function genInlineTypeImport(
 
 /**
  * Generate typescript object type.
+ *
+ * @example
+ *
+ * ```js
+ * genTypeObject({ name: "string", count: "number" });
+ * // ~> `{ name: string, count: number }`
+ *
+ * genTypeObject({ "key?": "boolean" });
+ * // ~> `{ key?: boolean }`
+ *
+ * genTypeObject({ nested: { value: "string" } });
+ * // ~> `{ nested: { value: string } }`
+ * ```
  *
  * @group Typescript
  */
@@ -226,6 +297,22 @@ export function genTypeObject(object: TypeObject, indent = ""): string {
 
 /**
  * Generate typescript interface.
+ *
+ * @example
+ *
+ * ```js
+ * genInterface("FooInterface");
+ * // ~> `interface FooInterface {}`
+ *
+ * genInterface("FooInterface", { name: "string", count: "number" });
+ * // ~> `interface FooInterface { name: string, count: number }`
+ *
+ * genInterface("FooInterface", undefined, { extends: "Other" });
+ * // ~> `interface FooInterface extends Other {}`
+ *
+ * genInterface("FooInterface", {}, { export: true });
+ * // ~> `export interface FooInterface {}`
+ * ```
  *
  * @group Typescript
  */
@@ -268,6 +355,22 @@ export function genInterface(
 /**
  * Generate typescript enum or const enum.
  *
+ * @example
+ *
+ * ```js
+ * genEnum("Color", { Red: 0, Green: 1, Blue: 2 });
+ * // ~> `enum Color { Red = 0, Green = 1, Blue = 2 }`
+ *
+ * genEnum("Status", { Active: "active", Inactive: "inactive" });
+ * // ~> `enum Status { Active = "active", Inactive = "inactive" }`
+ *
+ * genEnum("Auto", { A: undefined, B: undefined, C: undefined });
+ * // ~> `enum Auto { A = 0, B = 1, C = 2 }`
+ *
+ * genEnum("MyEnum", { Foo: 1 }, { export: true, const: true });
+ * // ~> `export const enum MyEnum { Foo = 1 }`
+ * ```
+ *
  * @group Typescript
  */
 export function genEnum(
@@ -308,6 +411,16 @@ export function genEnum(
 /**
  * Generate typescript const enum (shorthand for `genEnum` with `const: true`).
  *
+ * @example
+ *
+ * ```js
+ * genConstEnum("Direction", { Up: 1, Down: 2 });
+ * // ~> `const enum Direction { Up = 1, Down = 2 }`
+ *
+ * genConstEnum("Mode", { Read: 0, Write: 1 }, { export: true });
+ * // ~> `export const enum Mode { Read = 0, Write = 1 }`
+ * ```
+ *
  * @group Typescript
  */
 export function genConstEnum(
@@ -321,6 +434,22 @@ export function genConstEnum(
 
 /**
  * Generate typescript function declaration from SpecificFunction.
+ *
+ * @example
+ *
+ * ```js
+ * genFunction({ name: "foo" });
+ * // ~> `function foo() {}`
+ *
+ * genFunction({ name: "foo", parameters: [{ name: "x", type: "string" }, { name: "y", type: "number", optional: true }] });
+ * // ~> `function foo(x: string, y?: number) {}`
+ *
+ * genFunction({ name: "id", generics: [{ name: "T" }], parameters: [{ name: "x", type: "T" }], returnType: "T", body: ["return x;"] });
+ * // ~> `function id<T>(x: T): T { return x; }`
+ *
+ * genFunction({ name: "foo", export: true });
+ * // ~> `export function foo() {}`
+ * ```
  *
  * @group Typescript
  */
@@ -402,6 +531,19 @@ export function genFunction(
 /**
  * Generate typescript `declare module` augmentation.
  *
+ * @example
+ *
+ * ```js
+ * genAugmentation("@nuxt/utils");
+ * // ~> `declare module "@nuxt/utils" {}`
+ *
+ * genAugmentation("@nuxt/utils", { MyInterface: {} });
+ * // ~> `declare module "@nuxt/utils" { interface MyInterface {} }`
+ *
+ * genAugmentation("@nuxt/utils", { MyInterface: { "test?": "string" } });
+ * // ~> `declare module "@nuxt/utils" { interface MyInterface { test?: string } }`
+ * ```
+ *
  * @group Typescript
  */
 export function genAugmentation(
@@ -433,6 +575,19 @@ export type DeclareNamespaceInterfaces = Record<
 
 /**
  * Generate typescript `declare <namespace>` block (e.g. `declare global {}`).
+ *
+ * @example
+ *
+ * ```js
+ * genDeclareNamespace("global");
+ * // ~> `declare global {}`
+ *
+ * genDeclareNamespace("global", { Window: {} });
+ * // ~> `declare global { interface Window {} }`
+ *
+ * genDeclareNamespace("global", { Window: { "customProp?": "string" } });
+ * // ~> `declare global { interface Window { customProp?: string } }`
+ * ```
  *
  * @group Typescript
  */

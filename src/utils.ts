@@ -24,6 +24,19 @@ export function wrapInDelimiters(
 /**
  * Generate a safe javascript variable name for an object key.
  *
+ * @example
+ *
+ * ```js
+ * genObjectKey("foo");
+ * // ~> `foo`
+ *
+ * genObjectKey("foo-bar");
+ * // ~> `"foo-bar"`
+ *
+ * genObjectKey("with space");
+ * // ~> `"with space"`
+ * ```
+ *
  * @group utils
  */
 export function genObjectKey(key: string) {

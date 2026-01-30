@@ -46,16 +46,6 @@ export interface DynamicImportOptions extends ESMCodeGenOptions {
  *
  * genImport("pkg", "foo", { attributes: { type: "json" } });
  * // ~> `import foo from "pkg" with { type: "json" };
- *
- * genExport("pkg", "foo");
- * // ~> `export foo from "pkg";`
- *
- * genExport("pkg", ["a", "b"]);
- * // ~> `export { a, b } from "pkg";`
- *
- * // export * as bar from "pkg"
- * genExport("pkg", { name: "*", as: "bar" });
- * // ~> `export * as bar from "pkg";`
  * ```
  *
  * @group ESM
@@ -71,6 +61,16 @@ export function genImport(
 /**
  * Generate an ESM `import type` statement.
  *
+ * @example
+ *
+ * ```js
+ * genTypeImport("@nuxt/utils", ["test"]);
+ * // ~> `import type { test } from "@nuxt/utils";`
+ *
+ * genTypeImport("@nuxt/utils", [{ name: "test", as: "value" }]);
+ * // ~> `import type { test as value } from "@nuxt/utils";`
+ * ```
+ *
  * @group ESM
  */
 export function genTypeImport(
@@ -84,6 +84,19 @@ export function genTypeImport(
 /**
  * Generate an ESM `export` statement.
  *
+ * @example
+ *
+ * ```js
+ * genExport("pkg", "foo");
+ * // ~> `export foo from "pkg";`
+ *
+ * genExport("pkg", ["a", "b"]);
+ * // ~> `export { a, b } from "pkg";`
+ *
+ * genExport("pkg", { name: "*", as: "bar" });
+ * // ~> `export * as bar from "pkg";`
+ * ```
+ *
  * @group ESM
  */
 export function genExport(
@@ -96,6 +109,19 @@ export function genExport(
 
 /**
  * Generate an ESM dynamic `import()` statement.
+ *
+ * @example
+ *
+ * ```js
+ * genDynamicImport("pkg");
+ * // ~> `() => import("pkg")`
+ *
+ * genDynamicImport("pkg", { wrapper: false });
+ * // ~> `import("pkg")`
+ *
+ * genDynamicImport("pkg", { interopDefault: true });
+ * // ~> `() => import("pkg").then(m => m.default || m)`
+ * ```
  *
  * @group ESM
  */
@@ -117,6 +143,19 @@ export function genDynamicImport(
 
 /**
  * Generate an ESM type `import()` statement.
+ *
+ * @example
+ *
+ * ```js
+ * genDynamicTypeImport("pkg");
+ * // ~> `typeof import("pkg")`
+ *
+ * genDynamicTypeImport("pkg", "foo");
+ * // ~> `typeof import("pkg").foo`
+ *
+ * genDynamicTypeImport("pkg", "foo-bar");
+ * // ~> `typeof import("pkg")["foo-bar"]`
+ * ```
  *
  * @group ESM
  */

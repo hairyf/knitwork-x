@@ -90,6 +90,13 @@ export function genArrayFromRaw(
  *
  * Values are not escaped or quoted.
  *
+ * @example
+ *
+ * ```js
+ * genObjectFromRawEntries([["foo", "bar"], ["baz", 1]]);
+ * // ~> `{ foo: bar, baz: 1 }`
+ * ```
+ *
  * @group serialization
  */
 export function genObjectFromRawEntries(
