@@ -181,6 +181,14 @@ Generate a string with double or single quotes and handle escapes.
 
 Generate typescript `declare module` augmentation.
 
+### `genConstEnum(name, members, options, indent)`
+
+Generate typescript const enum (shorthand for `genEnum` with `const: true`).
+
+### `genEnum(name, members, options, indent)`
+
+Generate typescript enum or const enum.
+
 ### `genInlineTypeImport(specifier, name, options)`
 
 Generate an typescript `typeof import()` statement for default import.
