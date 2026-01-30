@@ -2,6 +2,7 @@ import { expect, describe, it } from "vitest";
 import {
   genInterface,
   genAugmentation,
+  genBlock,
   genDeclareNamespace,
   genEnum,
   genConstEnum,
@@ -318,6 +319,49 @@ describe("genDeclareNamespace", () => {
   for (const t of genDeclareNamespaceTests) {
     it(genTestTitle(t.code), () => {
       const code = genDeclareNamespace(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genBlockTests: Array<{
+  input: Parameters<typeof genBlock>;
+  code: string;
+}> = [
+  { input: [[]], code: "{}" },
+  {
+    input: [["return x;"]],
+    code: `{
+  return x;
+}`,
+  },
+  {
+    input: [["const a = 1;", "return a;"]],
+    code: `{
+  const a = 1;
+  return a;
+}`,
+  },
+  {
+    input: [["return x;"], "  "],
+    code: `{
+    return x;
+  }`,
+  },
+  {
+    input: [["if (x) {", "  return 1;", "}"]],
+    code: `{
+  if (x) {
+    return 1;
+  }
+}`,
+  },
+];
+
+describe("genBlock", () => {
+  for (const t of genBlockTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genBlock(...t.input);
       expect(code).to.equal(t.code);
     });
   }

@@ -297,6 +297,34 @@ export function genTypeObject(
 }
 
 /**
+ * Generate a single property signature from a TypeField.
+ * Returns `[name][optional?]: [type]`. When `field.jsdoc` is set, prepends JSDoc comment.
+ *
+ * @example
+ *
+ * ```js
+ * genProperty({ name: "foo", type: "string" });
+ * // ~> `foo: string`
+ *
+ * genProperty({ name: "bar", type: "number", optional: true });
+ * // ~> `bar?: number`
+ *
+ * genProperty({ name: "id", type: "string", jsdoc: "Unique id" }, "  ");
+ * // ~> `/** Unique id *\/\n  id: string`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genProperty(field: TypeField, indent = ""): string {
+  const prop = `${genObjectKey(field.name)}${field.optional ? "?" : ""}: ${field.type ?? "any"}`;
+  if (field.jsdoc === undefined) {
+    return indent ? `${indent}${prop}` : prop;
+  }
+  const jsdocComment = genJSDocComment(field.jsdoc, indent);
+  return indent ? `${jsdocComment}${indent}${prop}` : `${jsdocComment}${prop}`;
+}
+
+/**
  * Generate typescript interface.
  *
  * @example
@@ -326,18 +354,15 @@ export function genInterface(
   const jsdocComment =
     options.jsdoc === undefined ? "" : genJSDocComment(options.jsdoc);
 
-  let normalizedContents: TypeObject | TypeObjectField[] | undefined;
+  let body: string;
   if (contents === undefined) {
-    normalizedContents = undefined;
+    body = "{}";
   } else if (Array.isArray(contents)) {
-    normalizedContents = contents.map((f) => ({
-      name: f.name,
-      type: f.type ?? "any",
-      required: !f.optional,
-      jsdoc: f.jsdoc,
-    }));
+    const newIndent = indent + "  ";
+    const lines = contents.map((f) => genProperty(f, newIndent));
+    body = wrapInDelimiters(lines, indent, "{}", false);
   } else {
-    normalizedContents = contents;
+    body = genTypeObject(contents, indent);
   }
 
   const interfaceParts = [
@@ -349,7 +374,7 @@ export function genInterface(
           ? options.extends.join(", ")
           : options.extends
       }`,
-    normalizedContents ? genTypeObject(normalizedContents, indent) : "{}",
+    body,
   ]
     .filter(Boolean)
     .join(" ");
@@ -544,6 +569,38 @@ export function genFunction(options: FunctionOpts, indent = ""): string {
 
 function _indentStatements(statements: string[]): string[] {
   return statements.flatMap((s) => s.split("\n").map((line) => "  " + line));
+}
+
+/**
+ * Generate a statement block `{ statements }`.
+ *
+ * @example
+ *
+ * ```js
+ * genBlock([]);
+ * // ~> `{}`
+ *
+ * genBlock(["return x;"]);
+ * // ~> `{\n  return x;\n}`
+ *
+ * genBlock(["const a = 1;", "return a;"]);
+ * // ~> `{\n  const a = 1;\n  return a;\n}`
+ *
+ * genBlock(["return x;"], "  ");
+ * // ~> `{\n    return x;\n  }`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genBlock(statements: string[], indent = ""): string {
+  const newIndent = indent + "  ";
+  const lines =
+    statements.length === 0
+      ? []
+      : statements.flatMap((s) =>
+          s.split("\n").map((line) => newIndent + line),
+        );
+  return lines.length === 0 ? "{}" : wrapInDelimiters(lines, indent, "{}", false);
 }
 
 /**
