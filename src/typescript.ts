@@ -668,14 +668,14 @@ export interface GenElseOptions extends CodegenOptions {
   bracket?: boolean;
 }
 
-interface GenConditionalOptions {
+interface GenPrefixedBlockOptions {
   bracket?: boolean;
 }
 
-function _genConditional(
+function _genPrefixedBlock(
   prefix: string,
   statements: string | string[],
-  options: GenConditionalOptions,
+  options: GenPrefixedBlockOptions,
   indent: string,
 ): string {
   const { bracket = true } = options;
@@ -712,7 +712,7 @@ export function genIf(
   options: GenIfOptions = {},
   indent = "",
 ): string {
-  return _genConditional(`if (${cond})`, statements, options, indent);
+  return _genPrefixedBlock(`if (${cond})`, statements, options, indent);
 }
 
 /**
@@ -736,7 +736,7 @@ export function genElseIf(
   options: GenIfOptions = {},
   indent = "",
 ): string {
-  return _genConditional(`else if (${cond})`, statements, options, indent);
+  return _genPrefixedBlock(`else if (${cond})`, statements, options, indent);
 }
 
 /**
@@ -762,5 +762,73 @@ export function genElse(
   options: GenElseOptions = {},
   indent = "",
 ): string {
-  return _genConditional("else", statements, options, indent);
+  return _genPrefixedBlock("else", statements, options, indent);
+}
+
+export interface GenTryOptions extends CodegenOptions {
+  /** When false, emit single statement without braces: `try stmt`. Default true. */
+  bracket?: boolean;
+}
+
+export interface GenCatchOptions extends CodegenOptions {
+  /** Optional catch binding (e.g. `e` for `catch (e) { }`). Omit for `catch { }`. */
+  binding?: string;
+  /** When false, emit single statement without braces: `catch (e) stmt`. Default true. */
+  bracket?: boolean;
+}
+
+/**
+ * Generate `try { statements }` or `try statement`.
+ *
+ * @example
+ *
+ * ```js
+ * genTry("mightThrow();");
+ * // ~> `try { mightThrow(); }`
+ *
+ * genTry(["const x = await f();", "return x;"]);
+ * // ~> `try { const x = await f(); return x; }`
+ *
+ * genTry("f();", { bracket: false });
+ * // ~> `try f();`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genTry(
+  statements: string | string[],
+  options: GenTryOptions = {},
+  indent = "",
+): string {
+  return _genPrefixedBlock("try", statements, options, indent);
+}
+
+/**
+ * Generate `catch (binding) { statements }`, `catch { statements }`, or single-statement form.
+ *
+ * @example
+ *
+ * ```js
+ * genCatch(["throw e;"], { binding: "e" });
+ * // ~> `catch (e) { throw e; }`
+ *
+ * genCatch(["logError();"]);
+ * // ~> `catch { logError(); }`
+ *
+ * genCatch("handle(e);", { binding: "e", bracket: false });
+ * // ~> `catch (e) handle(e);`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genCatch(
+  statements: string | string[],
+  options: GenCatchOptions = {},
+  indent = "",
+): string {
+  const prefix =
+    typeof options.binding === "string"
+      ? `catch (${options.binding})`
+      : "catch";
+  return _genPrefixedBlock(prefix, statements, options, indent);
 }
