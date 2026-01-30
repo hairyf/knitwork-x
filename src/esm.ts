@@ -1,8 +1,6 @@
 import { CodegenOptions } from "./types";
 import { genString } from "./string";
 import { _genStatement, VALID_IDENTIFIER_RE } from "./_utils";
-import { genFunction } from "./typescript/function";
-import type { FunctionOpts } from "./typescript/types";
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
 export type ESMImport = string | { name: string; as?: string };
@@ -189,31 +187,13 @@ export function genDynamicTypeImport(
  * genDefaultExport("foo");
  * // ~> `export default foo;`
  *
- * genDefaultExport({ name: "bar", parameters: [{ name: "x", type: "string" }] });
- * // ~> `export default function bar(x: string) {}`
- *
  * genDefaultExport("42", { singleQuotes: true });
  * // ~> `export default 42;`
  * ```
  *
  * @group ESM
  */
-export function genDefaultExport(
-  value: string | FunctionOpts,
-  _options: CodegenOptions = {},
-) {
-  // If value is a function descriptor object, generate function declaration
-  if (typeof value === "object" && value !== null && "name" in value) {
-    // Generate function without export modifier, then add export default
-    const functionCode = genFunction({ ...value, export: false }, "");
-    // Remove trailing semicolon if present (genFunction doesn't add one)
-    const functionBody = functionCode.trim().endsWith(";")
-      ? functionCode.trim().slice(0, -1)
-      : functionCode.trim();
-    return `export default ${functionBody};`;
-  }
-
-  // Otherwise, treat as expression
+export function genDefaultExport(value: string, _options: CodegenOptions = {}) {
   return `export default ${value};`;
 }
 

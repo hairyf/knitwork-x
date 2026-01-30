@@ -1,8 +1,8 @@
 {
-  "name": "knitwork",
+  "name": "knitwork-x",
   "version": "1.3.0",
   "description": "Utilities to generate JavaScript code.",
-  "repository": "unjs/knitwork",
+  "repository": "hairyf/knitwork-x",
   "license": "MIT",
   "sideEffects": false,
   "type": "module",

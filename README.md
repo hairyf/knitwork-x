@@ -1,4 +1,4 @@
-# 🧶 knitwork
+# 🧶 knitwork-x
 
 <!-- automd:badges color=yellow codecov -->
 
@@ -161,9 +161,6 @@ Generate an ESM `export default` statement.
 ```js
 genDefaultExport("foo");
 // ~> `export default foo;`
-
-genDefaultExport({ name: "bar", parameters: [{ name: "x", type: "string" }] });
-// ~> `export default function bar(x: string) {}`
 
 genDefaultExport("42", { singleQuotes: true });
 // ~> `export default 42;`

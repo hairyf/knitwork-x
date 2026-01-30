@@ -170,31 +170,6 @@ const genDefaultExportTests = [
     options: { singleQuotes: true },
     code: "export default foo;",
   },
-  {
-    value: { name: "bar", parameters: [{ name: "x", type: "string" }] },
-    code: "export default function bar(x: string) {};",
-  },
-  {
-    value: {
-      name: "add",
-      parameters: [
-        { name: "a", type: "number" },
-        { name: "b", type: "number" },
-      ],
-      returnType: "number",
-      body: ["return a + b;"],
-    },
-    code: "export default function add(a: number, b: number): number {\n  return a + b;\n};",
-  },
-  {
-    value: {
-      name: "fetch",
-      async: true,
-      parameters: [{ name: "url", type: "string" }],
-      body: ["return await fetch(url);"],
-    },
-    code: "export default async function fetch(url: string) {\n  return await fetch(url);\n};",
-  },
 ];
 
 describe("genDefaultExport", () => {
