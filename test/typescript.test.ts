@@ -10,6 +10,8 @@ import {
   genTypeImport,
   genTypeExport,
   genTypeAlias,
+  genTypeAliasBlock,
+  genVariable,
 } from "../src";
 import { genTestTitle } from "./_utils";
 
@@ -365,6 +367,46 @@ describe("genTypeExport", () => {
   }
 });
 
+const genTypeAliasBlockTests: Array<{
+  input: Parameters<typeof genTypeAliasBlock>;
+  code: string;
+}> = [
+  { input: [[]], code: "{}" },
+  {
+    input: [[{ name: "a", type: "string" }]],
+    code: `{
+  a: string
+}`,
+  },
+  {
+    input: [
+      [
+        { name: "name", type: "string" },
+        { name: "count", type: "number" },
+      ],
+    ],
+    code: `{
+  name: string
+  count: number
+}`,
+  },
+  {
+    input: [[{ name: "key-with-dash", type: "boolean" }], "  "],
+    code: `{
+    "key-with-dash": boolean
+  }`,
+  },
+];
+
+describe("genTypeAliasBlock", () => {
+  for (const t of genTypeAliasBlockTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genTypeAliasBlock(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
 const genTypeAliasTests: Array<{
   input: Parameters<typeof genTypeAlias>;
   code: string;
@@ -387,6 +429,41 @@ describe("genTypeAlias", () => {
   for (const t of genTypeAliasTests) {
     it(genTestTitle(t.code), () => {
       const code = genTypeAlias(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genVariableTests: Array<{
+  input: Parameters<typeof genVariable>;
+  code: string;
+}> = [
+  {
+    input: ["a", "2"],
+    code: "const a = 2",
+  },
+  {
+    input: ["foo", "'bar'"],
+    code: "const foo = 'bar'",
+  },
+  {
+    input: ["a", "2", { export: true }],
+    code: "export const a = 2",
+  },
+  {
+    input: ["x", "1", { kind: "let" }],
+    code: "let x = 1",
+  },
+  {
+    input: ["y", "0", { kind: "var", export: true }],
+    code: "export var y = 0",
+  },
+];
+
+describe("genVariable", () => {
+  for (const t of genVariableTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genVariable(...t.input);
       expect(code).to.equal(t.code);
     });
   }

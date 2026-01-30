@@ -78,6 +78,34 @@ export interface GenEnumOptions extends CodegenOptions {
   /** Add `export` modifier. */
   export?: boolean;
 }
+export interface GenTypeAliasOptions {
+  /** Add `export` modifier. */
+  export?: boolean;
+}
+
+export interface TypeAliasItem {
+  /** property name */
+  name: string;
+  /** type expression */
+  type: string;
+}
+
+/**
+ * Create Type Alias Block
+ *
+ * @example { [item.name]: [item.type], ... }
+ * @param alias - array of name-type pairs
+ * @param indent - optional indent string
+ * @returns object type block string
+ * @group Typescript
+ */
+export function genTypeAliasBlock(alias: TypeAliasItem[], indent = ""): string {
+  const newIndent = indent + "  ";
+  const lines = alias.map(
+    (item) => `${newIndent}${genObjectKey(item.name)}: ${item.type}`,
+  );
+  return wrapInDelimiters(lines, indent, "{}", false);
+}
 
 /**
  * Create Type Alias
@@ -90,9 +118,38 @@ export interface GenEnumOptions extends CodegenOptions {
 export function genTypeAlias(
   name: string,
   value: string,
-  options: { export?: boolean } = {},
+  options: GenTypeAliasOptions = {},
 ): string {
   const prefix = [options.export && "export", "type", name]
+    .filter(Boolean)
+    .join(" ");
+  return `${prefix} = ${value}`;
+}
+
+export interface GenVariableOptions {
+  /** Add `export` modifier. */
+  export?: boolean;
+  /** Declaration kind: `const`, `let`, or `var`. Default `const`. */
+  kind?: "const" | "let" | "var";
+}
+
+/**
+ * Create variable declaration.
+ *
+ * @example [flag] [name] = [value]
+ * @example const a = 2
+ * @param name - variable name
+ * @param value - initializer (right-hand side expression)
+ * @param options - optional { export?, kind? }
+ * @group Typescript
+ */
+export function genVariable(
+  name: string,
+  value: string,
+  options: GenVariableOptions = {},
+): string {
+  const kind = options.kind ?? "const";
+  const prefix = [options.export && "export", kind, name]
     .filter(Boolean)
     .join(" ");
   return `${prefix} = ${value}`;
