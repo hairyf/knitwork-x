@@ -4,13 +4,13 @@ import { genString } from "./string";
 import type { CodegenOptions } from "./types";
 import { genJSDocComment, genObjectKey, wrapInDelimiters } from "./utils";
 
-export interface SpecificGeneric {
+export interface TypeGeneric {
   name: string;
   extends?: string;
   default?: string;
 }
 
-export interface SpecificField {
+export interface Field {
   /** parameter name */
   name: string;
   /** parameter type */
@@ -21,11 +21,11 @@ export interface SpecificField {
   default?: string;
 }
 
-export interface SpecificFunction {
+export interface FunctionOpts {
   /** function name */
   name: string;
   /** function params */
-  parameters?: SpecificField[];
+  parameters?: Field[];
   /** function block (each string is one statement) */
   body?: string[];
   /** is export */
@@ -39,7 +39,7 @@ export interface SpecificFunction {
   /** return type */
   returnType?: string;
   /** generics */
-  generics?: SpecificGeneric[];
+  generics?: TypeGeneric[];
 }
 
 export type TypeObjectWithJSDoc = {
@@ -428,7 +428,36 @@ export function genConstEnum(
 }
 
 /**
- * Generate typescript function declaration from SpecificFunction.
+ * Generate a single function parameter string from Field.
+ *
+ * @example
+ *
+ * ```js
+ * genParam({ name: "x", type: "string" });
+ * // ~> `x: string`
+ *
+ * genParam({ name: "y", type: "number", optional: true });
+ * // ~> `y?: number`
+ *
+ * genParam({ name: "z", type: "number", default: "0" });
+ * // ~> `z: number = 0`
+ *
+ * genParam({ name: "a" });
+ * // ~> `a`
+ * ```
+ *
+ * @group Typescript
+ */
+export function genParam(p: Field): string {
+  let s = p.name;
+  if (p.optional) s += "?";
+  if (p.type) s += `: ${p.type}`;
+  if (p.default !== undefined) s += ` = ${p.default}`;
+  return s;
+}
+
+/**
+ * Generate typescript function declaration from Function.
  *
  * @example
  *
@@ -448,11 +477,7 @@ export function genConstEnum(
  *
  * @group Typescript
  */
-export function genFunction(
-  options: SpecificFunction,
-  _codegenOpts: CodegenOptions = {},
-  indent = "",
-): string {
+export function genFunction(options: FunctionOpts, indent = ""): string {
   const {
     name,
     parameters = [],
@@ -481,18 +506,7 @@ export function genFunction(
         ">"
       : "";
 
-  const paramsPart =
-    "(" +
-    parameters
-      .map((p) => {
-        let s = p.name;
-        if (p.optional) s += "?";
-        if (p.type) s += `: ${p.type}`;
-        if (p.default !== undefined) s += ` = ${p.default}`;
-        return s;
-      })
-      .join(", ") +
-    ")";
+  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
 
   const returnPart = returnType ? `: ${returnType}` : "";
   const newIndent = indent + "  ";
@@ -518,6 +532,10 @@ export function genFunction(
   return `${jsdocComment}${prefix} ${bodyContent}`;
 }
 
+function _indentStatements(statements: string[]): string[] {
+  return statements.flatMap((s) => s.split("\n").map((line) => "  " + line));
+}
+
 /**
  * Generate typescript `declare module` augmentation.
  *
@@ -527,41 +545,35 @@ export function genFunction(
  * genAugmentation("@nuxt/utils");
  * // ~> `declare module "@nuxt/utils" {}`
  *
- * genAugmentation("@nuxt/utils", { MyInterface: {} });
+ * genAugmentation("@nuxt/utils", "interface MyInterface {}");
  * // ~> `declare module "@nuxt/utils" { interface MyInterface {} }`
  *
- * genAugmentation("@nuxt/utils", { MyInterface: { "test?": "string" } });
- * // ~> `declare module "@nuxt/utils" { interface MyInterface { test?: string } }`
+ * genAugmentation("@nuxt/utils", [
+ *   "interface MyInterface { test?: string }",
+ *   "type MyType = string",
+ * ]);
+ * // ~> multi-line declare module with both interface and type
  * ```
  *
  * @group Typescript
  */
 export function genAugmentation(
   specifier: string,
-  interfaces?: Record<
-    string,
-    TypeObject | [TypeObject, Omit<GenInterfaceOptions, "export">]
-  >,
+  statements?: string | string[],
 ): string {
+  const lines =
+    statements === undefined
+      ? []
+      : _indentStatements(
+          Array.isArray(statements) ? statements : [statements],
+        );
   return `declare module ${genString(specifier)} ${wrapInDelimiters(
-    Object.entries(interfaces || {}).map(
-      ([key, entry]) =>
-        "  " +
-        (Array.isArray(entry)
-          ? genInterface(key, ...entry)
-          : genInterface(key, entry, {}, "  ")),
-    ),
+    lines,
     undefined,
     undefined,
     false,
   )}`;
 }
-
-/** Interfaces shape for declare namespace body (same as genAugmentation). */
-export type DeclareNamespaceInterfaces = Record<
-  string,
-  TypeObject | [TypeObject, Omit<GenInterfaceOptions, "export">]
->;
 
 /**
  * Generate typescript `declare <namespace>` block (e.g. `declare global {}`).
@@ -572,27 +584,30 @@ export type DeclareNamespaceInterfaces = Record<
  * genDeclareNamespace("global");
  * // ~> `declare global {}`
  *
- * genDeclareNamespace("global", { Window: {} });
+ * genDeclareNamespace("global", "interface Window {}");
  * // ~> `declare global { interface Window {} }`
  *
- * genDeclareNamespace("global", { Window: { "customProp?": "string" } });
- * // ~> `declare global { interface Window { customProp?: string } }`
+ * genDeclareNamespace("global", [
+ *   "interface Window { customProp?: string }",
+ *   "const foo: string",
+ * ]);
+ * // ~> `declare global { interface Window {...} const foo: string }`
  * ```
  *
  * @group Typescript
  */
 export function genDeclareNamespace(
   namespace: string,
-  interfaces?: DeclareNamespaceInterfaces,
+  statements?: string | string[],
 ): string {
+  const lines =
+    statements === undefined
+      ? []
+      : _indentStatements(
+          Array.isArray(statements) ? statements : [statements],
+        );
   return `declare ${namespace} ${wrapInDelimiters(
-    Object.entries(interfaces || {}).map(
-      ([key, entry]) =>
-        "  " +
-        (Array.isArray(entry)
-          ? genInterface(key, ...entry)
-          : genInterface(key, entry, {}, "  ")),
-    ),
+    lines,
     undefined,
     undefined,
     false,

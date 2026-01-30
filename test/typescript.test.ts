@@ -6,6 +6,7 @@ import {
   genEnum,
   genConstEnum,
   genFunction,
+  genParam,
   genInlineTypeImport,
   genTypeImport,
   genTypeExport,
@@ -190,27 +191,23 @@ const genAugmentationTests: Array<{
 }> = [
   { input: ["@nuxt/utils"], code: 'declare module "@nuxt/utils" {}' },
   {
-    input: ["@nuxt/utils", { MyInterface: {} }],
+    input: ["@nuxt/utils", genInterface("MyInterface", {})],
     code: `declare module "@nuxt/utils" {
   interface MyInterface {}
 }`,
   },
   {
-    input: ["@nuxt/utils", { MyInterface: {}, MyOtherInterface: {} }],
+    input: [
+      "@nuxt/utils",
+      [genInterface("MyInterface", {}), genInterface("MyOtherInterface", {})],
+    ],
     code: `declare module "@nuxt/utils" {
   interface MyInterface {}
   interface MyOtherInterface {}
 }`,
   },
   {
-    input: [
-      "@nuxt/utils",
-      {
-        MyInterface: {
-          "test?": "string",
-        },
-      },
-    ],
+    input: ["@nuxt/utils", genInterface("MyInterface", { "test?": "string" })],
     code: `declare module "@nuxt/utils" {
   interface MyInterface {
     test?: string
@@ -220,12 +217,21 @@ const genAugmentationTests: Array<{
   {
     input: [
       "@nuxt/utils",
-      {
-        MyInterface: [{}, { extends: ["OtherInterface", "FurtherInterface"] }],
-      },
+      genInterface(
+        "MyInterface",
+        {},
+        { extends: ["OtherInterface", "FurtherInterface"] },
+      ),
     ],
     code: `declare module "@nuxt/utils" {
   interface MyInterface extends OtherInterface, FurtherInterface {}
+}`,
+  },
+  {
+    input: ["@nuxt/utils", ["interface Foo {}", "type Bar = string"]],
+    code: `declare module "@nuxt/utils" {
+  interface Foo {}
+  type Bar = string
 }`,
   },
 ];
@@ -245,27 +251,23 @@ const genDeclareNamespaceTests: Array<{
 }> = [
   { input: ["global"], code: "declare global {}" },
   {
-    input: ["global", { Window: {} }],
+    input: ["global", genInterface("Window", {})],
     code: `declare global {
   interface Window {}
 }`,
   },
   {
-    input: ["global", { Window: {}, Document: {} }],
+    input: [
+      "global",
+      [genInterface("Window", {}), genInterface("Document", {})],
+    ],
     code: `declare global {
   interface Window {}
   interface Document {}
 }`,
   },
   {
-    input: [
-      "global",
-      {
-        Window: {
-          "customProp?": "string",
-        },
-      },
-    ],
+    input: ["global", genInterface("Window", { "customProp?": "string" })],
     code: `declare global {
   interface Window {
     customProp?: string
@@ -273,14 +275,16 @@ const genDeclareNamespaceTests: Array<{
 }`,
   },
   {
-    input: [
-      "global",
-      {
-        Window: [{}, { extends: ["SomeMixin"] }],
-      },
-    ],
+    input: ["global", genInterface("Window", {}, { extends: ["SomeMixin"] })],
     code: `declare global {
   interface Window extends SomeMixin {}
+}`,
+  },
+  {
+    input: ["global", ["const foo: string", "function bar(): void"]],
+    code: `declare global {
+  const foo: string
+  function bar(): void
 }`,
   },
 ];
@@ -569,6 +573,35 @@ describe("genConstEnum", () => {
   for (const t of genConstEnumTests) {
     it(genTestTitle(t.code), () => {
       const code = genConstEnum(...t.input);
+      expect(code).to.equal(t.code);
+    });
+  }
+});
+
+const genParamTests: Array<{
+  input: Parameters<typeof genParam>;
+  code: string;
+}> = [
+  { input: [{ name: "x", type: "string" }], code: "x: string" },
+  {
+    input: [{ name: "y", type: "number", optional: true }],
+    code: "y?: number",
+  },
+  {
+    input: [{ name: "z", type: "number", default: "0" }],
+    code: "z: number = 0",
+  },
+  { input: [{ name: "a" }], code: "a" },
+  {
+    input: [{ name: "opt", type: "string", optional: true, default: "'x'" }],
+    code: "opt?: string = 'x'",
+  },
+];
+
+describe("genParam", () => {
+  for (const t of genParamTests) {
+    it(genTestTitle(t.code), () => {
+      const code = genParam(...t.input);
       expect(code).to.equal(t.code);
     });
   }

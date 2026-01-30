@@ -270,7 +270,7 @@ genString("foo\nbar");
 
 ## Typescript
 
-### `genAugmentation(specifier)`
+### `genAugmentation(specifier, statements?)`
 
 Generate typescript `declare module` augmentation.
 
@@ -280,11 +280,14 @@ Generate typescript `declare module` augmentation.
 genAugmentation("@nuxt/utils");
 // ~> `declare module "@nuxt/utils" {}`
 
-genAugmentation("@nuxt/utils", { MyInterface: {} });
+genAugmentation("@nuxt/utils", genInterface("MyInterface", {}));
 // ~> `declare module "@nuxt/utils" { interface MyInterface {} }`
 
-genAugmentation("@nuxt/utils", { MyInterface: { "test?": "string" } });
-// ~> `declare module "@nuxt/utils" { interface MyInterface { test?: string } }`
+genAugmentation("@nuxt/utils", [
+  genInterface("MyInterface", { "test?": "string" }),
+  "type MyType = string",
+]);
+// ~> declare module with multiple statements (interface + type)
 ```
 
 ### `genConstEnum(name, members, options, indent)`
@@ -301,7 +304,7 @@ genConstEnum("Mode", { Read: 0, Write: 1 }, { export: true });
 // ~> `export const enum Mode { Read = 0, Write = 1 }`
 ```
 
-### `genDeclareNamespace(namespace, interfaces?)`
+### `genDeclareNamespace(namespace, statements?)`
 
 Generate typescript `declare <namespace>` block (e.g. `declare global {}`).
 
@@ -311,11 +314,14 @@ Generate typescript `declare <namespace>` block (e.g. `declare global {}`).
 genDeclareNamespace("global");
 // ~> `declare global {}`
 
-genDeclareNamespace("global", { Window: {} });
+genDeclareNamespace("global", genInterface("Window", {}));
 // ~> `declare global { interface Window {} }`
 
-genDeclareNamespace("global", { Window: { "customProp?": "string" } });
-// ~> `declare global { interface Window { customProp?: string } }`
+genDeclareNamespace("global", [
+  genInterface("Window", { "customProp?": "string" }),
+  genVariable("foo", "string"),
+]);
+// ~> declare global with multiple statements (interface + const)
 ```
 
 ### `genEnum(name, members, options, indent)`
