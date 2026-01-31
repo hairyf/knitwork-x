@@ -271,6 +271,12 @@ Values are not escaped or quoted.
 ```js
 genObject({ foo: "bar", test: '() => import("pkg")' })
 // ~> `{ foo: bar, test: () => import("pkg") }`
+
+genObject([{ name: "foo", value: "bar" }, { name: "test", value: '() => import("pkg")' }])
+// ~> `{ foo: bar, test: () => import("pkg") }`
+
+genObject([{ name: "count", value: "0", jsdoc: "Counter value" }])
+// ~> `{ /** Counter value *\/ count: 0 }`
 ```
 
 ### `genSet(values, indent, options)`
@@ -479,29 +485,6 @@ genClass("Baz", [], { extends: "Base", implements: ["I1", "I2"] });
 
 genClass("Exported", [], { export: true });
 // ~> `export class Exported {}`
-```
-
-### `genProperty(field, indent)`
-
-Generate a single property signature from a TypeField (class/interface property). Returns `[modifiers?][name][optional?]: [type][ = value]?`. When `field.jsdoc` is set, prepends JSDoc comment. Supports static, readonly, public, private, protected and value (initializer).
-
-**Example:**
-
-```js
-genProperty({ name: "foo", type: "string" });
-// ~> `foo: string`
-
-genProperty({ name: "bar", type: "number", optional: true });
-// ~> `bar?: number`
-
-genProperty({ name: "id", type: "string", jsdoc: "Unique id" }, "  ");
-// ~> `/** Unique id *\/\n  id: string`
-
-genProperty({ name: "x", value: "0" });
-// ~> `x = 0`
-
-genProperty({ name: "id", type: "string", readonly: true, static: true });
-// ~> `static readonly id: string`
 ```
 
 ### `genConditionalType(checkType, extendsType, trueType, falseType)`
@@ -908,7 +891,7 @@ genMappedType("P", "keyof T", "T[P]");
 
 ### `genMethod(options, indent)`
 
-Generate method for class or object literal: `name(params) { body }`, or with `kind: "get"`/`"set"` for getter/setter. Supports async, generator, static.
+Generate method (including get/set) with optional async/generator/static. For class or object literal: `name(params) { body }`, `get name() { }`, `set name(v) { }`.
 
 **Example:**
 
@@ -924,9 +907,6 @@ genMethod({ name: "value", kind: "get", body: ["return this._v;"], returnType: "
 
 genMethod({ name: "value", kind: "set", parameters: [{ name: "v", type: "number" }], body: ["this._v = v;"] });
 // ~> `set value(v: number) { this._v = v; }`
-
-genMethod({ name: "fetch", async: true, parameters: [{ name: "url", type: "string" }], body: ["return await fetch(url);"] });
-// ~> `async fetch(url: string) { return await fetch(url); }`
 ```
 
 ### `genModule(specifier, statements?)`
@@ -1000,6 +980,29 @@ genPrefixedBlock("while (running)", ["step();", "check();"]);
 
 genPrefixedBlock("for (;;)", "break;", { bracket: false });
 // ~> `for (;;) break;`
+```
+
+### `genProperty(field, indent)`
+
+Generate a single property signature from a TypeField. Returns `[modifiers?][name][optional?]: [type][ = value]?`. When `field.jsdoc` is set, prepends JSDoc comment. Supports static, readonly, public, private, protected (class property) and value (initializer).
+
+**Example:**
+
+```js
+genProperty({ name: "foo", type: "string" });
+// ~> `foo: string`
+
+genProperty({ name: "bar", type: "number", optional: true });
+// ~> `bar?: number`
+
+genProperty({ name: "id", type: "string", jsdoc: "Unique id" }, "  ");
+// ~> `/** Unique id *\/\n  id: string`
+
+genProperty({ name: "x", value: "0" });
+// ~> `x = 0`
+
+genProperty({ name: "id", type: "string", readonly: true, static: true });
+// ~> `static readonly id: string`
 ```
 
 ### `genReturn(expr?, indent)`
@@ -1293,17 +1296,6 @@ genWhile("ok", "doIt();", { bracket: false });
 
 ## Utils
 
-### `genLiteral(fields, indent, _options)`
-
-Create object literal from field descriptors.
-
-**Example:**
-
-```js
-genLiteral(['type', ['type', 'A'], ['...', 'b']])
-// ~> `{ type, type: A, ...b }`
-```
-
 ### `genComment(text, options: { block? }, indent)`
 
 Generate comment: single-line `//` or block comment (non-JSDoc).
@@ -1359,6 +1351,17 @@ genKey("foo-bar");
 
 genKey("with space");
 // ~> `"with space"`
+```
+
+### `genLiteral(fields, indent, _options)`
+
+Create object literal from field descriptors.
+
+**Example:**
+
+```js
+genLiteral(['type', ['type', 'A'], ['...', 'b']])
+// ~> `{ type, type: A, ...b }`
 ```
 
 ### `genRegExp(pattern, flags?)`

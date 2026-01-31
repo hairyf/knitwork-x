@@ -12,7 +12,11 @@ genObject({
 })
 genObject([
   { name: 'foo', value: 'bar' },
-  { name: 'count', value: '0', jsdoc: 'Counter value' }
+  { 
+    name: 'count',
+    value: '0',
+    jsdoc: 'Counter value'
+  }
 ])`,
     output: () => [
       knitwork.genObject({ foo: "bar" }),
