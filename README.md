@@ -2,13 +2,15 @@
 
 <!-- automd:badges color=yellow codecov -->
 
-[![npm version](https://img.shields.io/npm/v/knitwork?color=yellow)](https://npmjs.com/package/knitwork)
-[![npm downloads](https://img.shields.io/npm/dm/knitwork?color=yellow)](https://npm.chart.dev/knitwork)
-[![codecov](https://img.shields.io/codecov/c/gh/unjs/knitwork?color=yellow)](https://codecov.io/gh/unjs/knitwork)
+[![npm version](https://img.shields.io/npm/v/knitwork-x?color=yellow)](https://npmjs.com/package/knitwork-x)
+[![npm downloads](https://img.shields.io/npm/dm/knitwork-x?color=yellow)](https://npm.chart.dev/knitwork-x)
+[![codecov](https://img.shields.io/codecov/c/gh/hairyf/knitwork-x?color=yellow)](https://codecov.io/gh/hairyf/knitwork-x)
 
 <!-- /automd -->
 
 Utilities to generate JavaScript code.
+
+forked from [knitwork](https://github.com/unjs/knitwork), and provide more comprehensive generation tools for typescript.
 
 ## Install
 
@@ -16,22 +18,22 @@ Utilities to generate JavaScript code.
 
 ```sh
 # ✨ Auto-detect
-npx nypm install knitwork
+npx nypm install knitwork-x
 
 # npm
-npm install knitwork
+npm install knitwork-x
 
 # yarn
-yarn add knitwork
+yarn add knitwork-x
 
 # pnpm
-pnpm add knitwork
+pnpm add knitwork-x
 
 # bun
-bun install knitwork
+bun install knitwork-x
 
 # deno
-deno install npm:knitwork
+deno install npm:knitwork-x
 ```
 
 <!-- /automd -->
@@ -41,19 +43,19 @@ deno install npm:knitwork
 **ESM** (Node.js, Bun, Deno)
 
 ```js
-import {} from "knitwork";
+import {} from "knitwork-x";
 ```
 
 **CommonJS** (Legacy Node.js)
 
 ```js
-const {} = require("knitwork");
+const {} = require("knitwork-x");
 ```
 
 **CDN** (Deno and Browsers)
 
 ```js
-import {} from "https://esm.sh/knitwork";
+import {} from "https://esm.sh/knitwork-x";
 ```
 
 <!-- /automd -->
@@ -1511,11 +1513,11 @@ Wrap an array of strings in delimiters.
 
 <!-- automd:contributors license=MIT author="pi0,danielroe" -->
 
-Published under the [MIT](https://github.com/unjs/knitwork/blob/main/LICENSE) license.
-Made by [@pi0](https://github.com/pi0), [@danielroe](https://github.com/danielroe) and [community](https://github.com/unjs/knitwork/graphs/contributors) 💛
+Published under the [MIT](https://github.com/hairyf/knitwork-x/blob/main/LICENSE) license.
+Made by [@pi0](https://github.com/pi0), [@danielroe](https://github.com/danielroe) and [community](https://github.com/hairyf/knitwork-x/graphs/contributors) 💛
 <br><br>
-<a href="https://github.com/unjs/knitwork/graphs/contributors">
-<img src="https://contrib.rocks/image?repo=unjs/knitwork" />
+<a href="https://github.com/hairyf/knitwork-x/graphs/contributors">
+<img src="https://contrib.rocks/image?repo=hairyf/knitwork-x" />
 </a>
 
 <!-- /automd -->

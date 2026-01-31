@@ -28,27 +28,32 @@ export type {
   GenConstructSignatureOptions,
 } from "./types";
 
+export { genVariable } from "./variable";
+
 export {
   genTypeAlias,
-  genVariable,
   genTypeExport,
   genInlineTypeImport,
   genTypeObject,
   genProperty,
-  genInterface,
   genUnion,
   genIntersection,
   genMappedType,
-  genConditionalType,
-  genIndexSignature,
-  genCallSignature,
-  genConstructSignature,
   genTemplateLiteralType,
   genKeyOf,
   genTypeof,
   genTypeAssertion,
   genSatisfies,
-} from "./type";
+} from "./type-alias";
+
+export { genConditionalType } from "./conditional";
+
+export {
+  genInterface,
+  genIndexSignature,
+  genCallSignature,
+  genConstructSignature,
+} from "./interface";
 
 export { genEnum, genConstEnum } from "./enum";
 
@@ -67,15 +72,13 @@ export {
   genClassMethod,
   genGetter,
   genSetter,
-  genDecorator,
 } from "./class";
 
-export {
-  genAugmentation,
-  genDeclareNamespace,
-  genNamespace,
-  genModule,
-} from "./augmentation";
+export { genDecorator } from "./decorator";
+
+export { genAugmentation, genModule } from "./module";
+
+export { genDeclareNamespace, genNamespace } from "./namespace";
 
 export {
   genPrefixedBlock,
@@ -83,17 +86,12 @@ export {
   genElseIf,
   genElse,
   genTernary,
-  genTry,
-  genCatch,
-  genFinally,
-  genCase,
-  genDefault,
-  genSwitch,
-  genFor,
-  genForOf,
-  genForIn,
-  genWhile,
-  genDoWhile,
-  genThrow,
-  genReturn,
-} from "./control";
+} from "./condition";
+
+export { genTry, genCatch, genFinally } from "./try";
+
+export { genFor, genForOf, genForIn, genWhile, genDoWhile } from "./loop";
+
+export { genCase, genDefault, genSwitch } from "./switch";
+
+export { genThrow, genReturn } from "./statement";

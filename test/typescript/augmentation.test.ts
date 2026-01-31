@@ -1,6 +1,6 @@
 import { expect, describe, it } from "vitest";
 import { genAugmentation, genDeclareNamespace, genInterface } from "../../src";
-import { genNamespace, genModule } from "../../src/typescript/augmentation";
+import { genNamespace, genModule } from "../../src/typescript";
 import { genTestTitle } from "../_utils";
 
 const genAugmentationTests: Array<{

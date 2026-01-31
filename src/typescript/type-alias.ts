@@ -1,17 +1,12 @@
 import { _genStatement } from "../_utils";
 import { ESMCodeGenOptions, ESMImport, genDynamicImport } from "../esm";
 import { genJSDocComment, genObjectKey, wrapInDelimiters } from "../utils";
-import { genParam } from "./function";
 import type {
-  GenInterfaceOptions,
   GenTypeAliasOptions,
-  GenVariableOptions,
   TypeObject,
   TypeObjectField,
   TypeObjectWithJSDoc,
   TypeField,
-  GenCallSignatureOptions,
-  GenConstructSignatureOptions,
 } from "./types";
 
 /**
@@ -61,42 +56,6 @@ export function genTypeAlias(
     .filter(Boolean)
     .join(" ");
   return `${prefix} = ${typeValue}`;
-}
-
-/**
- * Create variable declaration.
- *
- * @example
- *
- * ```js
- * genVariable("a", "2");
- * // ~> `const a = 2`
- *
- * genVariable("foo", "'bar'");
- * // ~> `const foo = 'bar'`
- *
- * genVariable("x", "1", { kind: "let" });
- * // ~> `let x = 1`
- *
- * genVariable("y", "2", { export: true });
- * // ~> `export const y = 2`
- * ```
- *
- * @param name - variable name
- * @param value - initializer (right-hand side expression)
- * @param options - optional { export?, kind? }
- * @group Typescript
- */
-export function genVariable(
-  name: string,
-  value: string,
-  options: GenVariableOptions = {},
-): string {
-  const kind = options.kind ?? "const";
-  const prefix = [options.export && "export", kind, name]
-    .filter(Boolean)
-    .join(" ");
-  return `${prefix} = ${value}`;
 }
 
 /**
@@ -246,64 +205,6 @@ export function genProperty(field: TypeField, indent = ""): string {
 }
 
 /**
- * Generate typescript interface.
- *
- * @example
- *
- * ```js
- * genInterface("FooInterface");
- * // ~> `interface FooInterface {}`
- *
- * genInterface("FooInterface", { name: "string", count: "number" });
- * // ~> `interface FooInterface { name: string, count: number }`
- *
- * genInterface("FooInterface", undefined, { extends: "Other" });
- * // ~> `interface FooInterface extends Other {}`
- *
- * genInterface("FooInterface", {}, { export: true });
- * // ~> `export interface FooInterface {}`
- * ```
- *
- * @group Typescript
- */
-export function genInterface(
-  name: string,
-  contents?: TypeObject | TypeField[],
-  options: GenInterfaceOptions = {},
-  indent = "",
-): string {
-  const jsdocComment =
-    options.jsdoc === undefined ? "" : genJSDocComment(options.jsdoc);
-
-  let body: string;
-  if (contents === undefined) {
-    body = "{}";
-  } else if (Array.isArray(contents)) {
-    const newIndent = indent + "  ";
-    const lines = contents.map((f) => genProperty(f, newIndent));
-    body = wrapInDelimiters(lines, indent, "{}", false);
-  } else {
-    body = genTypeObject(contents, indent);
-  }
-
-  const interfaceParts = [
-    options.export && "export",
-    `interface ${name}`,
-    options.extends &&
-      `extends ${
-        Array.isArray(options.extends)
-          ? options.extends.join(", ")
-          : options.extends
-      }`,
-    body,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  return `${jsdocComment}${interfaceParts}`;
-}
-
-/**
  * Generate union type.
  *
  * @example
@@ -387,149 +288,6 @@ export function genMappedType(
   valueType: string,
 ): string {
   return `{ [${keyName} in ${keyType}]: ${valueType} }`;
-}
-
-/**
- * Generate conditional type.
- *
- * @example
- *
- * ```js
- * genConditionalType("T", "U", "X", "Y");
- * // ~> `T extends U ? X : Y`
- *
- * genConditionalType("T", "null", "never", "T");
- * // ~> `T extends null ? never : T`
- * ```
- *
- * @param checkType - type to check (e.g. "T")
- * @param extendsType - type to extend (e.g. "U")
- * @param trueType - type when condition is true (e.g. "X")
- * @param falseType - type when condition is false (e.g. "Y")
- * @group Typescript
- */
-export function genConditionalType(
-  checkType: string,
-  extendsType: string,
-  trueType: string,
-  falseType: string,
-): string {
-  return `${checkType} extends ${extendsType} ? ${trueType} : ${falseType}`;
-}
-
-/**
- * Generate index signature.
- *
- * @example
- *
- * ```js
- * genIndexSignature("string", "number");
- * // ~> `[key: string]: number`
- *
- * genIndexSignature("number", "string");
- * // ~> `[key: number]: string`
- *
- * genIndexSignature("key", "string", "any");
- * // ~> `[key: string]: any`
- * ```
- *
- * @param keyName - index key name (default: "key")
- * @param keyType - index key type (e.g. "string", "number")
- * @param valueType - value type
- * @group Typescript
- */
-export function genIndexSignature(
-  keyType: string,
-  valueType: string,
-  keyName = "key",
-): string {
-  return `[${keyName}: ${keyType}]: ${valueType}`;
-}
-
-/**
- * Generate call signature for interfaces.
- *
- * @example
- *
- * ```js
- * genCallSignature({ parameters: [{ name: "x", type: "string" }], returnType: "number" });
- * // ~> `(x: string): number`
- *
- * genCallSignature({ parameters: [{ name: "a", type: "number" }, { name: "b", type: "number", optional: true }], returnType: "void" });
- * // ~> `(a: number, b?: number): void`
- *
- * genCallSignature({ generics: [{ name: "T" }], parameters: [{ name: "x", type: "T" }], returnType: "T" });
- * // ~> `<T>(x: T): T`
- * ```
- *
- * @group Typescript
- */
-export function genCallSignature(
-  options: GenCallSignatureOptions = {},
-): string {
-  const { parameters = [], returnType, generics = [] } = options;
-
-  const genericPart =
-    generics.length > 0
-      ? "<" +
-        generics
-          .map((g) => {
-            let s = g.name;
-            if (g.extends) s += ` extends ${g.extends}`;
-            if (g.default) s += ` = ${g.default}`;
-            return s;
-          })
-          .join(", ") +
-        ">"
-      : "";
-
-  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
-  const returnPart = returnType ? `: ${returnType}` : "";
-
-  return `${genericPart}${paramsPart}${returnPart}`;
-}
-
-/**
- * Generate construct signature for interfaces.
- *
- * @example
- *
- * ```js
- * genConstructSignature({ parameters: [{ name: "x", type: "string" }], returnType: "MyClass" });
- * // ~> `new (x: string): MyClass`
- *
- * genConstructSignature({ parameters: [{ name: "value", type: "number" }], returnType: "Instance" });
- * // ~> `new (value: number): Instance`
- *
- * genConstructSignature({ generics: [{ name: "T" }], parameters: [{ name: "x", type: "T" }], returnType: "T" });
- * // ~> `new <T>(x: T): T`
- * ```
- *
- * @group Typescript
- */
-export function genConstructSignature(
-  options: GenConstructSignatureOptions = {},
-): string {
-  const { parameters = [], returnType, generics = [] } = options;
-
-  const genericPart =
-    generics.length > 0
-      ? "<" +
-        generics
-          .map((g) => {
-            let s = g.name;
-            if (g.extends) s += ` extends ${g.extends}`;
-            if (g.default) s += ` = ${g.default}`;
-            return s;
-          })
-          .join(", ") +
-        ">"
-      : "";
-
-  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
-  const returnPart = returnType ? `: ${returnType}` : "";
-
-  return `new ${genericPart}${paramsPart}${returnPart}`;
 }
 
 /**
