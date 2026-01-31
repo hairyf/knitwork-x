@@ -3,8 +3,7 @@ import {
   genImport,
   genExport,
   genDynamicImport,
-  genSafeVariableName,
-  genDynamicTypeImport,
+  genVariableName,
   genDefaultExport,
   genExportStar,
   genExportStarAs,
@@ -46,12 +45,25 @@ const genImportTests = [
     code: 'import { foo } from "pkg" with { type: "json" };',
     options: { attributes: { type: "json" } },
   },
+  {
+    names: ["test"],
+    code: 'import type { test } from "@nuxt/utils";',
+    specifier: "@nuxt/utils",
+    options: { type: true },
+  },
+  {
+    names: [{ name: "test", as: "value" }],
+    code: 'import type { test as value } from "@nuxt/utils";',
+    specifier: "@nuxt/utils",
+    options: { type: true },
+  },
 ];
 
 describe("genImport", () => {
   for (const t of genImportTests) {
     it(genTestTitle(t.code), () => {
-      const code = genImport("pkg", t.names, t.options);
+      const specifier = "specifier" in t && t.specifier ? t.specifier : "pkg";
+      const code = genImport(specifier, t.names, t.options);
       expect(code).to.equal(t.code);
     });
   }
@@ -84,23 +96,44 @@ describe("genExport", () => {
 });
 
 const genDynamicImportTests = [
-  { code: '() => import("pkg")' },
-  { opts: { wrapper: false }, code: 'import("pkg")' },
+  { code: 'import("pkg")' },
+  { opts: { wrapper: true }, code: '() => import("pkg")' },
   {
-    opts: { interopDefault: true },
+    opts: { wrapper: true, interopDefault: true },
     code: '() => import("pkg").then(m => m.default || m)',
   },
   {
-    opts: { comment: 'webpackChunkName: "chunks/dynamic"' },
+    opts: { wrapper: true, comment: 'webpackChunkName: "chunks/dynamic"' },
     code: '() => import("pkg" /* webpackChunkName: "chunks/dynamic" */)',
   },
   {
-    opts: { assert: { type: "json" } },
+    opts: { wrapper: true, assert: { type: "json" } },
     code: '() => import("pkg", { assert: { type: "json" } })',
   },
   {
-    opts: { attributes: { type: "json" } },
+    opts: { wrapper: true, attributes: { type: "json" } },
     code: '() => import("pkg", { with: { type: "json" } })',
+  },
+  { opts: { type: true }, code: 'typeof import("pkg")' },
+  {
+    opts: { type: true, name: "foo" },
+    code: 'typeof import("pkg").foo',
+  },
+  {
+    opts: { type: true, name: "foo-bar" },
+    code: 'typeof import("pkg")["foo-bar"]',
+  },
+  {
+    opts: {
+      type: true,
+      name: "foo",
+      comment: 'webpackChunkName: "chunks/dynamic"',
+    },
+    code: 'typeof import("pkg" /* webpackChunkName: "chunks/dynamic" */).foo',
+  },
+  {
+    opts: { type: true, name: "foo", attributes: { type: "json" } },
+    code: 'typeof import("pkg", { with: { type: "json" } }).foo',
   },
 ];
 
@@ -113,50 +146,17 @@ describe("genDynamicImport", () => {
   }
 });
 
-const genDynamicTypeImportTests = [
-  {
-    code: 'typeof import("pkg")',
-  },
-  {
-    name: "foo",
-    code: 'typeof import("pkg").foo',
-  },
-  {
-    name: "foo-bar",
-    code: 'typeof import("pkg")["foo-bar"]',
-  },
-  {
-    name: "foo",
-    opts: { comment: 'webpackChunkName: "chunks/dynamic"' },
-    code: 'typeof import("pkg" /* webpackChunkName: "chunks/dynamic" */).foo',
-  },
-  {
-    name: "foo",
-    opts: { attributes: { type: "json" } },
-    code: 'typeof import("pkg", { with: { type: "json" } }).foo',
-  },
-];
-
-describe("genDynamicTypeImport", () => {
-  for (const t of genDynamicTypeImportTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genDynamicTypeImport("pkg", t.name, t.opts);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
-
-const genSafeVariableNameTests = [
+const genVariableNameTests = [
   { key: "valid_import", code: "valid_import" },
   { key: "for", code: "_for" },
   { key: "with space", code: "with_32space" },
   { key: "123 numbers", code: "_123_32numbers" },
 ];
 
-describe("genSafeVariableName", () => {
-  for (const t of genSafeVariableNameTests) {
+describe("genVariableName", () => {
+  for (const t of genVariableNameTests) {
     it(genTestTitle(t.code), () => {
-      const code = genSafeVariableName(t.key);
+      const code = genVariableName(t.key);
       expect(code).to.equal(t.code);
     });
   }

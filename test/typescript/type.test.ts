@@ -2,7 +2,7 @@ import { expect, describe, it } from "vitest";
 import {
   genInterface,
   genInlineTypeImport,
-  genTypeImport,
+  genImport,
   genTypeExport,
   genTypeAlias,
   genTypeObject,
@@ -237,6 +237,41 @@ const genTypeAliasTests: Array<{
     input: ["Baz", "string", { export: true }],
     code: "export type Baz = string",
   },
+  {
+    input: ["Id", "T", { generics: [{ name: "T" }] }],
+    code: "type Id<T> = T",
+  },
+  {
+    input: ["Nullable", "T | null", { generics: [{ name: "T" }] }],
+    code: "type Nullable<T> = T | null",
+  },
+  {
+    input: [
+      "WithExtends",
+      "T",
+      { generics: [{ name: "T", extends: "object" }] },
+    ],
+    code: "type WithExtends<T extends object> = T",
+  },
+  {
+    input: [
+      "WithDefault",
+      "T",
+      { generics: [{ name: "T", default: "string" }] },
+    ],
+    code: "type WithDefault<T = string> = T",
+  },
+  {
+    input: [
+      "Pair",
+      { first: "A", second: "B" },
+      { generics: [{ name: "A" }, { name: "B" }] },
+    ],
+    code: `type Pair<A, B> = {
+  first: A
+  second: B
+}`,
+  },
 ];
 
 describe("genTypeAlias", () => {
@@ -387,23 +422,23 @@ describe("genInlineTypeImport", () => {
 });
 
 const genTypeImportTests: Array<{
-  input: Parameters<typeof genTypeImport>;
+  input: Parameters<typeof genImport>;
   code: string;
 }> = [
   {
-    input: ["@nuxt/utils", ["test"]],
+    input: ["@nuxt/utils", ["test"], { type: true }],
     code: 'import type { test } from "@nuxt/utils";',
   },
   {
-    input: ["@nuxt/utils", [{ name: "test", as: "value" }]],
+    input: ["@nuxt/utils", [{ name: "test", as: "value" }], { type: true }],
     code: 'import type { test as value } from "@nuxt/utils";',
   },
 ];
 
-describe("genTypeImport", () => {
+describe("genImport with type option", () => {
   for (const t of genTypeImportTests) {
     it(genTestTitle(t.code), () => {
-      const code = genTypeImport(...t.input);
+      const code = genImport(...t.input);
       expect(code).to.equal(t.code);
     });
   }

@@ -10,6 +10,8 @@ export type ESMImport = string | { name: string; as?: string };
 export type ESMExport = string | { name: string; as?: string };
 
 export interface ESMCodeGenOptions extends CodegenOptions {
+  /** Emit `import type` instead of `import` (TypeScript). */
+  type?: boolean;
   // https://github.com/tc39/proposal-import-attributes
   // https://nodejs.org/api/esm.html#import-attributes
   attributes?: { type: string };
@@ -18,7 +20,12 @@ export interface ESMCodeGenOptions extends CodegenOptions {
 }
 
 export interface DynamicImportOptions extends ESMCodeGenOptions {
+  /** Emit `typeof import()` (TypeScript type-only). */
+  type?: boolean;
+  /** Property name for type import, e.g. `typeof import("pkg").name`. */
+  name?: string;
   comment?: string;
+  /** Wrap with `() => `. Default: false. */
   wrapper?: boolean;
   interopDefault?: boolean;
 }
@@ -46,6 +53,9 @@ export interface DynamicImportOptions extends ESMCodeGenOptions {
  *
  * genImport("pkg", "foo", { attributes: { type: "json" } });
  * // ~> `import foo from "pkg" with { type: "json" };
+ *
+ * genImport("@nuxt/utils", ["test"], { type: true });
+ * // ~> `import type { test } from "@nuxt/utils";`
  * ```
  *
  * @group ESM
@@ -55,30 +65,8 @@ export function genImport(
   imports?: ESMImport | ESMImport[],
   options: ESMCodeGenOptions = {},
 ) {
-  return _genStatement("import", specifier, imports, options);
-}
-
-/**
- * Generate an ESM `import type` statement.
- *
- * @example
- *
- * ```js
- * genTypeImport("@nuxt/utils", ["test"]);
- * // ~> `import type { test } from "@nuxt/utils";`
- *
- * genTypeImport("@nuxt/utils", [{ name: "test", as: "value" }]);
- * // ~> `import type { test as value } from "@nuxt/utils";`
- * ```
- *
- * @group ESM
- */
-export function genTypeImport(
-  specifier: string,
-  imports: ESMImport[],
-  options: ESMCodeGenOptions = {},
-) {
-  return _genStatement("import type", specifier, imports, options);
+  const statementType = options.type ? "import type" : "import";
+  return _genStatement(statementType, specifier, imports, options);
 }
 
 /**
@@ -114,13 +102,19 @@ export function genExport(
  *
  * ```js
  * genDynamicImport("pkg");
- * // ~> `() => import("pkg")`
- *
- * genDynamicImport("pkg", { wrapper: false });
  * // ~> `import("pkg")`
+ *
+ * genDynamicImport("pkg", { wrapper: true });
+ * // ~> `() => import("pkg")`
  *
  * genDynamicImport("pkg", { interopDefault: true });
  * // ~> `() => import("pkg").then(m => m.default || m)`
+ *
+ * genDynamicImport("pkg", { type: true });
+ * // ~> `typeof import("pkg")`
+ *
+ * genDynamicImport("pkg", { type: true, name: "foo" });
+ * // ~> `typeof import("pkg").foo`
  * ```
  *
  * @group ESM
@@ -130,52 +124,27 @@ export function genDynamicImport(
   options: DynamicImportOptions = {},
 ) {
   const commentString = options.comment ? ` /* ${options.comment} */` : "";
-  const wrapperString = options.wrapper === false ? "" : "() => ";
+  const optionsString = _genDynamicImportAttributes(options);
+  const importExpr = `import(${genString(
+    specifier,
+    options,
+  )}${commentString}${optionsString})`;
+
+  if (options.type) {
+    let nameString = "";
+    if (options.name) {
+      nameString = VALID_IDENTIFIER_RE.test(options.name)
+        ? `.${options.name}`
+        : `[${genString(options.name)}]`;
+    }
+    return `typeof ${importExpr}${nameString}`;
+  }
+
+  const wrapperString = options.wrapper === true ? "() => " : "";
   const interopString = options.interopDefault
     ? ".then(m => m.default || m)"
     : "";
-  const optionsString = _genDynamicImportAttributes(options);
-  return `${wrapperString}import(${genString(
-    specifier,
-    options,
-  )}${commentString}${optionsString})${interopString}`;
-}
-
-/**
- * Generate an ESM type `import()` statement.
- *
- * @example
- *
- * ```js
- * genDynamicTypeImport("pkg");
- * // ~> `typeof import("pkg")`
- *
- * genDynamicTypeImport("pkg", "foo");
- * // ~> `typeof import("pkg").foo`
- *
- * genDynamicTypeImport("pkg", "foo-bar");
- * // ~> `typeof import("pkg")["foo-bar"]`
- * ```
- *
- * @group ESM
- */
-export function genDynamicTypeImport(
-  specifier: string,
-  name: string | undefined,
-  options: Omit<DynamicImportOptions, "wrapper" | "interopDefault"> = {},
-) {
-  const commentString = options.comment ? ` /* ${options.comment} */` : "";
-  const optionsString = _genDynamicImportAttributes(options);
-  let nameString = "";
-  if (name) {
-    nameString = VALID_IDENTIFIER_RE.test(name)
-      ? `.${name}`
-      : `[${genString(name)}]`;
-  }
-  return `typeof import(${genString(
-    specifier,
-    options,
-  )}${commentString}${optionsString})${nameString}`;
+  return `${wrapperString}${importExpr}${interopString}`;
 }
 
 /**

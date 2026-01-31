@@ -1,8 +1,9 @@
 import { _genStatement } from "./_utils";
 import { ESMCodeGenOptions, ESMImport, genDynamicImport } from "./esm";
-import { genJSDocComment, genObjectKey, wrapInDelimiters } from "./utils";
+import { genJSDocComment, genKey, wrapInDelimiters } from "./utils";
 import type {
   GenTypeAliasOptions,
+  TypeGeneric,
   TypeObject,
   TypeObjectField,
   TypeObjectWithJSDoc,
@@ -38,6 +39,12 @@ function isTypeObjectWithJSDoc(value: unknown): value is TypeObjectWithJSDoc {
  *
  * genTypeAlias("Baz", "string", { export: true });
  * // ~> `export type Baz = string`
+ *
+ * genTypeAlias("Id", "T", { generics: [{ name: "T" }] });
+ * // ~> `type Id<T> = T`
+ *
+ * genTypeAlias("Nullable", "T | null", { generics: [{ name: "T" }] });
+ * // ~> `type Nullable<T> = T | null`
  * ```
  *
  * @param name - alias name
@@ -52,7 +59,21 @@ export function genTypeAlias(
 ): string {
   const typeValue =
     typeof value === "string" ? value : genTypeObject(value, indent);
-  const prefix = [options.export && "export", "type", name]
+  const { generics = [] } = options;
+  const genericPart =
+    generics.length > 0
+      ? "<" +
+        generics
+          .map((g: TypeGeneric) => {
+            let s = g.name;
+            if (g.extends) s += ` extends ${g.extends}`;
+            if (g.default) s += ` = ${g.default}`;
+            return s;
+          })
+          .join(", ") +
+        ">"
+      : "";
+  const prefix = [options.export && "export", "type", name + genericPart]
     .filter(Boolean)
     .join(" ");
   return `${prefix} = ${typeValue}`;
@@ -101,10 +122,7 @@ export function genInlineTypeImport(
   name = "default",
   options: ESMCodeGenOptions = {},
 ) {
-  return `typeof ${genDynamicImport(specifier, {
-    ...options,
-    wrapper: false,
-  })}.${name}`;
+  return genDynamicImport(specifier, { ...options, type: true, name });
 }
 
 /**
@@ -146,7 +164,7 @@ export function genTypeObject(
           ? ""
           : genJSDocComment(item.jsdoc, newIndent) + newIndent;
       const prefix = jsdocComment || newIndent;
-      return `${prefix}${genObjectKey(item.name)}${optional}: ${type}`;
+      return `${prefix}${genKey(item.name)}${optional}: ${type}`;
     });
     return wrapInDelimiters(lines, indent, "{}", false);
   }
@@ -159,13 +177,13 @@ export function genTypeObject(
       if (isTypeObjectWithJSDoc(value)) {
         const jsdocComment =
           genJSDocComment(value.jsdoc, newIndent) + newIndent;
-        return `${jsdocComment}${genObjectKey(k)}${optional}: ${value.type}`;
+        return `${jsdocComment}${genKey(k)}${optional}: ${value.type}`;
       }
 
       if (typeof value === "string") {
-        return `${newIndent}${genObjectKey(k)}${optional}: ${value}`;
+        return `${newIndent}${genKey(k)}${optional}: ${value}`;
       }
-      return `${newIndent}${genObjectKey(k)}${optional}: ${genTypeObject(
+      return `${newIndent}${genKey(k)}${optional}: ${genTypeObject(
         value,
         newIndent,
       )}`;
@@ -196,7 +214,7 @@ export function genTypeObject(
  * @group Typescript
  */
 export function genProperty(field: TypeField, indent = ""): string {
-  const prop = `${genObjectKey(field.name)}${field.optional ? "?" : ""}: ${field.type ?? "any"}`;
+  const prop = `${genKey(field.name)}${field.optional ? "?" : ""}: ${field.type ?? "any"}`;
   if (field.jsdoc === undefined) {
     return indent ? `${indent}${prop}` : prop;
   }

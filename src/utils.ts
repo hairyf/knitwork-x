@@ -143,24 +143,48 @@ export function wrapInDelimiters(
 }
 
 /**
+ * Generate regex literal from pattern and flags.
+ *
+ * @example
+ *
+ * ```js
+ * genRegExp("foo");
+ * // ~> `/foo/`
+ *
+ * genRegExp("foo", "gi");
+ * // ~> `/foo/gi`
+ *
+ * genRegExp("foo\\d+");
+ * // ~> `/foo\d+/`
+ * ```
+ *
+ * @group utils
+ */
+export function genRegExp(pattern: string, flags?: string): string {
+  // Escape forward slashes in the pattern
+  const escapedPattern = pattern.replace(/\//g, "\\/");
+  return flags ? `/${escapedPattern}/${flags}` : `/${escapedPattern}/`;
+}
+
+/**
  * Generate a safe javascript variable name for an object key.
  *
  * @example
  *
  * ```js
- * genObjectKey("foo");
+ * genKey("foo");
  * // ~> `foo`
  *
- * genObjectKey("foo-bar");
+ * genKey("foo-bar");
  * // ~> `"foo-bar"`
  *
- * genObjectKey("with space");
+ * genKey("with space");
  * // ~> `"with space"`
  * ```
  *
  * @group utils
  */
-export function genObjectKey(key: string) {
+export function genKey(key: string) {
   return VALID_IDENTIFIER_RE.test(key) ? key : genString(key);
 }
 

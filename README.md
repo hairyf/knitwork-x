@@ -65,25 +65,19 @@ import {} from "https://esm.sh/knitwork-x";
 - [ESM](#esm)
   * [`genDefaultExport(value, _options)`](#gendefaultexportvalue-_options)
   * [`genDynamicImport(specifier, options)`](#gendynamicimportspecifier-options)
-  * [`genDynamicTypeImport(specifier, name, options)`](#gendynamictypeimportspecifier-name-options)
   * [`genExport(specifier, exports?, options)`](#genexportspecifier-exports-options)
   * [`genExportStar(specifier, options)`](#genexportstarspecifier-options)
   * [`genExportStarAs(specifier, namespace, options)`](#genexportstarasspecifier-namespace-options)
   * [`genImport(specifier, imports?, options)`](#genimportspecifier-imports-options)
-  * [`genTypeImport(specifier, imports, options)`](#gentypeimportspecifier-imports-options)
 
 - [Serialization](#serialization)
-  * [`genArrayFromRaw(array, indent, options)`](#genarrayfromrawarray-indent-options)
-  * [`genMapFromRaw(entries, indent, options)`](#genmapfromrawentries-indent-options)
-  * [`genObjectFromRaw(object, indent, options)`](#genobjectfromrawobject-indent-options)
-  * [`genObjectFromRawEntries(array, indent, options)`](#genobjectfromrawentriesarray-indent-options)
-  * [`genObjectFromValues(obj, indent, options)`](#genobjectfromvaluesobj-indent-options)
-  * [`genObjectLiteral(fields, indent, _options)`](#genobjectliteralfields-indent-_options)
-  * [`genSetFromRaw(values, indent, options)`](#gensetfromrawvalues-indent-options)
+  * [`genArray(array, indent, options)`](#genArrayarray-indent-options)
+  * [`genMap(entries, indent, options)`](#genMapentries-indent-options)
+  * [`genObject(object, indent, options)`](#genObjectobject-indent-options)
+  * [`genLiteral(fields, indent, _options)`](#genLiteralfields-indent-_options)
+  * [`genSet(values, indent, options)`](#genSetvalues-indent-options)
 - [String](#string)
   * [`escapeString(id)`](#escapestringid)
-  * [`genRegExp(pattern, flags?)`](#genregexppattern-flags)
-  * [`genSafeVariableName(name)`](#gensafevariablenamename)
   * [`genString(input, options)`](#genstringinput-options)
   * [`genTemplateLiteral(parts)`](#gentemplateliteralparts)
 - [Typescript](#typescript)
@@ -141,11 +135,13 @@ import {} from "https://esm.sh/knitwork-x";
   * [`genTypeof(expr)`](#gentypeofexpr)
   * [`genUnion(types)`](#genuniontypes)
   * [`genVariable(name, value, options)`](#genvariablename-value-options)
+  * [`genVariableName(name)`](#genVariableNamename)
   * [`genWhile(cond, statements, options, indent)`](#genwhilecond-statements-options-indent)
 - [Utils](#utils)
   * [`genComment(text, options: { block? }, indent)`](#gencommenttext-options--block--indent)
-  * [`genJSDocComment(jsdoc, indent)`](#genjsdoccommentjsdoc-indent)
-  * [`genObjectKey(key)`](#genobjectkeykey)
+  * [`genJSDocComment(jsdoc, indent)`](#genJSDocCommentjsdoc-indent)
+  * [`genKey(key)`](#genKeykey)
+  * [`genRegExp(pattern, flags?)`](#genregexppattern-flags)
   * [`wrapInDelimiters(lines, indent, delimiters, withComma)`](#wrapindelimiterslines-indent-delimiters-withcomma)
 
 <!-- TOC end -->
@@ -176,30 +172,19 @@ Generate an ESM dynamic `import()` statement.
 
 ```js
 genDynamicImport("pkg");
-// ~> `() => import("pkg")`
-
-genDynamicImport("pkg", { wrapper: false });
 // ~> `import("pkg")`
+
+genDynamicImport("pkg", { wrapper: true });
+// ~> `() => import("pkg")`
 
 genDynamicImport("pkg", { interopDefault: true });
 // ~> `() => import("pkg").then(m => m.default || m)`
-```
 
-### `genDynamicTypeImport(specifier, name, options)`
-
-Generate an ESM type `import()` statement.
-
-**Example:**
-
-```js
-genDynamicTypeImport("pkg");
+genDynamicImport("pkg", { type: true });
 // ~> `typeof import("pkg")`
 
-genDynamicTypeImport("pkg", "foo");
+genDynamicImport("pkg", { type: true, name: "foo" });
 // ~> `typeof import("pkg").foo`
-
-genDynamicTypeImport("pkg", "foo-bar");
-// ~> `typeof import("pkg")["foo-bar"]`
 ```
 
 ### `genExport(specifier, exports?, options)`
@@ -277,25 +262,14 @@ genImport("pkg", [{ name: "foo", as: "bar" }]);
 
 genImport("pkg", "foo", { attributes: { type: "json" } });
 // ~> `import foo from "pkg" with { type: "json" };
-```
 
-### `genTypeImport(specifier, imports, options)`
-
-Generate an ESM `import type` statement.
-
-**Example:**
-
-```js
-genTypeImport("@nuxt/utils", ["test"]);
+genImport("@nuxt/utils", ["test"], { type: true });
 // ~> `import type { test } from "@nuxt/utils";`
-
-genTypeImport("@nuxt/utils", [{ name: "test", as: "value" }]);
-// ~> `import type { test as value } from "@nuxt/utils";`
 ```
 
 ## Serialization
 
-### `genArrayFromRaw(array, indent, options)`
+### `genArray(array, indent, options)`
 
 Serialize an array to a string.
 
@@ -304,11 +278,22 @@ Values are not escaped or quoted.
 **Example:**
 
 ```js
-genArrayFromRaw([1, 2, 3])
+genArray([1, 2, 3])
 // ~> `[1, 2, 3]`
 ```
 
-### `genMapFromRaw(entries, indent, options)`
+### `genLiteral(fields, indent, _options)`
+
+Create object literal from field descriptors.
+
+**Example:**
+
+```js
+genLiteral(['type', ['type', 'A'], ['...', 'b']])
+// ~> `{ type, type: A, ...b }`
+```
+
+### `genMap(entries, indent, options)`
 
 Serialize a Map to a string from raw entries.
 
@@ -317,11 +302,11 @@ Values are escaped and quoted if necessary (strings, etc.).
 **Example:**
 
 ```js
-genMapFromRaw([["foo", "bar"], ["baz", 1]]);
+genMap([["foo", "bar"], ["baz", 1]]);
 // ~> `new Map([["foo", "bar"], ["baz", 1]])`
 ```
 
-### `genObjectFromRaw(object, indent, options)`
+### `genObject(object, indent, options)`
 
 Serialize an object to a string.
 
@@ -330,48 +315,11 @@ Values are not escaped or quoted.
 **Example:**
 
 ```js
-genObjectFromRaw({ foo: "bar", test: '() => import("pkg")' })
+genObject({ foo: "bar", test: '() => import("pkg")' })
 // ~> `{ foo: bar, test: () => import("pkg") }`
 ```
 
-### `genObjectFromRawEntries(array, indent, options)`
-
-Serialize an array of key-value pairs to a string.
-
-Values are not escaped or quoted.
-
-**Example:**
-
-```js
-genObjectFromRawEntries([["foo", "bar"], ["baz", 1]]);
-// ~> `{ foo: bar, baz: 1 }`
-```
-
-### `genObjectFromValues(obj, indent, options)`
-
-Serialize an object to a string.
-
-Values are escaped and quoted if necessary.
-
-**Example:**
-
-```js
-genObjectFromValues({ foo: "bar" })
-// ~> `{ foo: "bar" }`
-```
-
-### `genObjectLiteral(fields, indent, _options)`
-
-Create object literal from field descriptors.
-
-**Example:**
-
-```js
-genObjectLiteral(['type', ['type', 'A'], ['...', 'b']])
-// ~> `{ type, type: A, ...b }`
-```
-
-### `genSetFromRaw(values, indent, options)`
+### `genSet(values, indent, options)`
 
 Serialize a Set to a string from raw values.
 
@@ -380,7 +328,7 @@ Values are escaped and quoted if necessary (strings, etc.).
 **Example:**
 
 ```js
-genSetFromRaw(["foo", "bar", 1]);
+genSet(["foo", "bar", 1]);
 // ~> `new Set(["foo", "bar", 1])`
 ```
 
@@ -398,40 +346,6 @@ escapeString("foo'bar");
 
 escapeString("foo\nbar");
 // ~> `foo\nbar`
-```
-
-### `genRegExp(pattern, flags?)`
-
-Generate regex literal from pattern and flags.
-
-**Example:**
-
-```js
-genRegExp("foo");
-// ~> `/foo/`
-
-genRegExp("foo", "gi");
-// ~> `/foo/gi`
-
-genRegExp("foo\\d+");
-// ~> `/foo\d+/`
-```
-
-### `genSafeVariableName(name)`
-
-Generate a safe javascript variable name.
-
-**Example:**
-
-```js
-genSafeVariableName("valid_import");
-// ~> `valid_import`
-
-genSafeVariableName("for");
-// ~> `_for`
-
-genSafeVariableName("with space");
-// ~> `with_32space`
 ```
 
 ### `genString(input, options)`
@@ -1310,6 +1224,12 @@ genTypeAlias("FooType", { name: "string", count: "number" });
 
 genTypeAlias("Baz", "string", { export: true });
 // ~> `export type Baz = string`
+
+genTypeAlias("Id", "T", { generics: [{ name: "T" }] });
+// ~> `type Id<T> = T`
+
+genTypeAlias("Nullable", "T | null", { generics: [{ name: "T" }] });
+// ~> `type Nullable<T> = T | null`
 ```
 
 ### `genTypeAssertion(expr, type)`
@@ -1414,6 +1334,23 @@ genVariable("y", "2", { export: true });
 // ~> `export const y = 2`
 ```
 
+### `genVariableName(name)`
+
+Generate a safe javascript variable name.
+
+**Example:**
+
+```js
+genVariableName("valid_import");
+// ~> `valid_import`
+
+genVariableName("for");
+// ~> `_for`
+
+genVariableName("with space");
+// ~> `with_32space`
+```
+
 ### `genWhile(cond, statements, options, indent)`
 
 Generate `while (cond) { body }` or single-statement form.
@@ -1473,21 +1410,38 @@ genJSDocComment("Indented", "  ");
 // ~> same block, each line prefixed with indent
 ```
 
-### `genObjectKey(key)`
+### `genKey(key)`
 
 Generate a safe javascript variable name for an object key.
 
 **Example:**
 
 ```js
-genObjectKey("foo");
+genKey("foo");
 // ~> `foo`
 
-genObjectKey("foo-bar");
+genKey("foo-bar");
 // ~> `"foo-bar"`
 
-genObjectKey("with space");
+genKey("with space");
 // ~> `"with space"`
+```
+
+### `genRegExp(pattern, flags?)`
+
+Generate regex literal from pattern and flags.
+
+**Example:**
+
+```js
+genRegExp("foo");
+// ~> `/foo/`
+
+genRegExp("foo", "gi");
+// ~> `/foo/gi`
+
+genRegExp("foo\\d+");
+// ~> `/foo\d+/`
 ```
 
 ### `wrapInDelimiters(lines, indent, delimiters, withComma)`

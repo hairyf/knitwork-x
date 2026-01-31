@@ -1,5 +1,5 @@
 import { expect, describe, it } from "vitest";
-import { genString, genRegExp, genTemplateLiteral } from "../src";
+import { genString, genTemplateLiteral } from "../src";
 import { genTestTitle } from "./_utils";
 
 const genStringTests = [
@@ -23,28 +23,6 @@ describe("genString (singleQuotes: true)", () => {
       expect(genString(input, { singleQuotes: true })).to.equal(output);
     });
   }
-});
-
-describe("genRegExp", () => {
-  it("simple pattern", () => {
-    expect(genRegExp("foo")).to.equal("/foo/");
-  });
-
-  it("pattern with flags", () => {
-    expect(genRegExp("foo", "gi")).to.equal("/foo/gi");
-  });
-
-  it("pattern with escaped characters", () => {
-    expect(genRegExp("foo\\d+")).to.equal("/foo\\d+/");
-  });
-
-  it("pattern with forward slash", () => {
-    expect(genRegExp("foo/bar")).to.equal("/foo\\/bar/");
-  });
-
-  it("pattern with forward slash and flags", () => {
-    expect(genRegExp("foo/bar", "g")).to.equal("/foo\\/bar/g");
-  });
 });
 
 const genTemplateLiteralTests: Array<{

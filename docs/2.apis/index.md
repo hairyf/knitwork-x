@@ -11,7 +11,7 @@ This document summarizes design conventions for knitwork's `gen*` APIs—paramet
 ### 1.1 Public API
 
 - **Prefix**: Exported code-generation functions use the `gen` prefix, e.g. `genImport`, `genString`, `genInterface`, `genBlock`.
-- **Verb + noun**: Names should clearly express what is generated, e.g. `genTypeAlias` (type alias), `genObjectFromRaw` (object literal from raw values).
+- **Verb + noun**: Names should clearly express what is generated, e.g. `genTypeAlias` (type alias), `genObject` (object literal from raw values).
 
 ### 1.2 Internal implementation
 
@@ -37,7 +37,7 @@ genTypeAlias(name: string, value: string | TypeObject, options?, indent?): strin
 genImport(specifier: string, imports?, options?: ESMCodeGenOptions): string
 
 // subject only (simple cases)
-genObjectKey(key: string): string
+genKey(key: string): string
 genParam(p: TypeField): string
 ```
 
@@ -92,7 +92,7 @@ genParam(p: TypeField): string
 
 ### 5.2 Keys and identifiers
 
-- Object literal keys: Use `genObjectKey(key)` to decide quoting (unquoted for valid identifiers, otherwise `genString`).
+- Object literal keys: Use `genKey(key)` to decide quoting (unquoted for valid identifiers, otherwise `genString`).
 - Identifier validity: Use `VALID_IDENTIFIER_RE` from `_utils` when needed.
 
 ### 5.3 Passing options through
@@ -112,7 +112,7 @@ genParam(p: TypeField): string
 | Options       | Named interface, extend CodegenOptions, default `{}`, all optional |
 | Return value  | Always `string`; pure; fragment suitable for splicing |
 | Documentation | Description + `@example` (`// ~> `) + `@param` + `@group` |
-| String output | Via `genString`; keys via `genObjectKey` |
+| String output | Via `genString`; keys via `genKey` |
 | Polymorphism  | `T \| T[]` or object/array union; normalize to array or branch inside |
 
 These guidelines align with the current knitwork source style; following them when adding or refactoring `gen*` methods helps keep the API consistent and maintainable.

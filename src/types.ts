@@ -80,6 +80,8 @@ export interface GenEnumOptions extends CodegenOptions {
 export interface GenTypeAliasOptions {
   /** Add `export` modifier. */
   export?: boolean;
+  /** Generic type parameters (e.g. `<T>`, `<T extends string>`). */
+  generics?: TypeGeneric[];
 }
 
 export interface GenVariableOptions {

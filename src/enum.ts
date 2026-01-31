@@ -1,5 +1,5 @@
 import { genString } from "./string";
-import { genObjectKey, wrapInDelimiters } from "./utils";
+import { genKey, wrapInDelimiters } from "./utils";
 import type { EnumMemberValue, GenEnumOptions } from "./types";
 
 /**
@@ -33,7 +33,7 @@ export function genEnum(
   let lastNumeric: number | undefined;
   const newIndent = indent + "  ";
   const lines = Object.entries(members).map(([key, value]) => {
-    const k = genObjectKey(key);
+    const k = genKey(key);
     if (typeof value === "number") {
       lastNumeric = value;
       return `${newIndent}${k} = ${value}`;

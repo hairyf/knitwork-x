@@ -3,7 +3,7 @@
 name: "knitwork-x"
 shortDescription: "Utilities to generate JavaScript code."
 themeColor: "blue"
-description: "Utilities to generate JavaScript code. Forked from knitwork, with comprehensive TypeScript generation tools."
+description: "Utilities to generate JavaScript code. with comprehensive TypeScript generation tools."
 github: "hairyf/knitwork-x"
 url: "https://knitwork-x.vercel.app"
 landing:
