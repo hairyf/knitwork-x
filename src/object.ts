@@ -1,5 +1,5 @@
 import { genBlock, genParam } from "./function";
-import type { CodegenOptions } from "./types";
+import type { CodegenOptions, Field } from "./types";
 import { genJSDocComment, genKey, wrapInDelimiters } from "./utils";
 import type {
   TypeGeneric,
@@ -22,16 +22,35 @@ export interface GenObjectOptions extends CodegenOptions {
  * ```js
  * genObject({ foo: "bar", test: '() => import("pkg")' })
  * // ~> `{ foo: bar, test: () => import("pkg") }`
+ *
+ * genObject([{ name: "foo", value: "bar" }, { name: "test", value: '() => import("pkg")' }])
+ * // ~> `{ foo: bar, test: () => import("pkg") }`
+ *
+ * genObject([{ name: "count", value: "0", jsdoc: "Counter value" }])
+ * // ~> `{ /** Counter value *\/ count: 0 }`
  * ```
  *
  * @group serialization
  */
 export function genObject(
-  object: Record<string, any>,
+  object: Record<string, any> | Field[],
   indent = "",
   options: GenObjectOptions = {},
 ): string {
   const newIdent = indent + "  ";
+
+  if (Array.isArray(object)) {
+    const lines = object.map((item) => {
+      const jsdocComment =
+        item.jsdoc === undefined
+          ? ""
+          : genJSDocComment(item.jsdoc, newIdent) + newIdent;
+      const prefix = jsdocComment || newIdent;
+      return `${prefix}${genKey(item.name)}: ${item.value}`;
+    });
+    return wrapInDelimiters(lines, indent, "{}", false);
+  }
+
   return wrapInDelimiters(
     Object.entries(object).map(
       ([key, value]) =>
@@ -175,10 +194,7 @@ export function genSet(
  * @param indent - base indent
  * @group Typescript
  */
-export function genMethod(
-  options: GenMethodOptions,
-  indent = "",
-): string {
+export function genMethod(options: GenMethodOptions, indent = ""): string {
   const {
     name,
     parameters = [],

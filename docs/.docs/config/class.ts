@@ -43,7 +43,7 @@ genConstructor(
     ],
   },
   {
-    module: "type-alias",
+    module: "class",
     label: "genProperty",
     code: `genProperty({ name: 'x', type: 'number' })
 genProperty({

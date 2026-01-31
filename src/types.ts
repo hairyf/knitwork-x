@@ -31,6 +31,12 @@ export interface TypeField {
   protected?: boolean;
 }
 
+export interface Field {
+  name: string;
+  value: string;
+  jsdoc?: JSDoc;
+}
+
 export interface FunctionOpts {
   /** function name */
   name: string;
