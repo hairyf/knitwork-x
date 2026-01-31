@@ -1,6 +1,7 @@
 ---
 title: Design Guidelines
 description: Design conventions for knitwork-x gen* APIs
+icon: "i-ph:book-open-duotone"
 ---
 
 This document summarizes design conventions for knitwork's `gen*` APIs—parameters, return values, naming, and related norms—for reference when adding or changing code-generation helpers.
