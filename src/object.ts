@@ -1,18 +1,16 @@
+import { genBlock, genParam } from "./function";
 import type { CodegenOptions } from "./types";
-import { genKey, wrapInDelimiters } from "./utils";
+import { genJSDocComment, genKey, wrapInDelimiters } from "./utils";
+import type {
+  TypeGeneric,
+  GenGetterOptions,
+  GenSetterOptions,
+  GenMethodOptions,
+} from "./types";
 
 export interface GenObjectOptions extends CodegenOptions {
   preserveTypes?: boolean;
 }
-
-/**
- * Object literal field descriptor.
- *
- * @example `'a'` → `{ a }` (shorthand property)
- * @example `['a', 'b']` → `{ a: b }` (key-value)
- * @example `['...', 'c']` → `{ ...c }` (spread)
- */
-export type LiteralField = string | [string | "...", string];
 
 /**
  * Serialize an object to a string.
@@ -69,38 +67,6 @@ export function genArray(
     indent,
     "[]",
   );
-}
-
-/**
- * Create object literal from field descriptors.
- *
- * @example
- *
- * ```js
- * genLiteral(['type', ['type', 'A'], ['...', 'b']])
- * // ~> `{ type, type: A, ...b }`
- * ```
- *
- * @param fields - Array of LiteralField: shorthand (string), key-value ([key, value]), or spread (['...', name])
- * @group serialization
- */
-export function genLiteral(
-  fields: LiteralField[],
-  indent = "",
-  _options: GenObjectOptions = {},
-): string {
-  const newIndent = indent + "  ";
-  const lines = fields.map((field) => {
-    if (typeof field === "string") {
-      return `${newIndent}${genKey(field)}`;
-    }
-    const [key, value] = field;
-    if (key === "...") {
-      return `${newIndent}...${value}`;
-    }
-    return `${newIndent}${genKey(key)}: ${value}`;
-  });
-  return wrapInDelimiters(lines, indent, "{}");
 }
 
 /**
@@ -183,6 +149,155 @@ export function genSet(
   );
   const valuesArray = wrapInDelimiters(multiLineValues, indent, "[]");
   return `new Set(${valuesArray})`;
+}
+
+/**
+ * Generate method (including get/set) with optional async/generator/static.
+ * For class or object literal: `name(params) { body }`, `get name() { }`, `set name(v) { }`.
+ *
+ * @example
+ *
+ * ```js
+ * genMethod({ name: "foo" });
+ * // ~> `foo() {}`
+ *
+ * genMethod({ name: "bar", parameters: [{ name: "x", type: "string" }], body: ["return x;"], returnType: "string" });
+ * // ~> `bar(x: string): string { return x; }`
+ *
+ * genMethod({ name: "value", kind: "get", body: ["return this._v;"], returnType: "number" });
+ * // ~> `get value(): number { return this._v; }`
+ *
+ * genMethod({ name: "value", kind: "set", parameters: [{ name: "v", type: "number" }], body: ["this._v = v;"] });
+ * // ~> `set value(v: number) { this._v = v; }`
+ * ```
+ *
+ * @param options - name, parameters, body, kind (method/get/set), static, async, generator, returnType, generics, jsdoc
+ * @param indent - base indent
+ * @group Typescript
+ */
+export function genMethod(
+  options: GenMethodOptions,
+  indent = "",
+): string {
+  const {
+    name,
+    parameters = [],
+    body = [],
+    kind = "method",
+    static: isStatic,
+    async: isAsync,
+    generator: isGenerator,
+    returnType,
+    generics = [],
+    jsdoc,
+  } = options;
+
+  const jsdocComment = jsdoc === undefined ? "" : genJSDocComment(jsdoc);
+
+  const genericPart =
+    generics.length > 0
+      ? "<" +
+        generics
+          .map((g: TypeGeneric) => {
+            let s = g.name;
+            if (g.extends) s += ` extends ${g.extends}`;
+            if (g.default) s += ` = ${g.default}`;
+            return s;
+          })
+          .join(", ") +
+        ">"
+      : "";
+
+  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
+  const returnPart = returnType ? `: ${returnType}` : "";
+  const bodyContent = genBlock(body.length > 0 ? body : undefined, indent);
+
+  let prefix: string;
+  if (kind === "get") {
+    prefix = [isStatic && "static", "get", name + "()" + returnPart]
+      .filter(Boolean)
+      .join(" ");
+  } else if (kind === "set") {
+    prefix = [isStatic && "static", "set", name + paramsPart]
+      .filter(Boolean)
+      .join(" ");
+  } else {
+    const namePart =
+      name + genericPart + (isGenerator ? "*" : "") + paramsPart + returnPart;
+    prefix = [isStatic && "static", isAsync && "async", namePart]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return `${jsdocComment}${indent}${prefix} ${bodyContent}`;
+}
+
+/**
+ * Generate getter: `get name() { ... }` (for class or object literal).
+ *
+ * @example
+ *
+ * ```js
+ * genGetter("value", ["return this._v;"]);
+ * // ~> `get value() { return this._v; }`
+ *
+ * genGetter("id", ["return this._id;"], { returnType: "string" });
+ * // ~> `get id(): string { return this._id; }`
+ * ```
+ *
+ * @param name - getter name
+ * @param body - getter body statements
+ * @param options - returnType, jsdoc
+ * @param indent - base indent
+ * @group Typescript
+ */
+export function genGetter(
+  name: string,
+  body: string[] = [],
+  options: GenGetterOptions = {},
+  indent = "",
+): string {
+  const returnPart = options.returnType ? `: ${options.returnType}` : "";
+  const jsdocComment =
+    options.jsdoc === undefined ? "" : genJSDocComment(options.jsdoc);
+  const block = genBlock(body.length > 0 ? body : undefined, indent);
+  return `${jsdocComment}${indent}get ${name}()${returnPart} ${block}`;
+}
+
+/**
+ * Generate setter: `set name(param) { ... }` (for class or object literal).
+ *
+ * @example
+ *
+ * ```js
+ * genSetter("value", "v", ["this._v = v;"]);
+ * // ~> `set value(v) { this._v = v; }`
+ *
+ * genSetter("id", "x", ["this._id = x;"], { paramType: "string" });
+ * // ~> `set id(x: string) { this._id = x; }`
+ * ```
+ *
+ * @param name - setter name
+ * @param paramName - parameter name for the setter
+ * @param body - setter body statements
+ * @param options - paramType, jsdoc
+ * @param indent - base indent
+ * @group Typescript
+ */
+export function genSetter(
+  name: string,
+  paramName: string,
+  body: string[] = [],
+  options: GenSetterOptions = {},
+  indent = "",
+): string {
+  const paramPart = options.paramType
+    ? `${paramName}: ${options.paramType}`
+    : paramName;
+  const jsdocComment =
+    options.jsdoc === undefined ? "" : genJSDocComment(options.jsdoc);
+  const block = genBlock(body.length > 0 ? body : undefined, indent);
+  return `${jsdocComment}${indent}set ${name}(${paramPart}) ${block}`;
 }
 
 // --- Internals ---

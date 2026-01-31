@@ -40,20 +40,6 @@ genArrowFunction({
   },
   {
     module: 'function',
-    label: 'genMethod',
-    code: `genMethod({ name: 'foo' })
-genMethod({
-  name: 'bar',
-  parameters: [{ name: 'x', type: 'string' }],
-  body: ['return x;']
-})`,
-    output: () => [
-      knitwork.genMethod({ name: 'foo' }),
-      knitwork.genMethod({ name: 'bar', parameters: [{ name: 'x', type: 'string' }], body: ['return x;'] }),
-    ],
-  },
-  {
-    module: 'function',
     label: 'genBlock',
     code: `genBlock([
   'const a = 1;',

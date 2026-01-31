@@ -1,6 +1,7 @@
 import { genJSDocComment, wrapInDelimiters } from "./utils";
 import { genParam } from "./function";
-import { genTypeObject, genProperty } from "./type-alias";
+import { genProperty } from "./class";
+import { genTypeObject } from "./type";
 import type {
   GenInterfaceOptions,
   GenCallSignatureOptions,

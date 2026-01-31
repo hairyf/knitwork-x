@@ -6,7 +6,7 @@ import { classPresets } from './class'
 import { interfacePresets } from './interface'
 import { enumPresets } from './enum'
 import { functionPresets } from './function'
-import { typeAliasPresets } from './type-alias'
+import { typePresets } from './type'
 import { conditionalPresets } from './conditional'
 import { decoratorPresets } from './decorator'
 import { modulePresets } from './module'
@@ -27,7 +27,7 @@ export const ALL_PRESETS = [
   ...interfacePresets,
   ...enumPresets,
   ...functionPresets,
-  ...typeAliasPresets,
+  ...typePresets,
   ...conditionalPresets,
   ...decoratorPresets,
   ...modulePresets,

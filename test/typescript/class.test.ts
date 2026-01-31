@@ -2,9 +2,7 @@ import { expect, describe, it } from "vitest";
 import {
   genClass,
   genConstructor,
-  genClassProperty,
-  genClassMethod,
-  genGetter,
+  genProperty,
   genSetter,
   genDecorator,
 } from "../../src";
@@ -55,7 +53,7 @@ const genClassTests: Array<{
           [{ name: "x", type: "string" }],
           ["super();", "this.x = x;"],
         ),
-        genClassProperty("x", { type: "string" }),
+        genProperty({ name: "x", type: "string" }),
       ],
     ],
     code: `class WithMembers {
@@ -129,184 +127,38 @@ describe("genConstructor", () => {
   }
 });
 
-const genClassPropertyTests: Array<{
-  input: Parameters<typeof genClassProperty>;
+const genPropertyClassTests: Array<{
+  input: Parameters<typeof genProperty>;
   code: string;
 }> = [
-  { input: ["x", { type: "number" }], code: "x: number" },
-  { input: ["y", { value: "0" }], code: "y = 0" },
+  { input: [{ name: "x", type: "number" }], code: "x: number" },
+  { input: [{ name: "y", value: "0" }], code: "y = 0" },
   {
-    input: ["z", { type: "string", value: "'z'" }],
+    input: [{ name: "z", type: "string", value: "'z'" }],
     code: "z: string = 'z'",
   },
   {
-    input: ["id", { type: "string", readonly: true, static: true }],
+    input: [{ name: "id", type: "string", readonly: true, static: true }],
     code: "static readonly id: string",
   },
   {
-    input: ["opt", { type: "boolean", optional: true }],
+    input: [{ name: "opt", type: "boolean", optional: true }],
     code: "opt?: boolean",
   },
   {
-    input: ["internal", { type: "number", private: true }],
+    input: [{ name: "internal", type: "number", private: true }],
     code: "private internal: number",
   },
   {
-    input: ["protected", { type: "string", protected: true }],
+    input: [{ name: "protected", type: "string", protected: true }],
     code: "protected protected: string",
   },
 ];
 
-describe("genClassProperty", () => {
-  for (const t of genClassPropertyTests) {
+describe("genProperty (class property)", () => {
+  for (const t of genPropertyClassTests) {
     it(genTestTitle(t.code), () => {
-      const code = genClassProperty(...t.input);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
-
-const genClassMethodTests: Array<{
-  input: Parameters<typeof genClassMethod>;
-  code: string;
-}> = [
-  { input: [{ name: "foo" }], code: "foo() {}" },
-  {
-    input: [
-      {
-        name: "bar",
-        parameters: [{ name: "x", type: "string" }],
-        body: ["return x;"],
-        returnType: "string",
-      },
-    ],
-    code: `bar(x: string): string {
-  return x;
-}`,
-  },
-  {
-    input: [
-      {
-        name: "value",
-        kind: "get",
-        body: ["return this._v;"],
-        returnType: "number",
-      },
-    ],
-    code: `get value(): number {
-  return this._v;
-}`,
-  },
-  {
-    input: [
-      {
-        name: "value",
-        kind: "set",
-        parameters: [{ name: "v", type: "number" }],
-        body: ["this._v = v;"],
-      },
-    ],
-    code: `set value(v: number) {
-  this._v = v;
-}`,
-  },
-  {
-    input: [{ name: "staticMethod", static: true, body: ["return 1;"] }],
-    code: `static staticMethod() {
-  return 1;
-}`,
-  },
-  {
-    input: [
-      {
-        name: "asyncFn",
-        async: true,
-        body: ["return await Promise.resolve(1);"],
-        returnType: "Promise<number>",
-      },
-    ],
-    code: `async asyncFn(): Promise<number> {
-  return await Promise.resolve(1);
-}`,
-  },
-  {
-    input: [
-      {
-        name: "identity",
-        generics: [{ name: "T", extends: "unknown" }],
-        parameters: [{ name: "x", type: "T" }],
-        returnType: "T",
-        body: ["return x;"],
-      },
-    ],
-    code: `identity<T extends unknown>(x: T): T {
-  return x;
-}`,
-  },
-  {
-    input: [
-      {
-        name: "create",
-        generics: [
-          { name: "T", extends: "object", default: "Record<string, any>" },
-        ],
-        parameters: [{ name: "data", type: "Partial<T>" }],
-        returnType: "T",
-        body: ["return data as T;"],
-      },
-    ],
-    code: `create<T extends object = Record<string, any>>(data: Partial<T>): T {
-  return data as T;
-}`,
-  },
-  {
-    input: [
-      {
-        name: "factory",
-        generics: [{ name: "T", default: "unknown" }],
-        parameters: [],
-        returnType: "T",
-        body: ["return null as T;"],
-      },
-    ],
-    code: `factory<T = unknown>(): T {
-  return null as T;
-}`,
-  },
-];
-
-describe("genClassMethod", () => {
-  for (const t of genClassMethodTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genClassMethod(...t.input);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
-
-const genGetterTests: Array<{
-  input: Parameters<typeof genGetter>;
-  code: string;
-}> = [
-  {
-    input: ["value", ["return this._v;"]],
-    code: `get value() {
-  return this._v;
-}`,
-  },
-  {
-    input: ["id", ["return this._id;"], { returnType: "string" }],
-    code: `get id(): string {
-  return this._id;
-}`,
-  },
-  { input: ["empty", []], code: "get empty() {}" },
-];
-
-describe("genGetter", () => {
-  for (const t of genGetterTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genGetter(...t.input);
+      const code = genProperty(...t.input);
       expect(code).to.equal(t.code);
     });
   }

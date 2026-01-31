@@ -7,7 +7,6 @@ import type {
   TypeObject,
   TypeObjectField,
   TypeObjectWithJSDoc,
-  TypeField,
 } from "./types";
 
 /**
@@ -192,34 +191,6 @@ export function genTypeObject(
     "{}",
     false,
   );
-}
-
-/**
- * Generate a single property signature from a TypeField.
- * Returns `[name][optional?]: [type]`. When `field.jsdoc` is set, prepends JSDoc comment.
- *
- * @example
- *
- * ```js
- * genProperty({ name: "foo", type: "string" });
- * // ~> `foo: string`
- *
- * genProperty({ name: "bar", type: "number", optional: true });
- * // ~> `bar?: number`
- *
- * genProperty({ name: "id", type: "string", jsdoc: "Unique id" }, "  ");
- * // ~> `/** Unique id *\/\n  id: string`
- * ```
- *
- * @group Typescript
- */
-export function genProperty(field: TypeField, indent = ""): string {
-  const prop = `${genKey(field.name)}${field.optional ? "?" : ""}: ${field.type ?? "any"}`;
-  if (field.jsdoc === undefined) {
-    return indent ? `${indent}${prop}` : prop;
-  }
-  const jsdocComment = genJSDocComment(field.jsdoc, indent);
-  return indent ? `${jsdocComment}${indent}${prop}` : `${jsdocComment}${prop}`;
 }
 
 /**

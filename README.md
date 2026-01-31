@@ -66,15 +66,12 @@ import {} from "https://esm.sh/knitwork-x";
   * [`genDefaultExport(value, _options)`](#gendefaultexportvalue-_options)
   * [`genDynamicImport(specifier, options)`](#gendynamicimportspecifier-options)
   * [`genExport(specifier, exports?, options)`](#genexportspecifier-exports-options)
-  * [`genExportStar(specifier, options)`](#genexportstarspecifier-options)
-  * [`genExportStarAs(specifier, namespace, options)`](#genexportstarasspecifier-namespace-options)
   * [`genImport(specifier, imports?, options)`](#genimportspecifier-imports-options)
 
 - [Serialization](#serialization)
   * [`genArray(array, indent, options)`](#genArrayarray-indent-options)
   * [`genMap(entries, indent, options)`](#genMapentries-indent-options)
   * [`genObject(object, indent, options)`](#genObjectobject-indent-options)
-  * [`genLiteral(fields, indent, _options)`](#genLiteralfields-indent-_options)
   * [`genSet(values, indent, options)`](#genSetvalues-indent-options)
 - [String](#string)
   * [`escapeString(id)`](#escapestringid)
@@ -88,8 +85,7 @@ import {} from "https://esm.sh/knitwork-x";
   * [`genCase(value, statements?, indent)`](#gencasevalue-statements-indent)
   * [`genCatch(statements, options, indent)`](#gencatchstatements-options-indent)
   * [`genClass(name, members, options, indent)`](#genclassname-members-options-indent)
-  * [`genClassMethod(options, indent)`](#genclassmethodoptions-indent)
-  * [`genClassProperty(name, options, indent)`](#genclasspropertyname-options-indent)
+  * [`genProperty(field, indent)`](#genpropertyfield-indent)
   * [`genConditionalType(checkType, extendsType, trueType, falseType)`](#genconditionaltypechecktype-extendstype-truetype-falsetype)
   * [`genConstEnum(name, members, options, indent)`](#genconstenumname-members-options-indent)
   * [`genConstructor(parameters, body, options, indent)`](#genconstructorparameters-body-options-indent)
@@ -119,7 +115,6 @@ import {} from "https://esm.sh/knitwork-x";
   * [`genNamespace(name, statements?)`](#gennamespacename-statements)
   * [`genParam(p)`](#genparamp)
   * [`genPrefixedBlock(prefix, statements, options, indent)`](#genprefixedblockprefix-statements-options-indent)
-  * [`genProperty(field, indent)`](#genpropertyfield-indent)
   * [`genReturn(expr?, indent)`](#genreturnexpr-indent)
   * [`genSatisfies(expr, type)`](#gensatisfiesexpr-type)
   * [`genSetter(name, paramName, body, options, indent)`](#gensettername-paramname-body-options-indent)
@@ -141,6 +136,7 @@ import {} from "https://esm.sh/knitwork-x";
   * [`genComment(text, options: { block? }, indent)`](#gencommenttext-options--block--indent)
   * [`genJSDocComment(jsdoc, indent)`](#genJSDocCommentjsdoc-indent)
   * [`genKey(key)`](#genKeykey)
+  * [`genLiteral(fields, indent, _options)`](#genLiteralfields-indent-_options)
   * [`genRegExp(pattern, flags?)`](#genregexppattern-flags)
   * [`wrapInDelimiters(lines, indent, delimiters, withComma)`](#wrapindelimiterslines-indent-delimiters-withcomma)
 
@@ -200,42 +196,11 @@ genExport("pkg", "foo");
 genExport("pkg", ["a", "b"]);
 // ~> `export { a, b } from "pkg";`
 
-genExport("pkg", { name: "*", as: "bar" });
-// ~> `export * as bar from "pkg";`
-```
-
-### `genExportStar(specifier, options)`
-
-Generate an ESM `export *` statement (re-export all).
-
-**Example:**
-
-```js
-genExportStar("pkg");
+genExport("pkg", "*");
 // ~> `export * from "pkg";`
 
-genExportStar("./utils", { singleQuotes: true });
-// ~> `export * from './utils';`
-
-genExportStar("pkg", { attributes: { type: "json" } });
-// ~> `export * from "pkg" with { type: "json" };`
-```
-
-### `genExportStarAs(specifier, namespace, options)`
-
-Generate an ESM `export * as` statement (re-export all as namespace).
-
-**Example:**
-
-```js
-genExportStarAs("pkg", "utils");
-// ~> `export * as utils from "pkg";`
-
-genExportStarAs("./helpers", "Helpers", { singleQuotes: true });
-// ~> `export * as Helpers from './helpers';`
-
-genExportStarAs("pkg", "ns", { attributes: { type: "json" } });
-// ~> `export * as ns from "pkg" with { type: "json" };`
+genExport("pkg", { name: "*", as: "bar" });
+// ~> `export * as bar from "pkg";`
 ```
 
 ### `genImport(specifier, imports?, options)`
@@ -280,17 +245,6 @@ Values are not escaped or quoted.
 ```js
 genArray([1, 2, 3])
 // ~> `[1, 2, 3]`
-```
-
-### `genLiteral(fields, indent, _options)`
-
-Create object literal from field descriptors.
-
-**Example:**
-
-```js
-genLiteral(['type', ['type', 'A'], ['...', 'b']])
-// ~> `{ type, type: A, ...b }`
 ```
 
 ### `genMap(entries, indent, options)`
@@ -527,43 +481,26 @@ genClass("Exported", [], { export: true });
 // ~> `export class Exported {}`
 ```
 
-### `genClassMethod(options, indent)`
+### `genProperty(field, indent)`
 
-Generate class method (including get/set) with optional async/generator.
-
-**Example:**
-
-```js
-genClassMethod({ name: "foo" });
-// ~> `foo() {}`
-
-genClassMethod({ name: "bar", parameters: [{ name: "x", type: "string" }], body: ["return x;"], returnType: "string" });
-// ~> `bar(x: string): string { return x; }`
-
-genClassMethod({ name: "value", kind: "get", body: ["return this._v;"], returnType: "number" });
-// ~> `get value(): number { return this._v; }`
-
-genClassMethod({ name: "value", kind: "set", parameters: [{ name: "v", type: "number" }], body: ["this._v = v;"] });
-// ~> `set value(v: number) { this._v = v; }`
-```
-
-### `genClassProperty(name, options, indent)`
-
-Generate class property: `name: Type` or `name = value` (with optional modifiers).
+Generate a single property signature from a TypeField (class/interface property). Returns `[modifiers?][name][optional?]: [type][ = value]?`. When `field.jsdoc` is set, prepends JSDoc comment. Supports static, readonly, public, private, protected and value (initializer).
 
 **Example:**
 
 ```js
-genClassProperty("x", { type: "number" });
-// ~> `x: number`
+genProperty({ name: "foo", type: "string" });
+// ~> `foo: string`
 
-genClassProperty("y", { value: "0" });
-// ~> `y = 0`
+genProperty({ name: "bar", type: "number", optional: true });
+// ~> `bar?: number`
 
-genClassProperty("z", { type: "string", value: "'z'" });
-// ~> `z: string = 'z'`
+genProperty({ name: "id", type: "string", jsdoc: "Unique id" }, "  ");
+// ~> `/** Unique id *\/\n  id: string`
 
-genClassProperty("id", { type: "string", readonly: true, static: true });
+genProperty({ name: "x", value: "0" });
+// ~> `x = 0`
+
+genProperty({ name: "id", type: "string", readonly: true, static: true });
 // ~> `static readonly id: string`
 ```
 
@@ -971,7 +908,7 @@ genMappedType("P", "keyof T", "T[P]");
 
 ### `genMethod(options, indent)`
 
-Generate shorthand object method: `name(params) { body }` (no `function` keyword).
+Generate method for class or object literal: `name(params) { body }`, or with `kind: "get"`/`"set"` for getter/setter. Supports async, generator, static.
 
 **Example:**
 
@@ -979,14 +916,17 @@ Generate shorthand object method: `name(params) { body }` (no `function` keyword
 genMethod({ name: "foo" });
 // ~> `foo() {}`
 
-genMethod({ name: "bar", parameters: [{ name: "x", type: "string" }], body: ["return x;"] });
-// ~> `bar(x: string) {\n  return x;\n}`
+genMethod({ name: "bar", parameters: [{ name: "x", type: "string" }], body: ["return x;"], returnType: "string" });
+// ~> `bar(x: string): string { return x; }`
 
-genMethod({ name: "add", parameters: [{ name: "a", type: "number" }, { name: "b", type: "number" }], returnType: "number", body: ["return a + b;"] });
-// ~> `add(a: number, b: number): number {\n  return a + b;\n}`
+genMethod({ name: "value", kind: "get", body: ["return this._v;"], returnType: "number" });
+// ~> `get value(): number { return this._v; }`
+
+genMethod({ name: "value", kind: "set", parameters: [{ name: "v", type: "number" }], body: ["this._v = v;"] });
+// ~> `set value(v: number) { this._v = v; }`
 
 genMethod({ name: "fetch", async: true, parameters: [{ name: "url", type: "string" }], body: ["return await fetch(url);"] });
-// ~> `async fetch(url: string) {\n  return await fetch(url);\n}`
+// ~> `async fetch(url: string) { return await fetch(url); }`
 ```
 
 ### `genModule(specifier, statements?)`
@@ -1060,23 +1000,6 @@ genPrefixedBlock("while (running)", ["step();", "check();"]);
 
 genPrefixedBlock("for (;;)", "break;", { bracket: false });
 // ~> `for (;;) break;`
-```
-
-### `genProperty(field, indent)`
-
-Generate a single property signature from a TypeField. Returns `[name][optional?]: [type]`. When `field.jsdoc` is set, prepends JSDoc comment.
-
-**Example:**
-
-```js
-genProperty({ name: "foo", type: "string" });
-// ~> `foo: string`
-
-genProperty({ name: "bar", type: "number", optional: true });
-// ~> `bar?: number`
-
-genProperty({ name: "id", type: "string", jsdoc: "Unique id" }, "  ");
-// ~> `/** Unique id *\/\n  id: string`
 ```
 
 ### `genReturn(expr?, indent)`
@@ -1369,6 +1292,17 @@ genWhile("ok", "doIt();", { bracket: false });
 ```
 
 ## Utils
+
+### `genLiteral(fields, indent, _options)`
+
+Create object literal from field descriptors.
+
+**Example:**
+
+```js
+genLiteral(['type', ['type', 'A'], ['...', 'b']])
+// ~> `{ type, type: A, ...b }`
+```
 
 ### `genComment(text, options: { block? }, indent)`
 

@@ -4,6 +4,20 @@ import type { Preset } from './types'
 export const utilsPresets: Preset[] = [
   {
     module: 'utils',
+    label: 'genLiteral',
+    code: `genLiteral([
+  'type',
+  ['type', 'A'],
+  ['...', 'b']
+])
+genLiteral(['a', 'b', 'c'])`,
+    output: () => [
+      knitwork.genLiteral(['type', ['type', 'A'], ['...', 'b']]),
+      knitwork.genLiteral(['a', 'b', 'c']),
+    ],
+  },
+  {
+    module: 'utils',
     label: 'genRegExp',
     code: `genRegExp('foo')
 genRegExp('foo', 'gi')`,

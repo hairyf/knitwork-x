@@ -4,20 +4,6 @@ import type { Preset } from './types'
 export const objectPresets: Preset[] = [
   {
     module: 'object',
-    label: 'genLiteral',
-    code: `genLiteral([
-  'type',
-  ['type', 'A'],
-  ['...', 'b']
-])
-genLiteral(['a', 'b', 'c'])`,
-    output: () => [
-      knitwork.genLiteral(['type', ['type', 'A'], ['...', 'b']]),
-      knitwork.genLiteral(['a', 'b', 'c']),
-    ],
-  },
-  {
-    module: 'object',
     label: 'genObject',
     code: `genObject({ foo: 'bar' })
 genObject({
@@ -60,5 +46,43 @@ genArray([
   1
 ])`,
     output: () => [knitwork.genSet(['foo', 'bar', 1])],
+  },
+  {
+    module: 'object',
+    label: 'genMethod',
+    code: `genMethod({ name: 'foo' })
+genMethod({
+  name: 'bar',
+  parameters: [{ name: 'x', type: 'string' }],
+  body: ['return x;']
+})`,
+    output: () => [
+      knitwork.genMethod({ name: 'foo' }),
+      knitwork.genMethod({ name: 'bar', parameters: [{ name: 'x', type: 'string' }], body: ['return x;'] }),
+    ],
+  },
+  {
+    module: 'object',
+    label: 'genGetter',
+    code: `genGetter('value', ['return this._v;'])
+genGetter('id', ['return this._id;'], {
+  returnType: 'string'
+})`,
+    output: () => [
+      knitwork.genGetter('value', ['return this._v;']),
+      knitwork.genGetter('id', ['return this._id;'], { returnType: 'string' }),
+    ],
+  },
+  {
+    module: 'object',
+    label: 'genSetter',
+    code: `genSetter('value', 'v', ['this._v = v;'])
+genSetter('id', 'x', ['this._id = x;'], {
+  paramType: 'string'
+})`,
+    output: () => [
+      knitwork.genSetter('value', 'v', ['this._v = v;']),
+      knitwork.genSetter('id', 'x', ['this._id = x;'], { paramType: 'string' }),
+    ],
   },
 ]

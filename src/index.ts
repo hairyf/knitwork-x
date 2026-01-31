@@ -1,6 +1,6 @@
 export * from "./types";
 export * from "./variable";
-export * from "./type-alias";
+export * from "./type";
 export * from "./conditional";
 export * from "./interface";
 export * from "./enum";

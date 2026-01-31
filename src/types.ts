@@ -17,6 +17,18 @@ export interface TypeField {
   jsdoc?: JSDoc;
   /** default value (code string) */
   default?: string;
+  /** initializer for class property (`name = value`) */
+  value?: string;
+  /** emit `static` modifier (class property) */
+  static?: boolean;
+  /** emit `readonly` modifier */
+  readonly?: boolean;
+  /** emit `public` modifier (class property) */
+  public?: boolean;
+  /** emit `private` modifier (class property) */
+  private?: boolean;
+  /** emit `protected` modifier (class property) */
+  protected?: boolean;
 }
 
 export interface FunctionOpts {
@@ -144,26 +156,7 @@ export interface GenConstructorOptions {
   super?: string;
 }
 
-export interface GenClassPropertyOptions {
-  /** Property type (for `name: Type`). */
-  type?: string;
-  /** Initializer (for `name = value`). Mutually exclusive with type-only form; can combine as `name: Type = value`. */
-  value?: string;
-  /** Emit `static` modifier. */
-  static?: boolean;
-  /** Emit `readonly` modifier. */
-  readonly?: boolean;
-  /** Emit `public` modifier (default in TS). */
-  public?: boolean;
-  /** Emit `private` modifier. */
-  private?: boolean;
-  /** Emit `protected` modifier. */
-  protected?: boolean;
-  /** Emit optional `name?`. */
-  optional?: boolean;
-}
-
-export interface GenClassMethodOptions {
+export interface GenMethodOptions {
   /** Method parameters. */
   parameters?: TypeField[];
   /** Method body statements. */

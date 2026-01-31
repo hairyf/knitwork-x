@@ -81,6 +81,9 @@ export function genImport(
  * genExport("pkg", ["a", "b"]);
  * // ~> `export { a, b } from "pkg";`
  *
+ * genExport("pkg", "*");
+ * // ~> `export * from "pkg";`
+ *
  * genExport("pkg", { name: "*", as: "bar" });
  * // ~> `export * as bar from "pkg";`
  * ```
@@ -164,74 +167,6 @@ export function genDynamicImport(
  */
 export function genDefaultExport(value: string, _options: CodegenOptions = {}) {
   return `export default ${value};`;
-}
-
-/**
- * Generate an ESM `export *` statement (re-export all).
- *
- * @example
- *
- * ```js
- * genExportStar("pkg");
- * // ~> `export * from "pkg";`
- *
- * genExportStar("./utils", { singleQuotes: true });
- * // ~> `export * from './utils';`
- *
- * genExportStar("pkg", { attributes: { type: "json" } });
- * // ~> `export * from "pkg" with { type: "json" };`
- * ```
- *
- * @group ESM
- */
-export function genExportStar(
-  specifier: string,
-  options: ESMCodeGenOptions = {},
-) {
-  const specifierString = genString(specifier, options);
-  return `export * from ${specifierString}${_genExportImportAttributes(options)};`;
-}
-
-/**
- * Generate an ESM `export * as` statement (re-export all as namespace).
- *
- * @example
- *
- * ```js
- * genExportStarAs("pkg", "utils");
- * // ~> `export * as utils from "pkg";`
- *
- * genExportStarAs("./helpers", "Helpers", { singleQuotes: true });
- * // ~> `export * as Helpers from './helpers';`
- *
- * genExportStarAs("pkg", "ns", { attributes: { type: "json" } });
- * // ~> `export * as ns from "pkg" with { type: "json" };`
- * ```
- *
- * @group ESM
- */
-export function genExportStarAs(
-  specifier: string,
-  namespace: string,
-  options: ESMCodeGenOptions = {},
-) {
-  const specifierString = genString(specifier, options);
-  return `export * as ${namespace} from ${specifierString}${_genExportImportAttributes(options)};`;
-}
-
-// --- internal ---
-
-function _genExportImportAttributes(options: ESMCodeGenOptions = {}) {
-  if (typeof options.attributes?.type === "string") {
-    return ` with { type: ${genString(options.attributes.type)} }`;
-  }
-
-  // TODO: Remove deprecated `assert` in the next major release
-  if (typeof options.assert?.type === "string") {
-    return ` assert { type: ${genString(options.assert.type)} }`;
-  }
-
-  return "";
 }
 
 function _genDynamicImportAttributes(options: DynamicImportOptions = {}) {

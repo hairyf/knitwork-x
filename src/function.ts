@@ -4,7 +4,6 @@ import type {
   FunctionOpts,
   TypeGeneric,
   GenArrowFunctionOptions,
-  GenMethodOptions,
 } from "./types";
 
 /**
@@ -212,64 +211,4 @@ export function genArrowFunction(
 
   const asyncPart = isAsync ? "async " : "";
   return `${asyncPart}${genericPart}${paramsPart}${returnPart} => ${bodyPart}`;
-}
-
-/**
- * Generate shorthand object method: `name(params) { body }` (no `function` keyword).
- *
- * @example
- *
- * ```js
- * genMethod({ name: "foo" });
- * // ~> `foo() {}`
- *
- * genMethod({ name: "bar", parameters: [{ name: "x", type: "string" }], body: ["return x;"] });
- * // ~> `bar(x: string) {\n  return x;\n}`
- *
- * genMethod({ name: "add", parameters: [{ name: "a", type: "number" }, { name: "b", type: "number" }], returnType: "number", body: ["return a + b;"] });
- * // ~> `add(a: number, b: number): number {\n  return a + b;\n}`
- *
- * genMethod({ name: "fetch", async: true, parameters: [{ name: "url", type: "string" }], body: ["return await fetch(url);"] });
- * // ~> `async fetch(url: string) {\n  return await fetch(url);\n}`
- * ```
- *
- * @group Typescript
- */
-export function genMethod(options: GenMethodOptions, indent = ""): string {
-  const {
-    name,
-    parameters = [],
-    body = [],
-    async: isAsync,
-    generator: isGenerator,
-    returnType,
-    generics = [],
-    jsdoc,
-  } = options;
-
-  const jsdocComment = jsdoc === undefined ? "" : genJSDocComment(jsdoc);
-
-  const genericPart =
-    generics.length > 0
-      ? "<" +
-        generics
-          .map((g: TypeGeneric) => {
-            let s = g.name;
-            if (g.extends) s += ` extends ${g.extends}`;
-            if (g.default) s += ` = ${g.default}`;
-            return s;
-          })
-          .join(", ") +
-        ">"
-      : "";
-
-  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
-  const returnPart = returnType ? `: ${returnType}` : "";
-  const bodyContent = genBlock(body.length > 0 ? body : undefined, indent);
-
-  const namePart =
-    name + genericPart + (isGenerator ? "*" : "") + paramsPart + returnPart;
-  const prefix = [isAsync && "async", namePart].filter(Boolean).join(" ");
-
-  return `${jsdocComment}${indent}${prefix} ${bodyContent}`;
 }

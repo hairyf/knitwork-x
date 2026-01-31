@@ -5,8 +5,6 @@ import {
   genDynamicImport,
   genVariableName,
   genDefaultExport,
-  genExportStar,
-  genExportStarAs,
 } from "../src";
 import { genTestTitle } from "./_utils";
 
@@ -77,6 +75,7 @@ const genExportTests = [
     names: [{ name: "foo", as: "bar" }],
     code: 'export { foo as bar } from "pkg";',
   },
+  { names: "*", code: 'export * from "pkg";' },
   { names: { name: "*", as: "bar" }, code: 'export * as bar from "pkg";' },
   { names: ["default"], code: 'export { default } from "pkg";' },
   {
@@ -84,12 +83,53 @@ const genExportTests = [
     code: 'export { foo } from "pkg" assert { type: "json" };',
     options: { assert: { type: "json" } },
   },
+  {
+    names: "*",
+    specifier: "./utils",
+    options: { singleQuotes: true },
+    code: "export * from './utils';",
+  },
+  {
+    names: "*",
+    specifier: "pkg",
+    options: { attributes: { type: "json" } },
+    code: 'export * from "pkg" with { type: "json" };',
+  },
+  {
+    names: "*",
+    specifier: "pkg",
+    options: { assert: { type: "json" } },
+    code: 'export * from "pkg" assert { type: "json" };',
+  },
+  {
+    names: { name: "*", as: "utils" },
+    code: 'export * as utils from "pkg";',
+  },
+  {
+    names: { name: "*", as: "Helpers" },
+    specifier: "./helpers",
+    options: { singleQuotes: true },
+    code: "export * as Helpers from './helpers';",
+  },
+  {
+    names: { name: "*", as: "ns" },
+    specifier: "pkg",
+    options: { attributes: { type: "json" } },
+    code: 'export * as ns from "pkg" with { type: "json" };',
+  },
+  {
+    names: { name: "*", as: "ns" },
+    specifier: "pkg",
+    options: { assert: { type: "json" } },
+    code: 'export * as ns from "pkg" assert { type: "json" };',
+  },
 ];
 
 describe("genExport", () => {
   for (const t of genExportTests) {
     it(genTestTitle(t.code), () => {
-      const code = genExport("pkg", t.names, t.options);
+      const specifier = "specifier" in t && t.specifier ? t.specifier : "pkg";
+      const code = genExport(specifier, t.names, t.options);
       expect(code).to.equal(t.code);
     });
   }
@@ -176,69 +216,6 @@ describe("genDefaultExport", () => {
   for (const t of genDefaultExportTests) {
     it(genTestTitle(t.code), () => {
       const code = genDefaultExport(t.value, t.options);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
-
-const genExportStarTests = [
-  { specifier: "pkg", code: 'export * from "pkg";' },
-  {
-    specifier: "./utils",
-    options: { singleQuotes: true },
-    code: "export * from './utils';",
-  },
-  {
-    specifier: "pkg",
-    options: { attributes: { type: "json" } },
-    code: 'export * from "pkg" with { type: "json" };',
-  },
-  {
-    specifier: "pkg",
-    options: { assert: { type: "json" } },
-    code: 'export * from "pkg" assert { type: "json" };',
-  },
-];
-
-describe("genExportStar", () => {
-  for (const t of genExportStarTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genExportStar(t.specifier, t.options);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
-
-const genExportStarAsTests = [
-  {
-    specifier: "pkg",
-    namespace: "utils",
-    code: 'export * as utils from "pkg";',
-  },
-  {
-    specifier: "./helpers",
-    namespace: "Helpers",
-    options: { singleQuotes: true },
-    code: "export * as Helpers from './helpers';",
-  },
-  {
-    specifier: "pkg",
-    namespace: "ns",
-    options: { attributes: { type: "json" } },
-    code: 'export * as ns from "pkg" with { type: "json" };',
-  },
-  {
-    specifier: "pkg",
-    namespace: "ns",
-    options: { assert: { type: "json" } },
-    code: 'export * as ns from "pkg" assert { type: "json" };',
-  },
-];
-
-describe("genExportStarAs", () => {
-  for (const t of genExportStarAsTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genExportStarAs(t.specifier, t.namespace, t.options);
       expect(code).to.equal(t.code);
     });
   }

@@ -143,6 +143,47 @@ export function wrapInDelimiters(
 }
 
 /**
+ * Object literal field descriptor.
+ *
+ * @example `'a'` → `{ a }` (shorthand property)
+ * @example `['a', 'b']` → `{ a: b }` (key-value)
+ * @example `['...', 'c']` → `{ ...c }` (spread)
+ */
+export type LiteralField = string | [string | "...", string];
+
+/**
+ * Create object literal from field descriptors.
+ *
+ * @example
+ *
+ * ```js
+ * genLiteral(['type', ['type', 'A'], ['...', 'b']])
+ * // ~> `{ type, type: A, ...b }`
+ * ```
+ *
+ * @param fields - Array of LiteralField: shorthand (string), key-value ([key, value]), or spread (['...', name])
+ * @group utils
+ */
+export function genLiteral(
+  fields: LiteralField[],
+  indent = "",
+  _options: object = {},
+): string {
+  const newIndent = indent + "  ";
+  const lines = fields.map((field) => {
+    if (typeof field === "string") {
+      return `${newIndent}${genKey(field)}`;
+    }
+    const [key, value] = field;
+    if (key === "...") {
+      return `${newIndent}...${value}`;
+    }
+    return `${newIndent}${genKey(key)}: ${value}`;
+  });
+  return wrapInDelimiters(lines, indent, "{}");
+}
+
+/**
  * Generate regex literal from pattern and flags.
  *
  * @example

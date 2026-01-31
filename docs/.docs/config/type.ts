@@ -1,9 +1,9 @@
 import * as knitwork from 'knitwork-x'
 import type { Preset } from './types'
 
-export const typeAliasPresets: Preset[] = [
+export const typePresets: Preset[] = [
   {
-    module: 'type-alias',
+    module: 'type',
     label: 'genTypeAlias',
     code: `genTypeAlias('Foo', 'string')
 genTypeAlias('Bar', {
@@ -16,7 +16,7 @@ genTypeAlias('Bar', {
     ],
   },
   {
-    module: 'type-alias',
+    module: 'type',
     label: 'genUnion',
     code: `genUnion(['string', 'number'])
 genUnion(['A', 'B', 'C'])`,
@@ -26,7 +26,7 @@ genUnion(['A', 'B', 'C'])`,
     ],
   },
   {
-    module: 'type-alias',
+    module: 'type',
     label: 'genIntersection',
     code: `genIntersection(['A', 'B'])
 genIntersection(['A', 'B', 'C'])`,
@@ -36,7 +36,7 @@ genIntersection(['A', 'B', 'C'])`,
     ],
   },
   {
-    module: 'type-alias',
+    module: 'type',
     label: 'genTypeObject',
     code: `genTypeObject({
   name: 'string',
@@ -49,7 +49,7 @@ genTypeObject({ 'key?': 'boolean' })`,
     ],
   },
   {
-    module: 'type-alias',
+    module: 'type',
     label: 'genKeyOf',
     code: `genKeyOf('T')
 genKeyOf('MyObject')`,
@@ -59,7 +59,7 @@ genKeyOf('MyObject')`,
     ],
   },
   {
-    module: 'type-alias',
+    module: 'type',
     label: 'genTypeof',
     code: `genTypeof('someVar')
 genTypeof('myFunction')`,
@@ -69,7 +69,7 @@ genTypeof('myFunction')`,
     ],
   },
   {
-    module: 'type-alias',
+    module: 'type',
     label: 'genTypeAssertion',
     code: `genTypeAssertion('value', 'string')
 genTypeAssertion('obj', 'MyType')`,
@@ -79,7 +79,7 @@ genTypeAssertion('obj', 'MyType')`,
     ],
   },
   {
-    module: 'type-alias',
+    module: 'type',
     label: 'genSatisfies',
     code: `genSatisfies('{ a: 1 }', '{ a: number }')
 genSatisfies('config', 'ConfigType')`,
@@ -89,7 +89,7 @@ genSatisfies('config', 'ConfigType')`,
     ],
   },
   {
-    module: 'type-alias',
+    module: 'type',
     label: 'genMappedType',
     code: `genMappedType('K', 'keyof T', 'U')
 genMappedType('P', 'keyof T', 'T[P]')`,
@@ -99,7 +99,7 @@ genMappedType('P', 'keyof T', 'T[P]')`,
     ],
   },
   {
-    module: 'type-alias',
+    module: 'type',
     label: 'genTemplateLiteralType',
     code: `genTemplateLiteralType([
   'prefix',
