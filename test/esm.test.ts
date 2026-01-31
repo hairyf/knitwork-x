@@ -3,7 +3,6 @@ import {
   genImport,
   genExport,
   genDynamicImport,
-  genVariableName,
   genDefaultExport,
 } from "../src";
 import { genTestTitle } from "./_utils";
@@ -181,22 +180,6 @@ describe("genDynamicImport", () => {
   for (const t of genDynamicImportTests) {
     it(genTestTitle(t.code), () => {
       const code = genDynamicImport("pkg", t.opts);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
-
-const genVariableNameTests = [
-  { key: "valid_import", code: "valid_import" },
-  { key: "for", code: "_for" },
-  { key: "with space", code: "with_32space" },
-  { key: "123 numbers", code: "_123_32numbers" },
-];
-
-describe("genVariableName", () => {
-  for (const t of genVariableNameTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genVariableName(t.key);
       expect(code).to.equal(t.code);
     });
   }

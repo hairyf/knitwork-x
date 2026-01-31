@@ -1,6 +1,6 @@
 import { expect, describe, it } from "vitest";
-import { genEnum, genConstEnum } from "../../src";
-import { genTestTitle } from "../_utils";
+import { genEnum, genConstEnum } from "../src";
+import { genTestTitle } from "./_utils";
 
 const genEnumTests: Array<{
   input: Parameters<typeof genEnum>;

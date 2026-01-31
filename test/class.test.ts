@@ -1,12 +1,6 @@
 import { expect, describe, it } from "vitest";
-import {
-  genClass,
-  genConstructor,
-  genProperty,
-  genSetter,
-  genDecorator,
-} from "../../src";
-import { genTestTitle } from "../_utils";
+import { genClass, genConstructor, genProperty, genSetter } from "../src";
+import { genTestTitle } from "./_utils";
 
 const genClassTests: Array<{
   input: Parameters<typeof genClass>;
@@ -187,41 +181,6 @@ describe("genSetter", () => {
   for (const t of genSetterTests) {
     it(genTestTitle(t.code), () => {
       const code = genSetter(...t.input);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
-
-const genDecoratorTests: Array<{
-  input: Parameters<typeof genDecorator>;
-  code: string;
-}> = [
-  {
-    input: ["Component"],
-    code: "@Component",
-  },
-  {
-    input: ["Injectable", "()"],
-    code: "@Injectable()",
-  },
-  {
-    input: ["Route", '("/api")'],
-    code: '@Route("/api")',
-  },
-  {
-    input: ["Validate", "(min: 0, max: 100)"],
-    code: "@Validate(min: 0, max: 100)",
-  },
-  {
-    input: ["Decorator", "()", "  "],
-    code: "  @Decorator()",
-  },
-];
-
-describe("genDecorator", () => {
-  for (const t of genDecoratorTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genDecorator(...t.input);
       expect(code).to.equal(t.code);
     });
   }

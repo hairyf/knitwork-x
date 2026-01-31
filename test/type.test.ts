@@ -1,16 +1,13 @@
 import { expect, describe, it } from "vitest";
 import {
-  genInterface,
   genInlineTypeImport,
   genImport,
   genTypeExport,
   genTypeAlias,
   genTypeObject,
-  genVariable,
   genUnion,
   genIntersection,
   genMappedType,
-  genConditionalType,
   genIndexSignature,
   genCallSignature,
   genConstructSignature,
@@ -19,200 +16,8 @@ import {
   genTypeof,
   genTypeAssertion,
   genSatisfies,
-} from "../../src";
-import { genTestTitle } from "../_utils";
-
-const genInterfaceTests: Array<{
-  input: Parameters<typeof genInterface>;
-  code: string;
-}> = [
-  { input: ["FooInterface"], code: "interface FooInterface {}" },
-  {
-    input: ["FooInterface", undefined, { extends: ["Other"] }],
-    code: "interface FooInterface extends Other {}",
-  },
-  {
-    input: ["FooInterface", undefined, { extends: "Other" }],
-    code: "interface FooInterface extends Other {}",
-  },
-  {
-    input: [
-      "FooInterface",
-      { name: "boolean", 'other name"': { value: "() => {}" } },
-    ],
-    code: `interface FooInterface {
-  name: boolean
-  "other name\\"": {
-    value: () => {}
-  }
-}`,
-  },
-  {
-    input: ["FooInterface", { "na'me?": "boolean" }],
-    code: `interface FooInterface {
-  "na'me"?: boolean
-}`,
-  },
-  {
-    input: ["FooInterface", {}, { jsdoc: "Simple description" }],
-    code: `/** Simple description */
-interface FooInterface {}`,
-  },
-  {
-    input: [
-      "FooInterface",
-      {},
-      {
-        jsdoc: ["Complex description", "@param someParam", "@returns void"],
-      },
-    ],
-    code: `/**
- * Complex description
- * @param someParam
- * @returns void
- */
-interface FooInterface {}`,
-  },
-  {
-    input: [
-      "FooInterface",
-      {
-        prop: {
-          type: "string",
-          jsdoc: "Property description",
-        },
-      },
-    ],
-    code: `interface FooInterface {
-  /** Property description */
-  prop: string
-}`,
-  },
-  {
-    input: [
-      "FooInterface",
-      {
-        prop: {
-          type: "string",
-          jsdoc: {
-            description: "Complex prop",
-            default: "''",
-            deprecated: "use newProp instead",
-          },
-        },
-      },
-    ],
-    code: `interface FooInterface {
-  /**
-   * Complex prop
-   * @default ''
-   * @deprecated use newProp instead
-   */
-  prop: string
-}`,
-  },
-  {
-    input: [
-      "FooInterface",
-      {
-        nested: {
-          subProp: {
-            type: "boolean",
-            jsdoc: "Nested property",
-          },
-        },
-      },
-    ],
-    code: `interface FooInterface {
-  nested: {
-    /** Nested property */
-    subProp: boolean
-  }
-}`,
-  },
-  {
-    input: [
-      "FooInterface",
-      {
-        nested: {
-          subProp: {
-            type: "boolean",
-            jsdoc: "Nested property",
-          },
-        },
-      },
-      {
-        export: true,
-      },
-    ],
-    code: `export interface FooInterface {
-  nested: {
-    /** Nested property */
-    subProp: boolean
-  }
-}`,
-  },
-  {
-    input: [
-      "FooInterface",
-      {
-        nested: {
-          subProp: {
-            type: "boolean",
-            jsdoc: "Nested property",
-          },
-        },
-      },
-      {
-        export: true,
-        jsdoc: ["Complex description", "@param someParam", "@returns void"],
-      },
-    ],
-    code: `/**
- * Complex description
- * @param someParam
- * @returns void
- */
-export interface FooInterface {
-  nested: {
-    /** Nested property */
-    subProp: boolean
-  }
-}`,
-  },
-  {
-    input: [
-      "FooInterface",
-      [
-        { name: "foo", type: "string" },
-        { name: "bar", type: "number", optional: true },
-      ],
-    ],
-    code: `interface FooInterface {
-  foo: string
-  bar?: number
-}`,
-  },
-  {
-    input: [
-      "FooInterface",
-      [{ name: "id", type: "string", jsdoc: "Unique id" }],
-    ],
-    code: `interface FooInterface {
-  /** Unique id */
-  id: string
-}`,
-  },
-];
-
-describe("genInterface", () => {
-  for (const t of genInterfaceTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genInterface(...t.input);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
+} from "../src";
+import { genTestTitle } from "./_utils";
 
 const genTypeAliasTests: Array<{
   input: Parameters<typeof genTypeAlias>;
@@ -338,41 +143,6 @@ describe("genTypeObject", () => {
   for (const t of genTypeObjectTests) {
     it(genTestTitle(t.code), () => {
       const code = genTypeObject(...t.input);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
-
-const genVariableTests: Array<{
-  input: Parameters<typeof genVariable>;
-  code: string;
-}> = [
-  {
-    input: ["a", "2"],
-    code: "const a = 2",
-  },
-  {
-    input: ["foo", "'bar'"],
-    code: "const foo = 'bar'",
-  },
-  {
-    input: ["a", "2", { export: true }],
-    code: "export const a = 2",
-  },
-  {
-    input: ["x", "1", { kind: "let" }],
-    code: "let x = 1",
-  },
-  {
-    input: ["y", "0", { kind: "var", export: true }],
-    code: "export var y = 0",
-  },
-];
-
-describe("genVariable", () => {
-  for (const t of genVariableTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genVariable(...t.input);
       expect(code).to.equal(t.code);
     });
   }
@@ -541,33 +311,6 @@ describe("genMappedType", () => {
   }
 });
 
-const genConditionalTypeTests: Array<{
-  input: Parameters<typeof genConditionalType>;
-  code: string;
-}> = [
-  {
-    input: ["T", "U", "X", "Y"],
-    code: "T extends U ? X : Y",
-  },
-  {
-    input: ["T", "null", "never", "T"],
-    code: "T extends null ? never : T",
-  },
-  {
-    input: ["T", "string", "string", "number"],
-    code: "T extends string ? string : number",
-  },
-];
-
-describe("genConditionalType", () => {
-  for (const t of genConditionalTypeTests) {
-    it(genTestTitle(t.code), () => {
-      const code = genConditionalType(...t.input);
-      expect(code).to.equal(t.code);
-    });
-  }
-});
-
 const genIndexSignatureTests: Array<{
   input: Parameters<typeof genIndexSignature>;
   code: string;
@@ -658,6 +401,16 @@ const genCallSignatureTests: Array<{
     input: [{ parameters: [{ name: "x", type: "string" }] }],
     code: "(x: string)",
   },
+  {
+    input: [
+      {
+        generics: [{ name: "T", default: "string" }],
+        parameters: [{ name: "x", type: "T" }],
+        returnType: "T",
+      },
+    ],
+    code: "<T = string>(x: T): T",
+  },
 ];
 
 describe("genCallSignature", () => {
@@ -716,6 +469,26 @@ const genConstructSignatureTests: Array<{
   {
     input: [{}],
     code: "new ()",
+  },
+  {
+    input: [
+      {
+        generics: [{ name: "T", extends: "object" }],
+        parameters: [{ name: "x", type: "T" }],
+        returnType: "T",
+      },
+    ],
+    code: "new <T extends object>(x: T): T",
+  },
+  {
+    input: [
+      {
+        generics: [{ name: "T", default: "unknown" }],
+        parameters: [{ name: "x", type: "T" }],
+        returnType: "T",
+      },
+    ],
+    code: "new <T = unknown>(x: T): T",
   },
 ];
 

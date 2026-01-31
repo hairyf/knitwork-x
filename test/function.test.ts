@@ -5,8 +5,8 @@ import {
   genFunction,
   genArrowFunction,
   genMethod,
-} from "../../src";
-import { genTestTitle } from "../_utils";
+} from "../src";
+import { genTestTitle } from "./_utils";
 
 const genBlockTests: Array<{
   input: Parameters<typeof genBlock>;

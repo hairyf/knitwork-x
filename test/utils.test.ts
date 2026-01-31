@@ -109,6 +109,50 @@ const genJSDocCommentTests: Array<{
     ],
     code: "/**\n * Test\n * @property {string} id\n */\n",
   },
+  {
+    input: [
+      {
+        description: "Returns already braced",
+        returns: "{void}",
+      },
+    ],
+    code: "/**\n * Returns already braced\n * @returns {void}\n */\n",
+  },
+  {
+    input: [
+      {
+        param: { x: "{number}" },
+      },
+    ],
+    code: "/** @param {number} x */\n",
+  },
+  {
+    input: [
+      {
+        description: "Custom tag",
+        customTag: "value",
+      },
+    ],
+    code: "/**\n * Custom tag\n * @customTag value\n */\n",
+  },
+  {
+    input: [
+      {
+        description: "Tags array",
+        see: ["url1", "url2"],
+      },
+    ],
+    code: "/**\n * Tags array\n * @see url1\n * @see url2\n */\n",
+  },
+  {
+    input: [
+      {
+        description: "Ignore undefined tag",
+        optionalTag: undefined,
+      },
+    ],
+    code: "/** Ignore undefined tag */\n",
+  },
 ];
 
 describe("genJSDocComment", () => {
