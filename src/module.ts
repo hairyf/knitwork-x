@@ -1,4 +1,4 @@
-import { genString } from "../string";
+import { genString } from "./string";
 import { genBlock } from "./function";
 
 /**

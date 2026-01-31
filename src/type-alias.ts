@@ -1,6 +1,6 @@
-import { _genStatement } from "../_utils";
-import { ESMCodeGenOptions, ESMImport, genDynamicImport } from "../esm";
-import { genJSDocComment, genObjectKey, wrapInDelimiters } from "../utils";
+import { _genStatement } from "./_utils";
+import { ESMCodeGenOptions, ESMImport, genDynamicImport } from "./esm";
+import { genJSDocComment, genObjectKey, wrapInDelimiters } from "./utils";
 import type {
   GenTypeAliasOptions,
   TypeObject,

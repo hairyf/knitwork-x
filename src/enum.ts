@@ -1,5 +1,5 @@
-import { genString } from "../string";
-import { genObjectKey, wrapInDelimiters } from "../utils";
+import { genString } from "./string";
+import { genObjectKey, wrapInDelimiters } from "./utils";
 import type { EnumMemberValue, GenEnumOptions } from "./types";
 
 /**

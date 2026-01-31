@@ -1,4 +1,4 @@
-import { genJSDocComment, wrapInDelimiters } from "../utils";
+import { genJSDocComment, wrapInDelimiters } from "./utils";
 import type {
   TypeField,
   FunctionOpts,
