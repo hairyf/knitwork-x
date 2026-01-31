@@ -48,7 +48,7 @@ export function genObject(
       const prefix = jsdocComment || newIdent;
       return `${prefix}${genKey(item.name)}: ${item.value}`;
     });
-    return wrapInDelimiters(lines, indent, "{}", false);
+    return wrapInDelimiters(lines, indent, "{}");
   }
 
   return wrapInDelimiters(

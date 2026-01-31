@@ -51,6 +51,65 @@ describe("genObject", () => {
       expect(code).to.equal(t.code);
     });
   }
+
+  describe("Field array format", () => {
+    it("simple fields", () => {
+      const code = genObject([
+        { name: "foo", value: "bar" },
+        { name: "test", value: '() => import("pkg")' },
+      ]);
+      expect(code).to.equal(
+        ["{", "  foo: bar,", '  test: () => import("pkg")', "}"].join("\n"),
+      );
+    });
+
+    it("field with JSDoc", () => {
+      const code = genObject([
+        { name: "count", value: "0", jsdoc: "Counter value" },
+        { name: "name", value: '"test"' },
+      ]);
+      expect(code).to.equal(
+        [
+          "{",
+          "  /** Counter value */",
+          "  count: 0,",
+          '  name: "test"',
+          "}",
+        ].join("\n"),
+      );
+    });
+
+    it("field with multiline JSDoc", () => {
+      const code = genObject([
+        {
+          name: "config",
+          value: "{ enabled: true }",
+          jsdoc: ["Configuration object", "@default { enabled: true }"],
+        },
+      ]);
+      expect(code).to.equal(
+        [
+          "{",
+          "  /**",
+          "   * Configuration object",
+          "   * @default { enabled: true }",
+          "   */",
+          "  config: { enabled: true }",
+          "}",
+        ].join("\n"),
+      );
+    });
+
+    it("fields with special characters in names", () => {
+      const code = genObject([
+        { name: "obj 1", value: "x" },
+        { name: "2xs", value: "true" },
+      ]);
+      expect(code).to.equal(
+        ["{", '  "obj 1": x,', '  "2xs": true', "}"].join("\n"),
+      );
+    });
+  });
 });
 
 describe("genLiteral", () => {
