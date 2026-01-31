@@ -1,3 +1,3 @@
 export default {
-  input: ["README.md", "docs/1.guide/2.apis/*.md"],
+  input: ["README.md", "docs/2.apis/*.md"],
 };

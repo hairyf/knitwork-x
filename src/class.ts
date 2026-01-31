@@ -322,4 +322,3 @@ export function genSetter(
   const block = genBlock(body.length > 0 ? body : undefined, indent);
   return `${jsdocComment}${indent}set ${name}(${paramPart}) ${block}`;
 }
-

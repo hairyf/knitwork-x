@@ -7,4 +7,4 @@ github: "hairyf/knitwork-x"
 url: "https://knitwork-x.vercel.app"
 landing:
   heroCode: "pnpm add knitwork-x"
-  contributors: true
+automd: true
