@@ -1,6 +1,3 @@
 packages:
   - .
   - docs
-
-patchedDependencies:
-  undocs@0.4.16: patches/undocs@0.4.16.patch
