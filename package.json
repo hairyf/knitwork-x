@@ -23,6 +23,7 @@
     "build": "unbuild",
     "dev": "vitest dev --coverage",
     "docs": "cd docs && pnpm dev",
+    "build:docs": "pnpm build && pnpm --filter docs build",
     "lint": "eslint --cache . && prettier -c src test",
     "lint:fix": "automd && eslint --cache . --fix && prettier -c src test -w",
     "prepack": "pnpm run build",

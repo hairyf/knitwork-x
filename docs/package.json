@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@vueuse/core": "^14.2.0",
-    "knitwork-x": "link:..",
+    "knitwork-x": "workspace:*",
     "shiki": "^3.22.0"
   },
   "devDependencies": {
