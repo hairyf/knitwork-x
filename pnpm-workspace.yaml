@@ -7,6 +7,9 @@ packages:
   - .
   - docs
 
+overrides:
+  nuxt: 4.2.0
+
 catalogs:
   cli:
     '@antfu/eslint-config': ^6.6.1
