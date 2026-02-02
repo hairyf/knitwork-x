@@ -1,3 +1,4 @@
+import type { GenVariableOptions } from '../src/types'
 import { describe, expect, it } from 'vitest'
 import { genVariable, genVariableName } from '../src'
 import { genTestTitle } from './_utils'
@@ -32,7 +33,9 @@ const genVariableTests = [
 describe('genVariable', () => {
   for (const t of genVariableTests) {
     it(genTestTitle(t.code), () => {
-      const code = genVariable(...t.input)
+      const code = t.input.length === 2
+        ? genVariable(...(t.input as [string, string]))
+        : genVariable(...(t.input as [string, string, GenVariableOptions]))
       expect(code).to.equal(t.code)
     })
   }
