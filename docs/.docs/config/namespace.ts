@@ -1,5 +1,5 @@
-import * as knitwork from 'knitwork-x'
 import type { Preset } from './types'
+import * as knitwork from 'knitwork-x'
 
 export const namespacePresets: Preset[] = [
   {

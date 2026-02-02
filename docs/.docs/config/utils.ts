@@ -1,5 +1,5 @@
-import * as knitwork from 'knitwork-x'
 import type { Preset } from './types'
+import * as knitwork from 'knitwork-x'
 
 export const utilsPresets: Preset[] = [
   {
@@ -38,22 +38,22 @@ genJSDocComment('@param x - number')`,
   },
   {
     module: 'utils',
-    label: 'genKey',
-    code: `genKey('foo-bar')
-genKey('default')`,
-    output: () => [
-      knitwork.genKey('foo-bar'),
-      knitwork.genKey('default'),
-    ],
-  },
-  {
-    module: 'utils',
     label: 'genComment',
     code: `genComment('Single line comment')
 genComment('TODO: fix')`,
     output: () => [
       knitwork.genComment('Single line comment'),
       knitwork.genComment('TODO: fix'),
+    ],
+  },
+  {
+    module: 'utils',
+    label: 'genKey',
+    code: `genKey('foo-bar')
+genKey('default')`,
+    output: () => [
+      knitwork.genKey('foo-bar'),
+      knitwork.genKey('default'),
     ],
   },
 ]

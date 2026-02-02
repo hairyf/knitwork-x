@@ -43,19 +43,19 @@ deno install npm:knitwork-x
 **ESM** (Node.js, Bun, Deno)
 
 ```js
-import {} from "knitwork-x";
+import {} from 'knitwork-x'
 ```
 
 **CommonJS** (Legacy Node.js)
 
 ```js
-const {} = require("knitwork-x");
+const {} = require('knitwork-x')
 ```
 
 **CDN** (Deno and Browsers)
 
 ```js
-import {} from "https://esm.sh/knitwork-x";
+import {} from 'https://esm.sh/knitwork-x'
 ```
 
 <!-- /automd -->
@@ -153,10 +153,10 @@ Generate an ESM `export default` statement.
 **Example:**
 
 ```js
-genDefaultExport("foo");
+genDefaultExport('foo')
 // ~> `export default foo;`
 
-genDefaultExport("42", { singleQuotes: true });
+genDefaultExport('42', { singleQuotes: true })
 // ~> `export default 42;`
 ```
 
@@ -167,19 +167,19 @@ Generate an ESM dynamic `import()` statement.
 **Example:**
 
 ```js
-genDynamicImport("pkg");
+genDynamicImport('pkg')
 // ~> `import("pkg")`
 
-genDynamicImport("pkg", { wrapper: true });
+genDynamicImport('pkg', { wrapper: true })
 // ~> `() => import("pkg")`
 
-genDynamicImport("pkg", { interopDefault: true });
+genDynamicImport('pkg', { interopDefault: true })
 // ~> `() => import("pkg").then(m => m.default || m)`
 
-genDynamicImport("pkg", { type: true });
+genDynamicImport('pkg', { type: true })
 // ~> `typeof import("pkg")`
 
-genDynamicImport("pkg", { type: true, name: "foo" });
+genDynamicImport('pkg', { type: true, name: 'foo' })
 // ~> `typeof import("pkg").foo`
 ```
 
@@ -190,16 +190,16 @@ Generate an ESM `export` statement.
 **Example:**
 
 ```js
-genExport("pkg", "foo");
+genExport('pkg', 'foo')
 // ~> `export foo from "pkg";`
 
-genExport("pkg", ["a", "b"]);
+genExport('pkg', ['a', 'b'])
 // ~> `export { a, b } from "pkg";`
 
-genExport("pkg", "*");
+genExport('pkg', '*')
 // ~> `export * from "pkg";`
 
-genExport("pkg", { name: "*", as: "bar" });
+genExport('pkg', { name: '*', as: 'bar' })
 // ~> `export * as bar from "pkg";`
 ```
 
@@ -210,25 +210,25 @@ Generate an ESM `import` statement.
 **Example:**
 
 ```js
-genImport("pkg", "foo");
+genImport('pkg', 'foo')
 // ~> `import foo from "pkg";`
 
-genImport("pkg", ["foo"]);
+genImport('pkg', ['foo'])
 // ~> `import { foo } from "pkg";`
 
-genImport("pkg", ["a", "b"]);
+genImport('pkg', ['a', 'b'])
 // ~> `import { a, b } from "pkg`;
 
-genImport("pkg", [{ name: "default", as: "bar" }]);
+genImport('pkg', [{ name: 'default', as: 'bar' }])
 // ~> `import { default as bar } from "pkg`;
 
-genImport("pkg", [{ name: "foo", as: "bar" }]);
+genImport('pkg', [{ name: 'foo', as: 'bar' }])
 // ~> `import { foo as bar } from "pkg`;
 
-genImport("pkg", "foo", { attributes: { type: "json" } });
+genImport('pkg', 'foo', { attributes: { type: 'json' } })
 // ~> `import foo from "pkg" with { type: "json" };
 
-genImport("@nuxt/utils", ["test"], { type: true });
+genImport('@nuxt/utils', ['test'], { type: true })
 // ~> `import type { test } from "@nuxt/utils";`
 ```
 
@@ -256,7 +256,7 @@ Values are escaped and quoted if necessary (strings, etc.).
 **Example:**
 
 ```js
-genMap([["foo", "bar"], ["baz", 1]]);
+genMap([['foo', 'bar'], ['baz', 1]])
 // ~> `new Map([["foo", "bar"], ["baz", 1]])`
 ```
 
@@ -269,13 +269,13 @@ Values are not escaped or quoted.
 **Example:**
 
 ```js
-genObject({ foo: "bar", test: '() => import("pkg")' })
+genObject({ foo: 'bar', test: '() => import("pkg")' })
 // ~> `{ foo: bar, test: () => import("pkg") }`
 
-genObject([{ name: "foo", value: "bar" }, { name: "test", value: '() => import("pkg")' }])
+genObject([{ name: 'foo', value: 'bar' }, { name: 'test', value: '() => import("pkg")' }])
 // ~> `{ foo: bar, test: () => import("pkg") }`
 
-genObject([{ name: "count", value: "0", jsdoc: "Counter value" }])
+genObject([{ name: 'count', value: '0', jsdoc: 'Counter value' }])
 // ~> `{ /** Counter value *\/ count: 0 }`
 ```
 
@@ -288,7 +288,7 @@ Values are escaped and quoted if necessary (strings, etc.).
 **Example:**
 
 ```js
-genSet(["foo", "bar", 1]);
+genSet(['foo', 'bar', 1])
 // ~> `new Set(["foo", "bar", 1])`
 ```
 
@@ -301,10 +301,10 @@ Escape a string for use in a javascript string.
 **Example:**
 
 ```js
-escapeString("foo'bar");
+escapeString('foo\'bar')
 // ~> `foo\'bar`
 
-escapeString("foo\nbar");
+escapeString('foo\nbar')
 // ~> `foo\nbar`
 ```
 
@@ -315,13 +315,13 @@ Generate a string with double or single quotes and handle escapes.
 **Example:**
 
 ```js
-genString("foo");
+genString('foo')
 // ~> `"foo"`
 
-genString("foo", { singleQuotes: true });
+genString('foo', { singleQuotes: true })
 // ~> `'foo'`
 
-genString("foo\nbar");
+genString('foo\nbar')
 // ~> `"foo\nbar"`
 ```
 
@@ -332,16 +332,16 @@ Generate runtime template literal: `` `hello ${x}` `` (value, not type).
 **Example:**
 
 ```js
-genTemplateLiteral(["hello ", "x"]);
+genTemplateLiteral(['hello ', 'x'])
 // ~> `` `hello ${x}` ``
 
-genTemplateLiteral(["prefix", "expr", "suffix"]);
+genTemplateLiteral(['prefix', 'expr', 'suffix'])
 // ~> `` `prefix${expr}suffix` ``
 
-genTemplateLiteral(["", "value"]);
+genTemplateLiteral(['', 'value'])
 // ~> `` `${value}` ``
 
-genTemplateLiteral(["text"]);
+genTemplateLiteral(['text'])
 // ~> `` `text` ``
 ```
 
@@ -354,19 +354,19 @@ Generate arrow function: `(params) => body` or `(params) => { statements }`.
 **Example:**
 
 ```js
-genArrowFunction({ body: "x + 1" });
+genArrowFunction({ body: 'x + 1' })
 // ~> `() => x + 1`
 
-genArrowFunction({ parameters: [{ name: "x", type: "number" }], body: "x * 2" });
+genArrowFunction({ parameters: [{ name: 'x', type: 'number' }], body: 'x * 2' })
 // ~> `(x: number) => x * 2`
 
-genArrowFunction({ parameters: [{ name: "x" }], body: ["return x + 1;"] });
+genArrowFunction({ parameters: [{ name: 'x' }], body: ['return x + 1;'] })
 // ~> `(x) => {\n  return x + 1;\n}`
 
-genArrowFunction({ parameters: [{ name: "x", type: "string" }], body: "x.length", returnType: "number" });
+genArrowFunction({ parameters: [{ name: 'x', type: 'string' }], body: 'x.length', returnType: 'number' })
 // ~> `(x: string): number => x.length`
 
-genArrowFunction({ async: true, parameters: [{ name: "url", type: "string" }], body: ["return fetch(url);"] });
+genArrowFunction({ async: true, parameters: [{ name: 'url', type: 'string' }], body: ['return fetch(url);'] })
 // ~> `async (url: string) => {\n  return fetch(url);\n}`
 ```
 
@@ -377,16 +377,16 @@ Generate typescript `declare module` augmentation.
 **Example:**
 
 ```js
-genAugmentation("@nuxt/utils");
+genAugmentation('@nuxt/utils')
 // ~> `declare module "@nuxt/utils" {}`
 
-genAugmentation("@nuxt/utils", "interface MyInterface {}");
+genAugmentation('@nuxt/utils', 'interface MyInterface {}')
 // ~> `declare module "@nuxt/utils" { interface MyInterface {} }`
 
-genAugmentation("@nuxt/utils", [
-  "interface MyInterface { test?: string }",
-  "type MyType = string",
-]);
+genAugmentation('@nuxt/utils', [
+  'interface MyInterface { test?: string }',
+  'type MyType = string',
+])
 // ~> multi-line declare module with both interface and type
 ```
 
@@ -397,22 +397,22 @@ Generate a statement block `{ statements }`.
 **Example:**
 
 ```js
-genBlock();
+genBlock()
 // ~> `{}`
 
-genBlock([]);
+genBlock([])
 // ~> `{}`
 
-genBlock("return x;");
+genBlock('return x;')
 // ~> `{\n  return x;\n}`
 
-genBlock(["return x;"]);
+genBlock(['return x;'])
 // ~> `{\n  return x;\n}`
 
-genBlock(["const a = 1;", "return a;"]);
+genBlock(['const a = 1;', 'return a;'])
 // ~> `{\n  const a = 1;\n  return a;\n}`
 
-genBlock(["return x;"], "  ");
+genBlock(['return x;'], '  ')
 // ~> `{\n    return x;\n  }`
 ```
 
@@ -423,13 +423,13 @@ Generate call signature for interfaces.
 **Example:**
 
 ```js
-genCallSignature({ parameters: [{ name: "x", type: "string" }], returnType: "number" });
+genCallSignature({ parameters: [{ name: 'x', type: 'string' }], returnType: 'number' })
 // ~> `(x: string): number`
 
-genCallSignature({ parameters: [{ name: "a", type: "number" }, { name: "b", type: "number", optional: true }], returnType: "void" });
+genCallSignature({ parameters: [{ name: 'a', type: 'number' }, { name: 'b', type: 'number', optional: true }], returnType: 'void' })
 // ~> `(a: number, b?: number): void`
 
-genCallSignature({ generics: [{ name: "T" }], parameters: [{ name: "x", type: "T" }], returnType: "T" });
+genCallSignature({ generics: [{ name: 'T' }], parameters: [{ name: 'x', type: 'T' }], returnType: 'T' })
 // ~> `<T>(x: T): T`
 ```
 
@@ -440,13 +440,13 @@ Generate `case value:` optionally followed by indented statements (fall-through 
 **Example:**
 
 ```js
-genCase("1", "break;");
+genCase('1', 'break;')
 // ~> `case 1:\n  break;`
 
-genCase("'a'", ["doA();", "break;"]);
+genCase('\'a\'', ['doA();', 'break;'])
 // ~> `case 'a':\n  doA();\n  break;`
 
-genCase("0");
+genCase('0')
 // ~> `case 0:` (fall-through)
 ```
 
@@ -457,13 +457,13 @@ Generate `catch (binding) { statements }`, `catch { statements }`, or single-sta
 **Example:**
 
 ```js
-genCatch(["throw e;"], { binding: "e" });
+genCatch(['throw e;'], { binding: 'e' })
 // ~> `catch (e) { throw e; }`
 
-genCatch(["logError();"]);
+genCatch(['logError();'])
 // ~> `catch { logError(); }`
 
-genCatch("handle(e);", { binding: "e", bracket: false });
+genCatch('handle(e);', { binding: 'e', bracket: false })
 // ~> `catch (e) handle(e);`
 ```
 
@@ -474,16 +474,16 @@ Generate `class Name [extends Base] [implements I1, I2] { ... }`.
 **Example:**
 
 ```js
-genClass("Foo");
+genClass('Foo')
 // ~> `class Foo {}`
 
-genClass("Bar", [genConstructor([], ["super();"])]);
+genClass('Bar', [genConstructor([], ['super();'])])
 // ~> `class Bar { constructor() { super(); } }`
 
-genClass("Baz", [], { extends: "Base", implements: ["I1", "I2"] });
+genClass('Baz', [], { extends: 'Base', implements: ['I1', 'I2'] })
 // ~> `class Baz extends Base implements I1, I2 {}`
 
-genClass("Exported", [], { export: true });
+genClass('Exported', [], { export: true })
 // ~> `export class Exported {}`
 ```
 
@@ -494,10 +494,10 @@ Generate conditional type.
 **Example:**
 
 ```js
-genConditionalType("T", "U", "X", "Y");
+genConditionalType('T', 'U', 'X', 'Y')
 // ~> `T extends U ? X : Y`
 
-genConditionalType("T", "null", "never", "T");
+genConditionalType('T', 'null', 'never', 'T')
 // ~> `T extends null ? never : T`
 ```
 
@@ -508,10 +508,10 @@ Generate typescript const enum (shorthand for `genEnum` with `const: true`).
 **Example:**
 
 ```js
-genConstEnum("Direction", { Up: 1, Down: 2 });
+genConstEnum('Direction', { Up: 1, Down: 2 })
 // ~> `const enum Direction { Up = 1, Down = 2 }`
 
-genConstEnum("Mode", { Read: 0, Write: 1 }, { export: true });
+genConstEnum('Mode', { Read: 0, Write: 1 }, { export: true })
 // ~> `export const enum Mode { Read = 0, Write = 1 }`
 ```
 
@@ -522,13 +522,13 @@ Generate constructor(params) { [super(...);] ... }.
 **Example:**
 
 ```js
-genConstructor();
+genConstructor()
 // ~> `constructor() {}`
 
-genConstructor([{ name: "x", type: "string" }], ["super();", "this.x = x;"]);
+genConstructor([{ name: 'x', type: 'string' }], ['super();', 'this.x = x;'])
 // ~> `constructor(x: string) { super(); this.x = x; }`
 
-genConstructor([{ name: "a", type: "number" }, { name: "b", type: "number" }], ["super(a, b);"]);
+genConstructor([{ name: 'a', type: 'number' }, { name: 'b', type: 'number' }], ['super(a, b);'])
 // ~> `constructor(a: number, b: number) { super(a, b); }`
 ```
 
@@ -539,13 +539,13 @@ Generate construct signature for interfaces.
 **Example:**
 
 ```js
-genConstructSignature({ parameters: [{ name: "x", type: "string" }], returnType: "MyClass" });
+genConstructSignature({ parameters: [{ name: 'x', type: 'string' }], returnType: 'MyClass' })
 // ~> `new (x: string): MyClass`
 
-genConstructSignature({ parameters: [{ name: "value", type: "number" }], returnType: "Instance" });
+genConstructSignature({ parameters: [{ name: 'value', type: 'number' }], returnType: 'Instance' })
 // ~> `new (value: number): Instance`
 
-genConstructSignature({ generics: [{ name: "T" }], parameters: [{ name: "x", type: "T" }], returnType: "T" });
+genConstructSignature({ generics: [{ name: 'T' }], parameters: [{ name: 'x', type: 'T' }], returnType: 'T' })
 // ~> `new <T>(x: T): T`
 ```
 
@@ -556,16 +556,16 @@ Generate typescript `declare <namespace>` block (e.g. `declare global {}`).
 **Example:**
 
 ```js
-genDeclareNamespace("global");
+genDeclareNamespace('global')
 // ~> `declare global {}`
 
-genDeclareNamespace("global", "interface Window {}");
+genDeclareNamespace('global', 'interface Window {}')
 // ~> `declare global { interface Window {} }`
 
-genDeclareNamespace("global", [
-  "interface Window { customProp?: string }",
-  "const foo: string",
-]);
+genDeclareNamespace('global', [
+  'interface Window { customProp?: string }',
+  'const foo: string',
+])
 // ~> `declare global { interface Window {...} const foo: string }`
 ```
 
@@ -576,16 +576,16 @@ Generate decorator: `@decorator` or `@decorator(args)`.
 **Example:**
 
 ```js
-genDecorator("Component");
+genDecorator('Component')
 // ~> `@Component`
 
-genDecorator("Injectable", "()");
+genDecorator('Injectable', '()')
 // ~> `@Injectable()`
 
-genDecorator("Route", '("/api")');
+genDecorator('Route', '("/api")')
 // ~> `@Route("/api")`
 
-genDecorator("Validate", "(min: 0, max: 100)");
+genDecorator('Validate', '(min: 0, max: 100)')
 // ~> `@Validate(min: 0, max: 100)`
 ```
 
@@ -596,13 +596,13 @@ Generate `default:` optionally followed by indented statements.
 **Example:**
 
 ```js
-genDefault("return 0;");
+genDefault('return 0;')
 // ~> `default:\n  return 0;`
 
-genDefault(["log('default');", "break;"]);
+genDefault(['log(\'default\');', 'break;'])
 // ~> `default:\n  log('default');\n  break;`
 
-genDefault();
+genDefault()
 // ~> `default:` (fall-through)
 ```
 
@@ -613,13 +613,13 @@ Generate `do { body } while (cond);` or single-statement form.
 **Example:**
 
 ```js
-genDoWhile("step();", "!done");
+genDoWhile('step();', '!done')
 // ~> `do { step(); } while (!done);`
 
-genDoWhile(["read();", "check();"], "eof");
+genDoWhile(['read();', 'check();'], 'eof')
 // ~> `do { read(); check(); } while (eof);`
 
-genDoWhile("next();", "hasMore", { bracket: false });
+genDoWhile('next();', 'hasMore', { bracket: false })
 // ~> `do next(); while (hasMore);`
 ```
 
@@ -630,13 +630,13 @@ Generate `else { statements }` or `else statement`.
 **Example:**
 
 ```js
-genElse(["return 0;"]);
+genElse(['return 0;'])
 // ~> `else { return 0; }`
 
-genElse("fallback();");
+genElse('fallback();')
 // ~> `else { fallback(); }`
 
-genElse("doIt();", { bracket: false });
+genElse('doIt();', { bracket: false })
 // ~> `else doIt();`
 ```
 
@@ -647,10 +647,10 @@ Generate `else if (cond) { statements }` or `else if (cond) statement`.
 **Example:**
 
 ```js
-genElseIf("x < 0", "return -x;");
+genElseIf('x < 0', 'return -x;')
 // ~> `else if (x < 0) { return -x; }`
 
-genElseIf("ok", "doIt();", { bracket: false });
+genElseIf('ok', 'doIt();', { bracket: false })
 // ~> `else if (ok) doIt();`
 ```
 
@@ -661,16 +661,16 @@ Generate typescript enum or const enum.
 **Example:**
 
 ```js
-genEnum("Color", { Red: 0, Green: 1, Blue: 2 });
+genEnum('Color', { Red: 0, Green: 1, Blue: 2 })
 // ~> `enum Color { Red = 0, Green = 1, Blue = 2 }`
 
-genEnum("Status", { Active: "active", Inactive: "inactive" });
+genEnum('Status', { Active: 'active', Inactive: 'inactive' })
 // ~> `enum Status { Active = "active", Inactive = "inactive" }`
 
-genEnum("Auto", { A: undefined, B: undefined, C: undefined });
+genEnum('Auto', { A: undefined, B: undefined, C: undefined })
 // ~> `enum Auto { A = 0, B = 1, C = 2 }`
 
-genEnum("MyEnum", { Foo: 1 }, { export: true, const: true });
+genEnum('MyEnum', { Foo: 1 }, { export: true, const: true })
 // ~> `export const enum MyEnum { Foo = 1 }`
 ```
 
@@ -681,13 +681,13 @@ Generate `finally { statements }` or `finally statement`.
 **Example:**
 
 ```js
-genFinally("cleanup();");
+genFinally('cleanup();')
 // ~> `finally { cleanup(); }`
 
-genFinally(["release();", "log('done');"]);
+genFinally(['release();', 'log(\'done\');'])
 // ~> `finally { release(); log('done'); }`
 
-genFinally("cleanup();", { bracket: false });
+genFinally('cleanup();', { bracket: false })
 // ~> `finally cleanup();`
 ```
 
@@ -698,13 +698,13 @@ Generate C-style `for (init; test; update) { body }` or single-statement form.
 **Example:**
 
 ```js
-genFor("let i = 0", "i < n", "i++", "console.log(i);");
+genFor('let i = 0', 'i < n', 'i++', 'console.log(i);')
 // ~> `for (let i = 0; i < n; i++) { console.log(i); }`
 
-genFor("", "true", "", ["doWork();", "if (done) break;"]);
+genFor('', 'true', '', ['doWork();', 'if (done) break;'])
 // ~> `for (; true; ) { doWork(); if (done) break; }`
 
-genFor("i = 0", "i < 10", "i++", "sum += i;", { bracket: false });
+genFor('i = 0', 'i < 10', 'i++', 'sum += i;', { bracket: false })
 // ~> `for (i = 0; i < 10; i++) sum += i;`
 ```
 
@@ -715,13 +715,13 @@ Generate `for (left in obj) { body }` or single-statement form.
 **Example:**
 
 ```js
-genForIn("const key", "obj", "console.log(key, obj[key]);");
+genForIn('const key', 'obj', 'console.log(key, obj[key]);')
 // ~> `for (const key in obj) { console.log(key, obj[key]); }`
 
-genForIn("const k", "o", ["sum += o[k];"]);
+genForIn('const k', 'o', ['sum += o[k];'])
 // ~> `for (const k in o) { sum += o[k]; }`
 
-genForIn("let p", "obj", "visit(p);", { bracket: false });
+genForIn('let p', 'obj', 'visit(p);', { bracket: false })
 // ~> `for (let p in obj) visit(p);`
 ```
 
@@ -732,13 +732,13 @@ Generate `for (left of iterable) { body }` or single-statement form.
 **Example:**
 
 ```js
-genForOf("const x", "items", "console.log(x);");
+genForOf('const x', 'items', 'console.log(x);')
 // ~> `for (const x of items) { console.log(x); }`
 
-genForOf("let [k, v]", "Object.entries(obj)", ["process(k, v);"]);
+genForOf('let [k, v]', 'Object.entries(obj)', ['process(k, v);'])
 // ~> `for (let [k, v] of Object.entries(obj)) { process(k, v); }`
 
-genForOf("const item", "list", "yield item;", { bracket: false });
+genForOf('const item', 'list', 'yield item;', { bracket: false })
 // ~> `for (const item of list) yield item;`
 ```
 
@@ -749,16 +749,16 @@ Generate typescript function declaration from Function.
 **Example:**
 
 ```js
-genFunction({ name: "foo" });
+genFunction({ name: 'foo' })
 // ~> `function foo() {}`
 
-genFunction({ name: "foo", parameters: [{ name: "x", type: "string" }, { name: "y", type: "number", optional: true }] });
+genFunction({ name: 'foo', parameters: [{ name: 'x', type: 'string' }, { name: 'y', type: 'number', optional: true }] })
 // ~> `function foo(x: string, y?: number) {}`
 
-genFunction({ name: "id", generics: [{ name: "T" }], parameters: [{ name: "x", type: "T" }], returnType: "T", body: ["return x;"] });
+genFunction({ name: 'id', generics: [{ name: 'T' }], parameters: [{ name: 'x', type: 'T' }], returnType: 'T', body: ['return x;'] })
 // ~> `function id<T>(x: T): T { return x; }`
 
-genFunction({ name: "foo", export: true });
+genFunction({ name: 'foo', export: true })
 // ~> `export function foo() {}`
 ```
 
@@ -769,10 +769,10 @@ Generate getter: `get name() { ... }` (for class or object literal).
 **Example:**
 
 ```js
-genGetter("value", ["return this._v;"]);
+genGetter('value', ['return this._v;'])
 // ~> `get value() { return this._v; }`
 
-genGetter("id", ["return this._id;"], { returnType: "string" });
+genGetter('id', ['return this._id;'], { returnType: 'string' })
 // ~> `get id(): string { return this._id; }`
 ```
 
@@ -783,13 +783,13 @@ Generate `if (cond) { statements }` or `if (cond) statement`.
 **Example:**
 
 ```js
-genIf("x > 0", "return x;");
+genIf('x > 0', 'return x;')
 // ~> `if (x > 0) { return x; }`
 
-genIf("ok", ["doA();", "doB();"]);
+genIf('ok', ['doA();', 'doB();'])
 // ~> `if (ok) { doA(); doB(); }`
 
-genIf("x", "console.log(x);", { bracket: false });
+genIf('x', 'console.log(x);', { bracket: false })
 // ~> `if (x) console.log(x);`
 ```
 
@@ -800,13 +800,13 @@ Generate index signature.
 **Example:**
 
 ```js
-genIndexSignature("string", "number");
+genIndexSignature('string', 'number')
 // ~> `[key: string]: number`
 
-genIndexSignature("number", "string");
+genIndexSignature('number', 'string')
 // ~> `[key: number]: string`
 
-genIndexSignature("key", "string", "any");
+genIndexSignature('key', 'string', 'any')
 // ~> `[key: string]: any`
 ```
 
@@ -817,10 +817,10 @@ Generate an typescript `typeof import()` statement for default import.
 **Example:**
 
 ```js
-genInlineTypeImport("@nuxt/utils");
+genInlineTypeImport('@nuxt/utils')
 // ~> `typeof import("@nuxt/utils").default`
 
-genInlineTypeImport("@nuxt/utils", "genString");
+genInlineTypeImport('@nuxt/utils', 'genString')
 // ~> `typeof import("@nuxt/utils").genString`
 ```
 
@@ -831,16 +831,16 @@ Generate typescript interface.
 **Example:**
 
 ```js
-genInterface("FooInterface");
+genInterface('FooInterface')
 // ~> `interface FooInterface {}`
 
-genInterface("FooInterface", { name: "string", count: "number" });
+genInterface('FooInterface', { name: 'string', count: 'number' })
 // ~> `interface FooInterface { name: string, count: number }`
 
-genInterface("FooInterface", undefined, { extends: "Other" });
+genInterface('FooInterface', undefined, { extends: 'Other' })
 // ~> `interface FooInterface extends Other {}`
 
-genInterface("FooInterface", {}, { export: true });
+genInterface('FooInterface', {}, { export: true })
 // ~> `export interface FooInterface {}`
 ```
 
@@ -851,13 +851,13 @@ Generate intersection type.
 **Example:**
 
 ```js
-genIntersection(["A", "B"]);
+genIntersection(['A', 'B'])
 // ~> `A & B`
 
-genIntersection(["A", "B", "C"]);
+genIntersection(['A', 'B', 'C'])
 // ~> `A & B & C`
 
-genIntersection("string");
+genIntersection('string')
 // ~> `string`
 ```
 
@@ -868,10 +868,10 @@ Generate keyof type.
 **Example:**
 
 ```js
-genKeyOf("T");
+genKeyOf('T')
 // ~> `keyof T`
 
-genKeyOf("MyObject");
+genKeyOf('MyObject')
 // ~> `keyof MyObject`
 ```
 
@@ -882,10 +882,10 @@ Generate mapped type.
 **Example:**
 
 ```js
-genMappedType("K", "keyof T", "U");
+genMappedType('K', 'keyof T', 'U')
 // ~> `{ [K in keyof T]: U }`
 
-genMappedType("P", "keyof T", "T[P]");
+genMappedType('P', 'keyof T', 'T[P]')
 // ~> `{ [P in keyof T]: T[P] }`
 ```
 
@@ -896,16 +896,16 @@ Generate method (including get/set) with optional async/generator/static. For cl
 **Example:**
 
 ```js
-genMethod({ name: "foo" });
+genMethod({ name: 'foo' })
 // ~> `foo() {}`
 
-genMethod({ name: "bar", parameters: [{ name: "x", type: "string" }], body: ["return x;"], returnType: "string" });
+genMethod({ name: 'bar', parameters: [{ name: 'x', type: 'string' }], body: ['return x;'], returnType: 'string' })
 // ~> `bar(x: string): string { return x; }`
 
-genMethod({ name: "value", kind: "get", body: ["return this._v;"], returnType: "number" });
+genMethod({ name: 'value', kind: 'get', body: ['return this._v;'], returnType: 'number' })
 // ~> `get value(): number { return this._v; }`
 
-genMethod({ name: "value", kind: "set", parameters: [{ name: "v", type: "number" }], body: ["this._v = v;"] });
+genMethod({ name: 'value', kind: 'set', parameters: [{ name: 'v', type: 'number' }], body: ['this._v = v;'] })
 // ~> `set value(v: number) { this._v = v; }`
 ```
 
@@ -918,10 +918,10 @@ This is an alias for `genAugmentation` for consistency with TypeScript terminolo
 **Example:**
 
 ```js
-genModule("@nuxt/utils");
+genModule('@nuxt/utils')
 // ~> `declare module "@nuxt/utils" {}`
 
-genModule("@nuxt/utils", "interface MyInterface {}");
+genModule('@nuxt/utils', 'interface MyInterface {}')
 // ~> `declare module "@nuxt/utils" { interface MyInterface {} }`
 ```
 
@@ -932,16 +932,16 @@ Generate typescript `namespace` block (non-declare; TS namespace).
 **Example:**
 
 ```js
-genNamespace("MyNamespace");
+genNamespace('MyNamespace')
 // ~> `namespace MyNamespace {}`
 
-genNamespace("MyNamespace", "interface MyInterface {}");
+genNamespace('MyNamespace', 'interface MyInterface {}')
 // ~> `namespace MyNamespace { interface MyInterface {} }`
 
-genNamespace("MyNamespace", [
-  "interface MyInterface { test?: string }",
-  "const foo: string",
-]);
+genNamespace('MyNamespace', [
+  'interface MyInterface { test?: string }',
+  'const foo: string',
+])
 // ~> `namespace MyNamespace { interface MyInterface {...} const foo: string }`
 ```
 
@@ -952,16 +952,16 @@ Generate a single function parameter string from Field.
 **Example:**
 
 ```js
-genParam({ name: "x", type: "string" });
+genParam({ name: 'x', type: 'string' })
 // ~> `x: string`
 
-genParam({ name: "y", type: "number", optional: true });
+genParam({ name: 'y', type: 'number', optional: true })
 // ~> `y?: number`
 
-genParam({ name: "z", type: "number", default: "0" });
+genParam({ name: 'z', type: 'number', default: '0' })
 // ~> `z: number = 0`
 
-genParam({ name: "a" });
+genParam({ name: 'a' })
 // ~> `a`
 ```
 
@@ -972,13 +972,13 @@ Low-level helper: generate `prefix { statements }` or `prefix statement`.
 **Example:**
 
 ```js
-genPrefixedBlock("if (ok)", "return true;");
+genPrefixedBlock('if (ok)', 'return true;')
 // ~> `if (ok) { return true; }`
 
-genPrefixedBlock("while (running)", ["step();", "check();"]);
+genPrefixedBlock('while (running)', ['step();', 'check();'])
 // ~> `while (running) { step(); check(); }`
 
-genPrefixedBlock("for (;;)", "break;", { bracket: false });
+genPrefixedBlock('for (;;)', 'break;', { bracket: false })
 // ~> `for (;;) break;`
 ```
 
@@ -989,19 +989,19 @@ Generate a single property signature from a TypeField. Returns `[modifiers?][nam
 **Example:**
 
 ```js
-genProperty({ name: "foo", type: "string" });
+genProperty({ name: 'foo', type: 'string' })
 // ~> `foo: string`
 
-genProperty({ name: "bar", type: "number", optional: true });
+genProperty({ name: 'bar', type: 'number', optional: true })
 // ~> `bar?: number`
 
-genProperty({ name: "id", type: "string", jsdoc: "Unique id" }, "  ");
+genProperty({ name: 'id', type: 'string', jsdoc: 'Unique id' }, '  ')
 // ~> `/** Unique id *\/\n  id: string`
 
-genProperty({ name: "x", value: "0" });
+genProperty({ name: 'x', value: '0' })
 // ~> `x = 0`
 
-genProperty({ name: "id", type: "string", readonly: true, static: true });
+genProperty({ name: 'id', type: 'string', readonly: true, static: true })
 // ~> `static readonly id: string`
 ```
 
@@ -1012,13 +1012,13 @@ Generate `return expr;` or `return;`.
 **Example:**
 
 ```js
-genReturn("x");
+genReturn('x')
 // ~> `return x;`
 
-genReturn();
+genReturn()
 // ~> `return;`
 
-genReturn("a + b");
+genReturn('a + b')
 // ~> `return a + b;`
 ```
 
@@ -1029,10 +1029,10 @@ Generate satisfies expression: `expr satisfies Type` (TS 4.9+).
 **Example:**
 
 ```js
-genSatisfies("{ a: 1 }", "{ a: number }");
+genSatisfies('{ a: 1 }', '{ a: number }')
 // ~> `{ a: 1 } satisfies { a: number }`
 
-genSatisfies("config", "ConfigType");
+genSatisfies('config', 'ConfigType')
 // ~> `config satisfies ConfigType`
 ```
 
@@ -1043,10 +1043,10 @@ Generate setter: `set name(param) { ... }` (for class or object literal).
 **Example:**
 
 ```js
-genSetter("value", "v", ["this._v = v;"]);
+genSetter('value', 'v', ['this._v = v;'])
 // ~> `set value(v) { this._v = v; }`
 
-genSetter("id", "x", ["this._id = x;"], { paramType: "string" });
+genSetter('id', 'x', ['this._id = x;'], { paramType: 'string' })
 // ~> `set id(x: string) { this._id = x; }`
 ```
 
@@ -1057,13 +1057,13 @@ Generate `switch (expr) { cases }`.
 **Example:**
 
 ```js
-genSwitch("x", [genCase("1", "break;"), genDefault("return 0;")]);
+genSwitch('x', [genCase('1', 'break;'), genDefault('return 0;')])
 // ~> `switch (x) {\n  case 1:\n    break;\n  default:\n    return 0;\n}`
 
-genSwitch("key", []);
+genSwitch('key', [])
 // ~> `switch (key) {}`
 
-genSwitch("n", [genCase("0"), genCase("1", "return 1;")]);
+genSwitch('n', [genCase('0'), genCase('1', 'return 1;')])
 // ~> switch with fall-through case 0
 ```
 
@@ -1074,16 +1074,16 @@ Generate template literal type.
 **Example:**
 
 ```js
-genTemplateLiteralType(["prefix", "T", "suffix"]);
+genTemplateLiteralType(['prefix', 'T', 'suffix'])
 // ~> `` `prefix${T}suffix` ``
 
-genTemplateLiteralType(["Hello ", "T", ""]);
+genTemplateLiteralType(['Hello ', 'T', ''])
 // ~> `` `Hello ${T}` ``
 
-genTemplateLiteralType(["", "K", "Key"]);
+genTemplateLiteralType(['', 'K', 'Key'])
 // ~> `` `${K}Key` ``
 
-genTemplateLiteralType(["prefix", "T1", "middle", "T2", "suffix"]);
+genTemplateLiteralType(['prefix', 'T1', 'middle', 'T2', 'suffix'])
 // ~> `` `prefix${T1}middle${T2}suffix` ``
 ```
 
@@ -1094,10 +1094,10 @@ Generate ternary expression `cond ? whenTrue : whenFalse`.
 **Example:**
 
 ```js
-genTernary("x > 0", "x", "-x");
+genTernary('x > 0', 'x', '-x')
 // ~> `x > 0 ? x : -x`
 
-genTernary("ok", "'yes'", "'no'");
+genTernary('ok', '\'yes\'', '\'no\'')
 // ~> `ok ? 'yes' : 'no'`
 ```
 
@@ -1108,10 +1108,10 @@ Generate `throw expr;`.
 **Example:**
 
 ```js
-genThrow("new Error('failed')");
+genThrow('new Error(\'failed\')')
 // ~> `throw new Error('failed');`
 
-genThrow("e");
+genThrow('e')
 // ~> `throw e;`
 ```
 
@@ -1122,13 +1122,13 @@ Generate `try { statements }` or `try statement`.
 **Example:**
 
 ```js
-genTry("mightThrow();");
+genTry('mightThrow();')
 // ~> `try { mightThrow(); }`
 
-genTry(["const x = await f();", "return x;"]);
+genTry(['const x = await f();', 'return x;'])
 // ~> `try { const x = await f(); return x; }`
 
-genTry("f();", { bracket: false });
+genTry('f();', { bracket: false })
 // ~> `try f();`
 ```
 
@@ -1139,22 +1139,22 @@ Create Type Alias
 **Example:**
 
 ```js
-genTypeAlias("Foo", "string");
+genTypeAlias('Foo', 'string')
 // ~> `type Foo = string`
 
-genTypeAlias("Bar", "{ a: number; b: string }");
+genTypeAlias('Bar', '{ a: number; b: string }')
 // ~> `type Bar = { a: number; b: string }`
 
-genTypeAlias("FooType", { name: "string", count: "number" });
+genTypeAlias('FooType', { name: 'string', count: 'number' })
 // ~> `type FooType = { name: string, count: number }`
 
-genTypeAlias("Baz", "string", { export: true });
+genTypeAlias('Baz', 'string', { export: true })
 // ~> `export type Baz = string`
 
-genTypeAlias("Id", "T", { generics: [{ name: "T" }] });
+genTypeAlias('Id', 'T', { generics: [{ name: 'T' }] })
 // ~> `type Id<T> = T`
 
-genTypeAlias("Nullable", "T | null", { generics: [{ name: "T" }] });
+genTypeAlias('Nullable', 'T | null', { generics: [{ name: 'T' }] })
 // ~> `type Nullable<T> = T | null`
 ```
 
@@ -1165,10 +1165,10 @@ Generate type assertion: `expr as Type`.
 **Example:**
 
 ```js
-genTypeAssertion("value", "string");
+genTypeAssertion('value', 'string')
 // ~> `value as string`
 
-genTypeAssertion("obj", "MyType");
+genTypeAssertion('obj', 'MyType')
 // ~> `obj as MyType`
 ```
 
@@ -1179,10 +1179,10 @@ Generate a typescript `export type` statement.
 **Example:**
 
 ```js
-genTypeExport("@nuxt/utils", ["test"]);
+genTypeExport('@nuxt/utils', ['test'])
 // ~> `export type { test } from "@nuxt/utils";`
 
-genTypeExport("@nuxt/utils", [{ name: "test", as: "value" }]);
+genTypeExport('@nuxt/utils', [{ name: 'test', as: 'value' }])
 // ~> `export type { test as value } from "@nuxt/utils";`
 ```
 
@@ -1193,19 +1193,19 @@ Generate typescript object type.
 **Example:**
 
 ```js
-genTypeObject({ name: "string", count: "number" });
+genTypeObject({ name: 'string', count: 'number' })
 // ~> `{ name: string, count: number }`
 
-genTypeObject({ "key?": "boolean" });
+genTypeObject({ 'key?': 'boolean' })
 // ~> `{ key?: boolean }`
 
-genTypeObject({ nested: { value: "string" } });
+genTypeObject({ nested: { value: 'string' } })
 // ~> `{ nested: { value: string } }`
 
-genTypeObject([{ name: "name", type: "string" }, { name: "count", type: "number", required: true }]);
+genTypeObject([{ name: 'name', type: 'string' }, { name: 'count', type: 'number', required: true }])
 // ~> `{ name?: string, count: number }`
 
-genTypeObject([{ name: "id", type: "string", jsdoc: "Unique id" }]);
+genTypeObject([{ name: 'id', type: 'string', jsdoc: 'Unique id' }])
 // ~> `{ /** Unique id *\/ id?: string }`
 ```
 
@@ -1216,10 +1216,10 @@ Generate typeof type.
 **Example:**
 
 ```js
-genTypeof("someVar");
+genTypeof('someVar')
 // ~> `typeof someVar`
 
-genTypeof("myFunction");
+genTypeof('myFunction')
 // ~> `typeof myFunction`
 ```
 
@@ -1230,13 +1230,13 @@ Generate union type.
 **Example:**
 
 ```js
-genUnion(["string", "number"]);
+genUnion(['string', 'number'])
 // ~> `string | number`
 
-genUnion(["A", "B", "C"]);
+genUnion(['A', 'B', 'C'])
 // ~> `A | B | C`
 
-genUnion("string");
+genUnion('string')
 // ~> `string`
 ```
 
@@ -1247,16 +1247,16 @@ Create variable declaration.
 **Example:**
 
 ```js
-genVariable("a", "2");
+genVariable('a', '2')
 // ~> `const a = 2`
 
-genVariable("foo", "'bar'");
+genVariable('foo', '\'bar\'')
 // ~> `const foo = 'bar'`
 
-genVariable("x", "1", { kind: "let" });
+genVariable('x', '1', { kind: 'let' })
 // ~> `let x = 1`
 
-genVariable("y", "2", { export: true });
+genVariable('y', '2', { export: true })
 // ~> `export const y = 2`
 ```
 
@@ -1267,13 +1267,13 @@ Generate a safe javascript variable name.
 **Example:**
 
 ```js
-genVariableName("valid_import");
+genVariableName('valid_import')
 // ~> `valid_import`
 
-genVariableName("for");
+genVariableName('for')
 // ~> `_for`
 
-genVariableName("with space");
+genVariableName('with space')
 // ~> `with_32space`
 ```
 
@@ -1284,13 +1284,13 @@ Generate `while (cond) { body }` or single-statement form.
 **Example:**
 
 ```js
-genWhile("running", "step();");
+genWhile('running', 'step();')
 // ~> `while (running) { step(); }`
 
-genWhile("i > 0", ["process();", "i--;"]);
+genWhile('i > 0', ['process();', 'i--;'])
 // ~> `while (i > 0) { process(); i--; }`
 
-genWhile("ok", "doIt();", { bracket: false });
+genWhile('ok', 'doIt();', { bracket: false })
 // ~> `while (ok) doIt();`
 ```
 
@@ -1303,16 +1303,16 @@ Generate comment: single-line `//` or block comment (non-JSDoc).
 **Example:**
 
 ```js
-genComment("Single line comment");
+genComment('Single line comment')
 // ~> `// Single line comment`
 
-genComment("Multi-line\ncomment", { block: true });
+genComment('Multi-line\ncomment', { block: true })
 // ~> block comment format
 
-genComment("Block comment", { block: true });
+genComment('Block comment', { block: true })
 // ~> block comment format
 
-genComment("Indented", "  ");
+genComment('Indented', '  ')
 // ~> `  // Indented`
 ```
 
@@ -1323,16 +1323,16 @@ Generate a JSDoc block comment from lines or a JSDoc object (typed interface).
 **Example:**
 
 ```js
-genJSDocComment("Single line");
+genJSDocComment('Single line')
 // ~> block comment with one line
 
-genJSDocComment(["Line one", "@param x - number", "@returns void"]);
+genJSDocComment(['Line one', '@param x - number', '@returns void'])
 // ~> multi-line block with those lines
 
-genJSDocComment({ description: "Fn", param: { x: "number" }, returns: "void" });
+genJSDocComment({ description: 'Fn', param: { x: 'number' }, returns: 'void' })
 // ~> block with description, @param {number} x, @returns {void}
 
-genJSDocComment("Indented", "  ");
+genJSDocComment('Indented', '  ')
 // ~> same block, each line prefixed with indent
 ```
 
@@ -1343,13 +1343,13 @@ Generate a safe javascript variable name for an object key.
 **Example:**
 
 ```js
-genKey("foo");
+genKey('foo')
 // ~> `foo`
 
-genKey("foo-bar");
+genKey('foo-bar')
 // ~> `"foo-bar"`
 
-genKey("with space");
+genKey('with space')
 // ~> `"with space"`
 ```
 
@@ -1371,13 +1371,13 @@ Generate regex literal from pattern and flags.
 **Example:**
 
 ```js
-genRegExp("foo");
+genRegExp('foo')
 // ~> `/foo/`
 
-genRegExp("foo", "gi");
+genRegExp('foo', 'gi')
 // ~> `/foo/gi`
 
-genRegExp("foo\\d+");
+genRegExp('foo\\d+')
 // ~> `/foo\d+/`
 ```
 

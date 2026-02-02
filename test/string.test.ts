@@ -1,72 +1,72 @@
-import { expect, describe, it } from "vitest";
-import { genString, genTemplateLiteral } from "../src";
-import { genTestTitle } from "./_utils";
+import { describe, expect, it } from 'vitest'
+import { genString, genTemplateLiteral } from '../src'
+import { genTestTitle } from './_utils'
 
 const genStringTests = [
   [`foo`, `"foo"`, `'foo'`],
   [`foo\nbar`, `"foo\\nbar"`, `'foo\\\\nbar'`],
   [`foo'bar`, `"foo'bar"`, `'foo\\'bar'`],
   [`foo"bar`, `"foo\\"bar"`, `'foo\\\\"bar'`],
-];
+]
 
-describe("genString", () => {
+describe('genString', () => {
   for (const [input, output] of genStringTests) {
     it(genTestTitle(input), () => {
-      expect(genString(input)).to.equal(output);
-    });
+      expect(genString(input)).to.equal(output)
+    })
   }
-});
+})
 
-describe("genString (singleQuotes: true)", () => {
+describe('genString (singleQuotes: true)', () => {
   for (const [input, _, output] of genStringTests) {
     it(genTestTitle(input), () => {
-      expect(genString(input, { singleQuotes: true })).to.equal(output);
-    });
+      expect(genString(input, { singleQuotes: true })).to.equal(output)
+    })
   }
-});
+})
 
 const genTemplateLiteralTests: Array<{
-  input: Parameters<typeof genTemplateLiteral>;
-  code: string;
+  input: Parameters<typeof genTemplateLiteral>
+  code: string
 }> = [
   {
-    input: [["hello ", "x"]],
-    code: "`hello ${x}`",
+    input: [['hello ', 'x']],
+    code: '`hello ${x}`',
   },
   {
-    input: [["prefix", "expr", "suffix"]],
-    code: "`prefix${expr}suffix`",
+    input: [['prefix', 'expr', 'suffix']],
+    code: '`prefix${expr}suffix`',
   },
   {
-    input: [["", "value"]],
-    code: "`${value}`",
+    input: [['', 'value']],
+    code: '`${value}`',
   },
   {
-    input: [["text"]],
-    code: "`text`",
+    input: [['text']],
+    code: '`text`',
   },
   {
     input: [[]],
-    code: "``",
+    code: '``',
   },
   {
-    input: [["Hello ", "name", ", you are ", "age", " years old"]],
-    code: "`Hello ${name}, you are ${age} years old`",
+    input: [['Hello ', 'name', ', you are ', 'age', ' years old']],
+    code: '`Hello ${name}, you are ${age} years old`',
   },
   {
-    input: [["text with `backtick`"]],
-    code: "`text with \\`backtick\\``",
+    input: [['text with `backtick`']],
+    code: '`text with \\`backtick\\``',
   },
   {
-    input: [["text with ${interpolation}"]],
-    code: "`text with \\${interpolation}`",
+    input: [['text with ${interpolation}']],
+    code: '`text with \\${interpolation}`',
   },
-];
+]
 
-describe("genTemplateLiteral", () => {
+describe('genTemplateLiteral', () => {
   for (const t of genTemplateLiteralTests) {
     it(genTestTitle(t.code), () => {
-      expect(genTemplateLiteral(...t.input)).to.equal(t.code);
-    });
+      expect(genTemplateLiteral(...t.input)).to.equal(t.code)
+    })
   }
-});
+})

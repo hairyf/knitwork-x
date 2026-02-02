@@ -1,5 +1,5 @@
-import { genString } from "./string";
-import { genBlock } from "./function";
+import { genBlock } from './function'
+import { genString } from './string'
 
 /**
  * Generate typescript `declare module` augmentation.
@@ -26,7 +26,7 @@ export function genAugmentation(
   specifier: string,
   statements?: string | string[],
 ): string {
-  return `declare module ${genString(specifier)} ${genBlock(statements)}`;
+  return `declare module ${genString(specifier)} ${genBlock(statements)}`
 }
 
 /**
@@ -50,5 +50,5 @@ export function genModule(
   specifier: string,
   statements?: string | string[],
 ): string {
-  return genAugmentation(specifier, statements);
+  return genAugmentation(specifier, statements)
 }

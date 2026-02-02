@@ -1,86 +1,86 @@
-import { expect, describe, it } from "vitest";
-import { genCase, genDefault, genSwitch } from "../src";
-import { genTestTitle } from "./_utils";
+import { describe, expect, it } from 'vitest'
+import { genCase, genDefault, genSwitch } from '../src'
+import { genTestTitle } from './_utils'
 
 const genCaseTests: Array<{
-  input: Parameters<typeof genCase>;
-  code: string;
+  input: Parameters<typeof genCase>
+  code: string
 }> = [
   {
-    input: ["1", "break;"],
+    input: ['1', 'break;'],
     code: `case 1:
   break;`,
   },
   {
-    input: ["'a'", ["doA();", "break;"]],
+    input: ['\'a\'', ['doA();', 'break;']],
     code: `case 'a':
   doA();
   break;`,
   },
   {
-    input: ["0"],
-    code: "case 0:",
+    input: ['0'],
+    code: 'case 0:',
   },
   {
-    input: ["Color.Red", "return 'red';"],
+    input: ['Color.Red', 'return \'red\';'],
     code: `case Color.Red:
   return 'red';`,
   },
   {
-    input: ["2", []],
-    code: "case 2:",
+    input: ['2', []],
+    code: 'case 2:',
   },
-];
+]
 
-describe("genCase", () => {
+describe('genCase', () => {
   for (const t of genCaseTests) {
     it(genTestTitle(t.code), () => {
-      const code = genCase(...t.input);
-      expect(code).to.equal(t.code);
-    });
+      const code = genCase(...t.input)
+      expect(code).to.equal(t.code)
+    })
   }
-});
+})
 
 const genDefaultTests: Array<{
-  input: Parameters<typeof genDefault>;
-  code: string;
+  input: Parameters<typeof genDefault>
+  code: string
 }> = [
   {
-    input: ["return 0;"],
+    input: ['return 0;'],
     code: `default:
   return 0;`,
   },
   {
-    input: [["log('default');", "break;"]],
+    input: [['log(\'default\');', 'break;']],
     code: `default:
   log('default');
   break;`,
   },
   {
     input: [],
-    code: "default:",
+    code: 'default:',
   },
   {
     input: [[]],
-    code: "default:",
+    code: 'default:',
   },
-];
+]
 
-describe("genDefault", () => {
+describe('genDefault', () => {
   for (const t of genDefaultTests) {
     it(genTestTitle(t.code), () => {
-      const code = genDefault(...t.input);
-      expect(code).to.equal(t.code);
-    });
+      const code = genDefault(...t.input)
+      expect(code).to.equal(t.code)
+    })
   }
-});
+})
 
 const genSwitchTests: Array<{
-  input: Parameters<typeof genSwitch>;
-  code: string;
+  input: Parameters<typeof genSwitch>
+  code: string
 }> = [
   {
-    input: ["x", [genCase("1", "break;"), genDefault("return 0;")]],
+    input: ['x', [genCase('1', 'break;'), genDefault('return 0;')]],
     code: `switch (x) {
   case 1:
     break;
@@ -89,11 +89,11 @@ const genSwitchTests: Array<{
 }`,
   },
   {
-    input: ["key", []],
-    code: "switch (key) {}",
+    input: ['key', []],
+    code: 'switch (key) {}',
   },
   {
-    input: ["n", [genCase("0"), genCase("1", "return 1;")]],
+    input: ['n', [genCase('0'), genCase('1', 'return 1;')]],
     code: `switch (n) {
   case 0:
   case 1:
@@ -101,16 +101,16 @@ const genSwitchTests: Array<{
 }`,
   },
   {
-    input: ["x", [], { bracket: true }],
-    code: "switch (x) {}",
+    input: ['x', [], { bracket: true }],
+    code: 'switch (x) {}',
   },
-];
+]
 
-describe("genSwitch", () => {
+describe('genSwitch', () => {
   for (const t of genSwitchTests) {
     it(genTestTitle(t.code), () => {
-      const code = genSwitch(...t.input);
-      expect(code).to.equal(t.code);
-    });
+      const code = genSwitch(...t.input)
+      expect(code).to.equal(t.code)
+    })
   }
-});
+})

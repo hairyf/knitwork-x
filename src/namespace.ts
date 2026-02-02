@@ -1,4 +1,4 @@
-import { genBlock } from "./function";
+import { genBlock } from './function'
 
 /**
  * Generate typescript `declare <namespace>` block (e.g. `declare global {}`).
@@ -25,7 +25,7 @@ export function genDeclareNamespace(
   namespace: string,
   statements?: string | string[],
 ): string {
-  return `declare ${namespace} ${genBlock(statements)}`;
+  return `declare ${namespace} ${genBlock(statements)}`
 }
 
 /**
@@ -53,5 +53,5 @@ export function genNamespace(
   name: string,
   statements?: string | string[],
 ): string {
-  return `namespace ${name} ${genBlock(statements)}`;
+  return `namespace ${name} ${genBlock(statements)}`
 }

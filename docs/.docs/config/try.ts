@@ -1,5 +1,5 @@
-import * as knitwork from 'knitwork-x'
 import type { Preset } from './types'
+import * as knitwork from 'knitwork-x'
 
 export const tryPresets: Preset[] = [
   {
@@ -34,7 +34,7 @@ genFinally([
 ])`,
     output: () => [
       knitwork.genFinally('cleanup();'),
-      knitwork.genFinally(['release();', "log('done');"]),
+      knitwork.genFinally(['release();', 'log(\'done\');']),
     ],
   },
 ]

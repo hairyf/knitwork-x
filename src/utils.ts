@@ -1,7 +1,7 @@
-import { VALID_IDENTIFIER_RE } from "./_utils";
-import { genString } from "./string";
+import { VALID_IDENTIFIER_RE } from './_utils'
+import { genString } from './string'
 
-export type JSDoc = string | string[] | JSDocObject;
+export type JSDoc = string | string[] | JSDocObject
 
 /**
  * JSDoc object shape: description + typed tags, all types referenced for reuse.
@@ -12,32 +12,32 @@ export type JSDoc = string | string[] | JSDocObject;
  */
 export interface JSDocObject {
   /** Description lines (no @). */
-  description?: string | string[];
+  description?: string | string[]
   /** @param {Type} name - description. */
-  param?: Record<string, string>;
+  param?: Record<string, string>
   /** @returns {Type}. */
-  returns?: string;
+  returns?: string
   /** @template T for each. */
-  template?: string[];
+  template?: string[]
   /** @property {Type} name - description. */
-  property?: Record<string, string>;
-  [tag: string]: string | string[] | Record<string, string> | undefined;
+  property?: Record<string, string>
+  [tag: string]: string | string[] | Record<string, string> | undefined
 }
 
 function formatTypedTag(
-  tag: "param" | "property",
+  tag: 'param' | 'property',
   name: string,
   value: string,
 ): string {
-  const sep = " - ";
-  const typePart = value.includes(sep) ? value.split(sep)[0].trim() : value;
+  const sep = ' - '
+  const typePart = value.includes(sep) ? value.split(sep)[0].trim() : value
   const descPart = value.includes(sep)
     ? value.slice(value.indexOf(sep) + sep.length).trim()
-    : "";
-  const typeBraced = typePart.startsWith("{") ? typePart : `{${typePart}}`;
+    : ''
+  const typeBraced = typePart.startsWith('{') ? typePart : `{${typePart}}`
   return descPart
     ? `@${tag} ${typeBraced} ${name} - ${descPart}`
-    : `@${tag} ${typeBraced} ${name}`;
+    : `@${tag} ${typeBraced} ${name}`
 }
 
 /**
@@ -61,65 +61,69 @@ function formatTypedTag(
  *
  * @group utils
  */
-export function genJSDocComment(jsdoc: JSDoc, indent = ""): string {
-  const lines: string[] = [];
+export function genJSDocComment(jsdoc: JSDoc, indent = ''): string {
+  const lines: string[] = []
 
-  if (typeof jsdoc === "string") {
-    lines.push(jsdoc);
-  } else if (Array.isArray(jsdoc)) {
-    lines.push(...jsdoc);
-  } else {
-    const desc = jsdoc.description;
+  if (typeof jsdoc === 'string') {
+    lines.push(jsdoc)
+  }
+  else if (Array.isArray(jsdoc)) {
+    lines.push(...jsdoc)
+  }
+  else {
+    const desc = jsdoc.description
     if (desc !== undefined) {
-      lines.push(...(Array.isArray(desc) ? desc : [desc]));
+      lines.push(...(Array.isArray(desc) ? desc : [desc]))
     }
     if (jsdoc.param !== undefined) {
       for (const [name, value] of Object.entries(jsdoc.param)) {
-        lines.push(formatTypedTag("param", name, value));
+        lines.push(formatTypedTag('param', name, value))
       }
     }
     if (jsdoc.returns !== undefined) {
-      const t = jsdoc.returns;
-      lines.push(t.startsWith("{") ? `@returns ${t}` : `@returns {${t}}`);
+      const t = jsdoc.returns
+      lines.push(t.startsWith('{') ? `@returns ${t}` : `@returns {${t}}`)
     }
     if (jsdoc.template !== undefined) {
       for (const t of jsdoc.template) {
-        lines.push(`@template ${t}`);
+        lines.push(`@template ${t}`)
       }
     }
     if (jsdoc.property !== undefined) {
       for (const [name, value] of Object.entries(jsdoc.property)) {
-        lines.push(formatTypedTag("property", name, value));
+        lines.push(formatTypedTag('property', name, value))
       }
     }
     const known = new Set([
-      "description",
-      "param",
-      "returns",
-      "template",
-      "property",
-    ]);
+      'description',
+      'param',
+      'returns',
+      'template',
+      'property',
+    ])
     for (const [tag, val] of Object.entries(jsdoc)) {
-      if (known.has(tag) || val === undefined) continue;
-      if (typeof val === "string") {
-        lines.push(`@${tag} ${val}`);
-      } else if (Array.isArray(val)) {
-        for (const v of val) lines.push(`@${tag} ${v}`);
+      if (known.has(tag) || val === undefined)
+        continue
+      if (typeof val === 'string') {
+        lines.push(`@${tag} ${val}`)
+      }
+      else if (Array.isArray(val)) {
+        for (const v of val) lines.push(`@${tag} ${v}`)
       }
     }
   }
 
   if (lines.length === 1) {
-    return indent + "/** " + lines[0] + " */\n";
+    return `${indent}/** ${lines[0]} */\n`
   }
   return (
-    indent +
-    "/**\n" +
-    lines.map((line) => indent + " * " + line).join("\n") +
-    "\n" +
-    indent +
-    " */\n"
-  );
+    `${indent
+    }/**\n${
+      lines.map(line => `${indent} * ${line}`).join('\n')
+    }\n${
+      indent
+    } */\n`
+  )
 }
 
 /**
@@ -129,17 +133,17 @@ export function genJSDocComment(jsdoc: JSDoc, indent = ""): string {
  */
 export function wrapInDelimiters(
   lines: string[],
-  indent = "",
-  delimiters = "{}",
+  indent = '',
+  delimiters = '{}',
   withComma = true,
 ) {
   if (lines.length === 0) {
-    return delimiters;
+    return delimiters
   }
-  const [start, end] = delimiters;
+  const [start, end] = delimiters
   return (
-    `${start}\n` + lines.join(withComma ? ",\n" : "\n") + `\n${indent}${end}`
-  );
+    `${start}\n${lines.join(withComma ? ',\n' : '\n')}\n${indent}${end}`
+  )
 }
 
 /**
@@ -149,7 +153,7 @@ export function wrapInDelimiters(
  * @example `['a', 'b']` → `{ a: b }` (key-value)
  * @example `['...', 'c']` → `{ ...c }` (spread)
  */
-export type LiteralField = string | [string | "...", string];
+export type LiteralField = string | [string | '...', string]
 
 /**
  * Create object literal from field descriptors.
@@ -166,21 +170,21 @@ export type LiteralField = string | [string | "...", string];
  */
 export function genLiteral(
   fields: LiteralField[],
-  indent = "",
+  indent = '',
   _options: object = {},
 ): string {
-  const newIndent = indent + "  ";
+  const newIndent = `${indent}  `
   const lines = fields.map((field) => {
-    if (typeof field === "string") {
-      return `${newIndent}${genKey(field)}`;
+    if (typeof field === 'string') {
+      return `${newIndent}${genKey(field)}`
     }
-    const [key, value] = field;
-    if (key === "...") {
-      return `${newIndent}...${value}`;
+    const [key, value] = field
+    if (key === '...') {
+      return `${newIndent}...${value}`
     }
-    return `${newIndent}${genKey(key)}: ${value}`;
-  });
-  return wrapInDelimiters(lines, indent, "{}");
+    return `${newIndent}${genKey(key)}: ${value}`
+  })
+  return wrapInDelimiters(lines, indent, '{}')
 }
 
 /**
@@ -203,8 +207,8 @@ export function genLiteral(
  */
 export function genRegExp(pattern: string, flags?: string): string {
   // Escape forward slashes in the pattern
-  const escapedPattern = pattern.replace(/\//g, "\\/");
-  return flags ? `/${escapedPattern}/${flags}` : `/${escapedPattern}/`;
+  const escapedPattern = pattern.replace(/\//g, '\\/')
+  return flags ? `/${escapedPattern}/${flags}` : `/${escapedPattern}/`
 }
 
 /**
@@ -226,7 +230,7 @@ export function genRegExp(pattern: string, flags?: string): string {
  * @group utils
  */
 export function genKey(key: string) {
-  return VALID_IDENTIFIER_RE.test(key) ? key : genString(key);
+  return VALID_IDENTIFIER_RE.test(key) ? key : genString(key)
 }
 
 /**
@@ -249,31 +253,32 @@ export function genKey(key: string) {
  * ```
  *
  * @param text - comment text (can be multi-line)
- * @param options - block: use block comment instead of `//`
+ * @param options - options object
+ * @param options.block - use block comment style instead of single-line `//`
  * @param indent - base indent
  * @group utils
  */
 export function genComment(
   text: string,
   options: { block?: boolean } = {},
-  indent = "",
+  indent = '',
 ): string {
-  const { block = false } = options;
+  const { block = false } = options
   if (block) {
     // Block comment: /* ... */
-    const lines = text.split("\n");
+    const lines = text.split('\n')
     if (lines.length === 1) {
-      return `${indent}/* ${lines[0]} */`;
+      return `${indent}/* ${lines[0]} */`
     }
     return (
-      `${indent}/*\n` +
-      lines.map((line) => `${indent} * ${line}`).join("\n") +
-      `\n${indent} */`
-    );
+      `${indent}/*\n${
+        lines.map(line => `${indent} * ${line}`).join('\n')
+      }\n${indent} */`
+    )
   }
   // Single-line comment: // ...
   return text
-    .split("\n")
-    .map((line) => `${indent}// ${line}`)
-    .join("\n");
+    .split('\n')
+    .map(line => `${indent}// ${line}`)
+    .join('\n')
 }

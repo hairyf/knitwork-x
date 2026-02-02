@@ -23,5 +23,5 @@ export function genConditionalType(
   trueType: string,
   falseType: string,
 ): string {
-  return `${checkType} extends ${extendsType} ? ${trueType} : ${falseType}`;
+  return `${checkType} extends ${extendsType} ? ${trueType} : ${falseType}`
 }

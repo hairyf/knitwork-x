@@ -1,6 +1,6 @@
-import { genBlock } from "./function";
-import { genPrefixedBlock } from "./condition";
-import type { GenPrefixedBlockOptions } from "./types";
+import type { GenPrefixedBlockOptions } from './types'
+import { genPrefixedBlock } from './condition'
+import { genBlock } from './function'
 
 /**
  * Generate C-style `for (init; test; update) { body }` or single-statement form.
@@ -26,10 +26,10 @@ export function genFor(
   update: string,
   statements: string | string[],
   options: GenPrefixedBlockOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const prefix = `for (${init}; ${test}; ${update})`;
-  return genPrefixedBlock(prefix, statements, options, indent);
+  const prefix = `for (${init}; ${test}; ${update})`
+  return genPrefixedBlock(prefix, statements, options, indent)
 }
 
 /**
@@ -55,10 +55,10 @@ export function genForOf(
   iterable: string,
   statements: string | string[],
   options: GenPrefixedBlockOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const prefix = `for (${left} of ${iterable})`;
-  return genPrefixedBlock(prefix, statements, options, indent);
+  const prefix = `for (${left} of ${iterable})`
+  return genPrefixedBlock(prefix, statements, options, indent)
 }
 
 /**
@@ -84,10 +84,10 @@ export function genForIn(
   obj: string,
   statements: string | string[],
   options: GenPrefixedBlockOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const prefix = `for (${left} in ${obj})`;
-  return genPrefixedBlock(prefix, statements, options, indent);
+  const prefix = `for (${left} in ${obj})`
+  return genPrefixedBlock(prefix, statements, options, indent)
 }
 
 /**
@@ -112,9 +112,9 @@ export function genWhile(
   cond: string,
   statements: string | string[],
   options: GenPrefixedBlockOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  return genPrefixedBlock(`while (${cond})`, statements, options, indent);
+  return genPrefixedBlock(`while (${cond})`, statements, options, indent)
 }
 
 /**
@@ -139,16 +139,16 @@ export function genDoWhile(
   statements: string | string[],
   cond: string,
   options: GenPrefixedBlockOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const prefix = "do";
-  const suffix = ` while (${cond});`;
-  const { bracket = true } = options;
-  const lines = Array.isArray(statements) ? statements : [statements];
+  const prefix = 'do'
+  const suffix = ` while (${cond});`
+  const { bracket = true } = options
+  const lines = Array.isArray(statements) ? statements : [statements]
   if (!bracket) {
-    const stmt = lines.length === 1 ? lines[0] : lines.join("\n");
-    return `${indent}${prefix} ${stmt}${suffix}`;
+    const stmt = lines.length === 1 ? lines[0] : lines.join('\n')
+    return `${indent}${prefix} ${stmt}${suffix}`
   }
-  const body = genBlock(lines, indent);
-  return `${indent}${prefix} ${body}${suffix}`;
+  const body = genBlock(lines, indent)
+  return `${indent}${prefix} ${body}${suffix}`
 }

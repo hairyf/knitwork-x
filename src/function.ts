@@ -1,10 +1,10 @@
-import { genJSDocComment, wrapInDelimiters } from "./utils";
 import type {
-  TypeField,
   FunctionOpts,
-  TypeGeneric,
   GenArrowFunctionOptions,
-} from "./types";
+  TypeField,
+  TypeGeneric,
+} from './types'
+import { genJSDocComment, wrapInDelimiters } from './utils'
 
 /**
  * Generate a single function parameter string from Field.
@@ -28,11 +28,14 @@ import type {
  * @group Typescript
  */
 export function genParam(p: TypeField): string {
-  let s = p.name;
-  if (p.optional) s += "?";
-  if (p.type) s += `: ${p.type}`;
-  if (p.default !== undefined) s += ` = ${p.default}`;
-  return s;
+  let s = p.name
+  if (p.optional)
+    s += '?'
+  if (p.type)
+    s += `: ${p.type}`
+  if (p.default !== undefined)
+    s += ` = ${p.default}`
+  return s
 }
 
 /**
@@ -56,7 +59,7 @@ export function genParam(p: TypeField): string {
  *
  * @group Typescript
  */
-export function genFunction(options: FunctionOpts, indent = ""): string {
+export function genFunction(options: FunctionOpts, indent = ''): string {
   const {
     name,
     parameters = [],
@@ -67,39 +70,41 @@ export function genFunction(options: FunctionOpts, indent = ""): string {
     generator: isGenerator,
     returnType,
     generics = [],
-  } = options;
+  } = options
 
-  const jsdocComment = jsdoc === undefined ? "" : genJSDocComment(jsdoc);
+  const jsdocComment = jsdoc === undefined ? '' : genJSDocComment(jsdoc)
 
-  const genericPart =
-    generics.length > 0
-      ? "<" +
+  const genericPart
+    = generics.length > 0
+      ? `<${
         generics
           .map((g) => {
-            let s = g.name;
-            if (g.extends) s += ` extends ${g.extends}`;
-            if (g.default) s += ` = ${g.default}`;
-            return s;
+            let s = g.name
+            if (g.extends)
+              s += ` extends ${g.extends}`
+            if (g.default)
+              s += ` = ${g.default}`
+            return s
           })
-          .join(", ") +
-        ">"
-      : "";
+          .join(', ')
+      }>`
+      : ''
 
-  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
+  const paramsPart = `(${parameters.map(p => genParam(p)).join(', ')})`
 
-  const returnPart = returnType ? `: ${returnType}` : "";
-  const bodyContent = genBlock(body, indent);
+  const returnPart = returnType ? `: ${returnType}` : ''
+  const bodyContent = genBlock(body, indent)
 
   const prefix = [
-    isExport && "export",
-    isAsync && "async",
-    isGenerator ? "function*" : "function",
+    isExport && 'export',
+    isAsync && 'async',
+    isGenerator ? 'function*' : 'function',
     name + genericPart + paramsPart + returnPart,
   ]
     .filter(Boolean)
-    .join(" ");
+    .join(' ')
 
-  return `${jsdocComment}${prefix} ${bodyContent}`;
+  return `${jsdocComment}${prefix} ${bodyContent}`
 }
 
 /**
@@ -129,21 +134,22 @@ export function genFunction(options: FunctionOpts, indent = ""): string {
  *
  * @group Typescript
  */
-export function genBlock(statements?: string | string[], indent = ""): string {
-  let arr: string[];
+export function genBlock(statements?: string | string[], indent = ''): string {
+  let arr: string[]
   if (statements === undefined) {
-    arr = [];
-  } else {
-    arr = Array.isArray(statements) ? statements : [statements];
+    arr = []
   }
-  const newIndent = indent + "  ";
-  const lines =
-    arr.length === 0
+  else {
+    arr = Array.isArray(statements) ? statements : [statements]
+  }
+  const newIndent = `${indent}  `
+  const lines
+    = arr.length === 0
       ? []
-      : arr.flatMap((s) => s.split("\n").map((line) => newIndent + line));
+      : arr.flatMap(s => s.split('\n').map(line => newIndent + line))
   return lines.length === 0
-    ? "{}"
-    : wrapInDelimiters(lines, indent, "{}", false);
+    ? '{}'
+    : wrapInDelimiters(lines, indent, '{}', false)
 }
 
 /**
@@ -179,36 +185,40 @@ export function genArrowFunction(
     async: isAsync,
     returnType,
     generics = [],
-  } = options;
+  } = options
 
-  const genericPart =
-    generics.length > 0
-      ? "<" +
+  const genericPart
+    = generics.length > 0
+      ? `<${
         generics
           .map((g: TypeGeneric) => {
-            let s = g.name;
-            if (g.extends) s += ` extends ${g.extends}`;
-            if (g.default) s += ` = ${g.default}`;
-            return s;
+            let s = g.name
+            if (g.extends)
+              s += ` extends ${g.extends}`
+            if (g.default)
+              s += ` = ${g.default}`
+            return s
           })
-          .join(", ") +
-        ">"
-      : "";
+          .join(', ')
+      }>`
+      : ''
 
-  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
-  const returnPart = returnType ? `: ${returnType}` : "";
+  const paramsPart = `(${parameters.map(p => genParam(p)).join(', ')})`
+  const returnPart = returnType ? `: ${returnType}` : ''
 
-  let bodyPart: string;
+  let bodyPart: string
   if (body === undefined) {
-    bodyPart = "{}";
-  } else if (typeof body === "string") {
+    bodyPart = '{}'
+  }
+  else if (typeof body === 'string') {
     // Single expression: `=> expr`
-    bodyPart = body;
-  } else {
+    bodyPart = body
+  }
+  else {
     // Array of statements: `=> { statements }`
-    bodyPart = genBlock(body);
+    bodyPart = genBlock(body)
   }
 
-  const asyncPart = isAsync ? "async " : "";
-  return `${asyncPart}${genericPart}${paramsPart}${returnPart} => ${bodyPart}`;
+  const asyncPart = isAsync ? 'async ' : ''
+  return `${asyncPart}${genericPart}${paramsPart}${returnPart} => ${bodyPart}`
 }

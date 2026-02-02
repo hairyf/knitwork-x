@@ -1,17 +1,7 @@
-import * as knitwork from 'knitwork-x'
 import type { Preset } from './types'
+import * as knitwork from 'knitwork-x'
 
 export const variablePresets: Preset[] = [
-  {
-    module: 'variable',
-    label: 'genVariableName',
-    code: `genVariableName('valid_import')
-genVariableName('for')`,
-    output: () => [
-      knitwork.genVariableName('valid_import'),
-      knitwork.genVariableName('for'),
-    ],
-  },
   {
     module: 'variable',
     label: 'genVariable',
@@ -26,6 +16,16 @@ genVariable('y', '2', {
       knitwork.genVariable('a', '2'),
       knitwork.genVariable('x', '1', { kind: 'let' }),
       knitwork.genVariable('y', '2', { export: true }),
+    ],
+  },
+  {
+    module: 'variable',
+    label: 'genVariableName',
+    code: `genVariableName('valid_import')
+genVariableName('for')`,
+    output: () => [
+      knitwork.genVariableName('valid_import'),
+      knitwork.genVariableName('for'),
     ],
   },
 ]

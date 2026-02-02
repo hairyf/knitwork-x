@@ -1,51 +1,58 @@
 {
   "name": "knitwork-x",
-  "version": "1.3.0",
-  "description": "Utilities to generate JavaScript code.",
-  "repository": "hairyf/knitwork-x",
-  "license": "MIT",
-  "sideEffects": false,
   "type": "module",
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.20.0",
+  "description": "Utilities to generate JavaScript code.",
+  "license": "MIT",
+  "repository": "hairyf/knitwork-x",
+  "sideEffects": false,
   "exports": {
-    ".": {
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.cjs"
-    }
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
   },
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/index.d.mts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "unbuild",
-    "dev": "vitest dev --coverage",
-    "docs": "cd docs && pnpm dev",
-    "build:docs": "pnpm build && pnpm --filter docs build",
-    "lint": "eslint --cache . && prettier -c src test",
-    "lint:fix": "automd && eslint --cache . --fix && prettier -c src test -w",
-    "prepack": "pnpm run build",
-    "release": "pnpm test && changelogen --release && npm publish && git push --follow-tags",
-    "test": "pnpm lint && vitest run --coverage"
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc",
+    "test": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "release": "bumpp",
+    "prepublishOnly": "nr build",
+    "prepare": "simple-git-hooks"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^4.0.8",
-    "automd": "^0.4.2",
-    "changelogen": "^0.6.2",
-    "esbuild": "^0.25.12",
-    "eslint": "^9.39.1",
-    "eslint-config-unjs": "^0.5.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3",
-    "unbuild": "^3.6.1",
-    "vitest": "^4.0.8"
+    "@antfu/eslint-config": "catalog:cli",
+    "@antfu/ni": "catalog:cli",
+    "bumpp": "catalog:cli",
+    "eslint": "catalog:cli",
+    "lint-staged": "catalog:cli",
+    "publint": "catalog:cli",
+    "simple-git-hooks": "catalog:cli",
+    "tsdown": "catalog:cli",
+    "tsx": "catalog:cli",
+    "typescript": "catalog:cli",
+    "vitest": "catalog:testing",
+    "vitest-package-exports": "catalog:testing"
   },
-  "packageManager": "pnpm@10.20.0",
-  "pnpm": {
-    "overrides": {
-      "nuxt": "4.2.0"
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./package.json": "./package.json"
     }
   }
 }

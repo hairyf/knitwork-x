@@ -3,7 +3,7 @@ name: autofix.ci # needed to securely identify the workflow
 on:
   pull_request:
   push:
-    branches: ["main"]
+    branches: [main]
 
 permissions:
   contents: read
@@ -17,9 +17,9 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 20
-          cache: "pnpm"
+          cache: pnpm
       - run: pnpm install
-      - run: pnpm lint:fix
+      - run: pnpm i -g @antfu/ni && nci && nr lint:fix
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27
         with:
-          commit-message: "chore: apply automated updates"
+          commit-message: 'chore: apply automated updates'

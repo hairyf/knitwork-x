@@ -3,16 +3,16 @@
   "private": true,
   "scripts": {
     "dev": "undocs dev",
-    "build": "cd ../ && pnpm build && cd docs && undocs build"
+    "build": "undocs build"
   },
   "dependencies": {
-    "@vueuse/core": "^14.2.0",
+    "@vueuse/core": "catalog:docs",
     "knitwork-x": "workspace:*",
-    "shiki": "^3.22.0"
+    "shiki": "catalog:docs"
   },
   "devDependencies": {
-    "nuxt": "3.14.0",
-    "undocs": "latest",
-    "vue": "^3.5.0"
+    "nuxt": "catalog:docs",
+    "undocs": "catalog:docs",
+    "vue": "catalog:docs"
   }
 }

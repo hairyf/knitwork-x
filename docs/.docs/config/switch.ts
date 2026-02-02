@@ -1,5 +1,5 @@
-import * as knitwork from 'knitwork-x'
 import type { Preset } from './types'
+import * as knitwork from 'knitwork-x'
 
 export const switchPresets: Preset[] = [
   {
@@ -26,7 +26,7 @@ genCase("'a'", [
 ])`,
     output: () => [
       knitwork.genCase('1', 'break;'),
-      knitwork.genCase("'a'", ['doA();', 'break;']),
+      knitwork.genCase('\'a\'', ['doA();', 'break;']),
     ],
   },
   {

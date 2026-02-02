@@ -1,22 +1,22 @@
-import { expect, describe, it } from "vitest";
-import { genDeclareNamespace, genNamespace, genInterface } from "../src";
-import { genTestTitle } from "./_utils";
+import { describe, expect, it } from 'vitest'
+import { genDeclareNamespace, genInterface, genNamespace } from '../src'
+import { genTestTitle } from './_utils'
 
 const genDeclareNamespaceTests: Array<{
-  input: Parameters<typeof genDeclareNamespace>;
-  code: string;
+  input: Parameters<typeof genDeclareNamespace>
+  code: string
 }> = [
-  { input: ["global"], code: "declare global {}" },
+  { input: ['global'], code: 'declare global {}' },
   {
-    input: ["global", genInterface("Window", {})],
+    input: ['global', genInterface('Window', {})],
     code: `declare global {
   interface Window {}
 }`,
   },
   {
     input: [
-      "global",
-      [genInterface("Window", {}), genInterface("Document", {})],
+      'global',
+      [genInterface('Window', {}), genInterface('Document', {})],
     ],
     code: `declare global {
   interface Window {}
@@ -24,7 +24,7 @@ const genDeclareNamespaceTests: Array<{
 }`,
   },
   {
-    input: ["global", genInterface("Window", { "customProp?": "string" })],
+    input: ['global', genInterface('Window', { 'customProp?': 'string' })],
     code: `declare global {
   interface Window {
     customProp?: string
@@ -32,44 +32,44 @@ const genDeclareNamespaceTests: Array<{
 }`,
   },
   {
-    input: ["global", genInterface("Window", {}, { extends: ["SomeMixin"] })],
+    input: ['global', genInterface('Window', {}, { extends: ['SomeMixin'] })],
     code: `declare global {
   interface Window extends SomeMixin {}
 }`,
   },
   {
-    input: ["global", ["const foo: string", "function bar(): void"]],
+    input: ['global', ['const foo: string', 'function bar(): void']],
     code: `declare global {
   const foo: string
   function bar(): void
 }`,
   },
-];
+]
 
-describe("genDeclareNamespace", () => {
+describe('genDeclareNamespace', () => {
   for (const t of genDeclareNamespaceTests) {
     it(genTestTitle(t.code), () => {
-      const code = genDeclareNamespace(...t.input);
-      expect(code).to.equal(t.code);
-    });
+      const code = genDeclareNamespace(...t.input)
+      expect(code).to.equal(t.code)
+    })
   }
-});
+})
 
 const genNamespaceTests: Array<{
-  input: Parameters<typeof genNamespace>;
-  code: string;
+  input: Parameters<typeof genNamespace>
+  code: string
 }> = [
-  { input: ["MyNamespace"], code: "namespace MyNamespace {}" },
+  { input: ['MyNamespace'], code: 'namespace MyNamespace {}' },
   {
-    input: ["MyNamespace", genInterface("MyInterface", {})],
+    input: ['MyNamespace', genInterface('MyInterface', {})],
     code: `namespace MyNamespace {
   interface MyInterface {}
 }`,
   },
   {
     input: [
-      "MyNamespace",
-      [genInterface("MyInterface", {}), genInterface("MyOtherInterface", {})],
+      'MyNamespace',
+      [genInterface('MyInterface', {}), genInterface('MyOtherInterface', {})],
     ],
     code: `namespace MyNamespace {
   interface MyInterface {}
@@ -77,7 +77,7 @@ const genNamespaceTests: Array<{
 }`,
   },
   {
-    input: ["MyNamespace", genInterface("MyInterface", { "test?": "string" })],
+    input: ['MyNamespace', genInterface('MyInterface', { 'test?': 'string' })],
     code: `namespace MyNamespace {
   interface MyInterface {
     test?: string
@@ -85,19 +85,19 @@ const genNamespaceTests: Array<{
 }`,
   },
   {
-    input: ["MyNamespace", ["const foo: string", "function bar(): void"]],
+    input: ['MyNamespace', ['const foo: string', 'function bar(): void']],
     code: `namespace MyNamespace {
   const foo: string
   function bar(): void
 }`,
   },
-];
+]
 
-describe("genNamespace", () => {
+describe('genNamespace', () => {
   for (const t of genNamespaceTests) {
     it(genTestTitle(t.code), () => {
-      const code = genNamespace(...t.input);
-      expect(code).to.equal(t.code);
-    });
+      const code = genNamespace(...t.input)
+      expect(code).to.equal(t.code)
+    })
   }
-});
+})

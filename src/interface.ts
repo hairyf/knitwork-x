@@ -1,14 +1,14 @@
-import { genJSDocComment, wrapInDelimiters } from "./utils";
-import { genParam } from "./function";
-import { genProperty } from "./class";
-import { genTypeObject } from "./type";
 import type {
-  GenInterfaceOptions,
   GenCallSignatureOptions,
   GenConstructSignatureOptions,
-  TypeObject,
+  GenInterfaceOptions,
   TypeField,
-} from "./types";
+  TypeObject,
+} from './types'
+import { genProperty } from './class'
+import { genParam } from './function'
+import { genTypeObject } from './type'
+import { genJSDocComment, wrapInDelimiters } from './utils'
 
 /**
  * Generate typescript interface.
@@ -35,37 +35,39 @@ export function genInterface(
   name: string,
   contents?: TypeObject | TypeField[],
   options: GenInterfaceOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const jsdocComment =
-    options.jsdoc === undefined ? "" : genJSDocComment(options.jsdoc);
+  const jsdocComment
+    = options.jsdoc === undefined ? '' : genJSDocComment(options.jsdoc)
 
-  let body: string;
+  let body: string
   if (contents === undefined) {
-    body = "{}";
-  } else if (Array.isArray(contents)) {
-    const newIndent = indent + "  ";
-    const lines = contents.map((f) => genProperty(f, newIndent));
-    body = wrapInDelimiters(lines, indent, "{}", false);
-  } else {
-    body = genTypeObject(contents, indent);
+    body = '{}'
+  }
+  else if (Array.isArray(contents)) {
+    const newIndent = `${indent}  `
+    const lines = contents.map(f => genProperty(f, newIndent))
+    body = wrapInDelimiters(lines, indent, '{}', false)
+  }
+  else {
+    body = genTypeObject(contents, indent)
   }
 
   const interfaceParts = [
-    options.export && "export",
+    options.export && 'export',
     `interface ${name}`,
-    options.extends &&
-      `extends ${
-        Array.isArray(options.extends)
-          ? options.extends.join(", ")
-          : options.extends
-      }`,
+    options.extends
+    && `extends ${
+      Array.isArray(options.extends)
+        ? options.extends.join(', ')
+        : options.extends
+    }`,
     body,
   ]
     .filter(Boolean)
-    .join(" ");
+    .join(' ')
 
-  return `${jsdocComment}${interfaceParts}`;
+  return `${jsdocComment}${interfaceParts}`
 }
 
 /**
@@ -84,17 +86,17 @@ export function genInterface(
  * // ~> `[key: string]: any`
  * ```
  *
- * @param keyName - index key name (default: "key")
  * @param keyType - index key type (e.g. "string", "number")
  * @param valueType - value type
+ * @param keyName - index key name (default: "key")
  * @group Typescript
  */
 export function genIndexSignature(
   keyType: string,
   valueType: string,
-  keyName = "key",
+  keyName = 'key',
 ): string {
-  return `[${keyName}: ${keyType}]: ${valueType}`;
+  return `[${keyName}: ${keyType}]: ${valueType}`
 }
 
 /**
@@ -118,26 +120,28 @@ export function genIndexSignature(
 export function genCallSignature(
   options: GenCallSignatureOptions = {},
 ): string {
-  const { parameters = [], returnType, generics = [] } = options;
+  const { parameters = [], returnType, generics = [] } = options
 
-  const genericPart =
-    generics.length > 0
-      ? "<" +
+  const genericPart
+    = generics.length > 0
+      ? `<${
         generics
           .map((g) => {
-            let s = g.name;
-            if (g.extends) s += ` extends ${g.extends}`;
-            if (g.default) s += ` = ${g.default}`;
-            return s;
+            let s = g.name
+            if (g.extends)
+              s += ` extends ${g.extends}`
+            if (g.default)
+              s += ` = ${g.default}`
+            return s
           })
-          .join(", ") +
-        ">"
-      : "";
+          .join(', ')
+      }>`
+      : ''
 
-  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
-  const returnPart = returnType ? `: ${returnType}` : "";
+  const paramsPart = `(${parameters.map(p => genParam(p)).join(', ')})`
+  const returnPart = returnType ? `: ${returnType}` : ''
 
-  return `${genericPart}${paramsPart}${returnPart}`;
+  return `${genericPart}${paramsPart}${returnPart}`
 }
 
 /**
@@ -161,24 +165,26 @@ export function genCallSignature(
 export function genConstructSignature(
   options: GenConstructSignatureOptions = {},
 ): string {
-  const { parameters = [], returnType, generics = [] } = options;
+  const { parameters = [], returnType, generics = [] } = options
 
-  const genericPart =
-    generics.length > 0
-      ? "<" +
+  const genericPart
+    = generics.length > 0
+      ? `<${
         generics
           .map((g) => {
-            let s = g.name;
-            if (g.extends) s += ` extends ${g.extends}`;
-            if (g.default) s += ` = ${g.default}`;
-            return s;
+            let s = g.name
+            if (g.extends)
+              s += ` extends ${g.extends}`
+            if (g.default)
+              s += ` = ${g.default}`
+            return s
           })
-          .join(", ") +
-        ">"
-      : "";
+          .join(', ')
+      }>`
+      : ''
 
-  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
-  const returnPart = returnType ? `: ${returnType}` : "";
+  const paramsPart = `(${parameters.map(p => genParam(p)).join(', ')})`
+  const returnPart = returnType ? `: ${returnType}` : ''
 
-  return `new ${genericPart}${paramsPart}${returnPart}`;
+  return `new ${genericPart}${paramsPart}${returnPart}`
 }

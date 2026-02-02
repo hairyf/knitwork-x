@@ -1,5 +1,5 @@
-import { genPrefixedBlock } from "./condition";
-import type { GenSwitchOptions } from "./types";
+import type { GenSwitchOptions } from './types'
+import { genPrefixedBlock } from './condition'
 
 /**
  * Generate `case value:` optionally followed by indented statements (fall-through when omitted).
@@ -22,18 +22,20 @@ import type { GenSwitchOptions } from "./types";
 export function genCase(
   value: string,
   statements?: string | string[],
-  indent = "",
+  indent = '',
 ): string {
-  const line = `${indent}case ${value}:`;
-  if (statements === undefined) return line;
-  const arr = Array.isArray(statements) ? statements : [statements];
-  if (arr.length === 0) return line;
-  const inner = indent + "  ";
+  const line = `${indent}case ${value}:`
+  if (statements === undefined)
+    return line
+  const arr = Array.isArray(statements) ? statements : [statements]
+  if (arr.length === 0)
+    return line
+  const inner = `${indent}  `
   const body = arr
-    .flatMap((s) => s.split("\n"))
-    .map((l) => inner + l)
-    .join("\n");
-  return `${line}\n${body}`;
+    .flatMap(s => s.split('\n'))
+    .map(l => inner + l)
+    .join('\n')
+  return `${line}\n${body}`
 }
 
 /**
@@ -56,18 +58,20 @@ export function genCase(
  */
 export function genDefault(
   statements?: string | string[],
-  indent = "",
+  indent = '',
 ): string {
-  const line = `${indent}default:`;
-  if (statements === undefined) return line;
-  const arr = Array.isArray(statements) ? statements : [statements];
-  if (arr.length === 0) return line;
-  const inner = indent + "  ";
+  const line = `${indent}default:`
+  if (statements === undefined)
+    return line
+  const arr = Array.isArray(statements) ? statements : [statements]
+  if (arr.length === 0)
+    return line
+  const inner = `${indent}  `
   const body = arr
-    .flatMap((s) => s.split("\n"))
-    .map((l) => inner + l)
-    .join("\n");
-  return `${line}\n${body}`;
+    .flatMap(s => s.split('\n'))
+    .map(l => inner + l)
+    .join('\n')
+  return `${line}\n${body}`
 }
 
 /**
@@ -92,7 +96,7 @@ export function genSwitch(
   expr: string,
   cases: string[],
   options: GenSwitchOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  return genPrefixedBlock(`switch (${expr})`, cases, options, indent);
+  return genPrefixedBlock(`switch (${expr})`, cases, options, indent)
 }

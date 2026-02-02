@@ -1,6 +1,6 @@
-import { genString } from "./string";
-import { genKey, wrapInDelimiters } from "./utils";
-import type { EnumMemberValue, GenEnumOptions } from "./types";
+import type { EnumMemberValue, GenEnumOptions } from './types'
+import { genString } from './string'
+import { genKey, wrapInDelimiters } from './utils'
 
 /**
  * Generate typescript enum or const enum.
@@ -27,35 +27,35 @@ export function genEnum(
   name: string,
   members: Record<string, EnumMemberValue>,
   options: GenEnumOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const { const: isConst, export: isExport, ...codegenOpts } = options;
-  let lastNumeric: number | undefined;
-  const newIndent = indent + "  ";
+  const { const: isConst, export: isExport, ...codegenOpts } = options
+  let lastNumeric: number | undefined
+  const newIndent = `${indent}  `
   const lines = Object.entries(members).map(([key, value]) => {
-    const k = genKey(key);
-    if (typeof value === "number") {
-      lastNumeric = value;
-      return `${newIndent}${k} = ${value}`;
+    const k = genKey(key)
+    if (typeof value === 'number') {
+      lastNumeric = value
+      return `${newIndent}${k} = ${value}`
     }
-    if (typeof value === "string") {
-      lastNumeric = undefined;
-      return `${newIndent}${k} = ${genString(value, codegenOpts)}`;
+    if (typeof value === 'string') {
+      lastNumeric = undefined
+      return `${newIndent}${k} = ${genString(value, codegenOpts)}`
     }
     // value === undefined: auto-increment for numeric enum
     if (lastNumeric !== undefined) {
-      lastNumeric += 1;
-      return `${newIndent}${k} = ${lastNumeric}`;
+      lastNumeric += 1
+      return `${newIndent}${k} = ${lastNumeric}`
     }
-    lastNumeric = 0;
-    return `${newIndent}${k}`;
-  });
-  const prefix = [isExport && "export", isConst && "const", "enum", name]
+    lastNumeric = 0
+    return `${newIndent}${k}`
+  })
+  const prefix = [isExport && 'export', isConst && 'const', 'enum', name]
     .filter(Boolean)
-    .join(" ");
-  const body =
-    lines.length === 0 ? "{}" : wrapInDelimiters(lines, indent, "{}", true);
-  return `${prefix} ${body}`;
+    .join(' ')
+  const body
+    = lines.length === 0 ? '{}' : wrapInDelimiters(lines, indent, '{}', true)
+  return `${prefix} ${body}`
 }
 
 /**
@@ -76,8 +76,8 @@ export function genEnum(
 export function genConstEnum(
   name: string,
   members: Record<string, EnumMemberValue>,
-  options: Omit<GenEnumOptions, "const"> = {},
-  indent = "",
+  options: Omit<GenEnumOptions, 'const'> = {},
+  indent = '',
 ): string {
-  return genEnum(name, members, { ...options, const: true }, indent);
+  return genEnum(name, members, { ...options, const: true }, indent)
 }

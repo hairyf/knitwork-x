@@ -1,10 +1,10 @@
-import { genJSDocComment, genKey, wrapInDelimiters } from "./utils";
-import { genBlock, genParam } from "./function";
 import type {
-  TypeField,
   GenClassOptions,
   GenConstructorOptions,
-} from "./types";
+  TypeField,
+} from './types'
+import { genBlock, genParam } from './function'
+import { genJSDocComment, genKey, wrapInDelimiters } from './utils'
 
 /**
  * Generate `class Name [extends Base] [implements I1, I2] { ... }`.
@@ -35,39 +35,39 @@ export function genClass(
   name: string,
   members: string[] = [],
   options: GenClassOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const jsdocComment =
-    options.jsdoc === undefined ? "" : genJSDocComment(options.jsdoc);
+  const jsdocComment
+    = options.jsdoc === undefined ? '' : genJSDocComment(options.jsdoc)
 
-  const extendsPart = options.extends ? ` extends ${options.extends}` : "";
-  const implementsPart =
-    options.implements === undefined
-      ? ""
+  const extendsPart = options.extends ? ` extends ${options.extends}` : ''
+  const implementsPart
+    = options.implements === undefined
+      ? ''
       : ` implements ${
-          Array.isArray(options.implements)
-            ? options.implements.join(", ")
-            : options.implements
-        }`;
+        Array.isArray(options.implements)
+          ? options.implements.join(', ')
+          : options.implements
+      }`
 
   const head = [
-    options.export && "export",
-    "class",
+    options.export && 'export',
+    'class',
     `${name}${extendsPart}${implementsPart}`,
   ]
     .filter(Boolean)
-    .join(" ");
+    .join(' ')
 
   if (members.length > 0) {
-    const newIndent = indent + "  ";
-    const lines = members.flatMap((m) =>
-      m.split("\n").map((line) => newIndent + line),
-    );
-    const body = wrapInDelimiters(lines, indent, "{}", false);
-    return `${jsdocComment}${indent}${head} ${body}`;
+    const newIndent = `${indent}  `
+    const lines = members.flatMap(m =>
+      m.split('\n').map(line => newIndent + line),
+    )
+    const body = wrapInDelimiters(lines, indent, '{}', false)
+    return `${jsdocComment}${indent}${head} ${body}`
   }
 
-  return `${jsdocComment}${indent}${head} {}`;
+  return `${jsdocComment}${indent}${head} {}`
 }
 
 /**
@@ -96,17 +96,17 @@ export function genConstructor(
   parameters: TypeField[] = [],
   body: string[] = [],
   options: GenConstructorOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
-  const prefix = `constructor${paramsPart}`;
-  const statements =
-    options.super === undefined ? body : [`super(${options.super});`, ...body];
+  const paramsPart = `(${parameters.map(p => genParam(p)).join(', ')})`
+  const prefix = `constructor${paramsPart}`
+  const statements
+    = options.super === undefined ? body : [`super(${options.super});`, ...body]
   const block = genBlock(
     statements.length > 0 ? statements : undefined,
     indent,
-  );
-  return indent ? `${indent}${prefix} ${block}` : `${prefix} ${block}`;
+  )
+  return indent ? `${indent}${prefix} ${block}` : `${prefix} ${block}`
 }
 
 /**
@@ -137,31 +137,32 @@ export function genConstructor(
  * @param indent - base indent
  * @group Typescript
  */
-export function genProperty(field: TypeField, indent = ""): string {
+export function genProperty(field: TypeField, indent = ''): string {
   const mods = [
-    field.static && "static",
-    field.readonly && "readonly",
-    field.public && "public",
-    field.private && "private",
-    field.protected && "protected",
-  ].filter(Boolean);
-  const modPart = mods.length > 0 ? mods.join(" ") + " " : "";
-  const key = genKey(field.name);
-  const opt = field.optional ? "?" : "";
-  let decl: string;
+    field.static && 'static',
+    field.readonly && 'readonly',
+    field.public && 'public',
+    field.private && 'private',
+    field.protected && 'protected',
+  ].filter(Boolean)
+  const modPart = mods.length > 0 ? `${mods.join(' ')} ` : ''
+  const key = genKey(field.name)
+  const opt = field.optional ? '?' : ''
+  let decl: string
   if (field.value === undefined) {
-    decl = field.type ? `${key}${opt}: ${field.type}` : key + opt;
-  } else {
+    decl = field.type ? `${key}${opt}: ${field.type}` : key + opt
+  }
+  else {
     decl = field.type
       ? `${key}${opt}: ${field.type} = ${field.value}`
-      : `${key}${opt} = ${field.value}`;
+      : `${key}${opt} = ${field.value}`
   }
-  const propLine = modPart + decl;
+  const propLine = modPart + decl
   if (field.jsdoc === undefined) {
-    return indent ? `${indent}${propLine}` : propLine;
+    return indent ? `${indent}${propLine}` : propLine
   }
-  const jsdocComment = genJSDocComment(field.jsdoc, indent);
+  const jsdocComment = genJSDocComment(field.jsdoc, indent)
   return indent
     ? `${jsdocComment}${indent}${propLine}`
-    : `${jsdocComment}${propLine}`;
+    : `${jsdocComment}${propLine}`
 }

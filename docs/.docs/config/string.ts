@@ -1,5 +1,5 @@
-import * as knitwork from 'knitwork-x'
 import type { Preset } from './types'
+import * as knitwork from 'knitwork-x'
 
 export const stringPresets: Preset[] = [
   {
@@ -20,7 +20,7 @@ genString('foo', {
     code: `escapeString("foo'bar")
 escapeString("foo\\nbar")`,
     output: () => [
-      knitwork.escapeString("foo'bar"),
+      knitwork.escapeString('foo\'bar'),
       knitwork.escapeString('foo\nbar'),
     ],
   },

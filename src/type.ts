@@ -1,24 +1,25 @@
-import { _genStatement } from "./_utils";
-import { ESMCodeGenOptions, ESMImport, genDynamicImport } from "./esm";
-import { genJSDocComment, genKey, wrapInDelimiters } from "./utils";
+import type { ESMCodeGenOptions, ESMImport } from './esm'
 import type {
   GenTypeAliasOptions,
   TypeGeneric,
   TypeObject,
   TypeObjectField,
   TypeObjectWithJSDoc,
-} from "./types";
+} from './types'
+import { _genStatement } from './_utils'
+import { genDynamicImport } from './esm'
+import { genJSDocComment, genKey, wrapInDelimiters } from './utils'
 
 /**
  * Type guard to check if a value is TypeObjectWithJSDoc
  */
 function isTypeObjectWithJSDoc(value: unknown): value is TypeObjectWithJSDoc {
   return (
-    typeof value === "object" &&
-    value !== null &&
-    "type" in value &&
-    "jsdoc" in value
-  );
+    typeof value === 'object'
+    && value !== null
+    && 'type' in value
+    && 'jsdoc' in value
+  )
 }
 
 /**
@@ -54,28 +55,30 @@ export function genTypeAlias(
   name: string,
   value: string | TypeObject,
   options: GenTypeAliasOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const typeValue =
-    typeof value === "string" ? value : genTypeObject(value, indent);
-  const { generics = [] } = options;
-  const genericPart =
-    generics.length > 0
-      ? "<" +
+  const typeValue
+    = typeof value === 'string' ? value : genTypeObject(value, indent)
+  const { generics = [] } = options
+  const genericPart
+    = generics.length > 0
+      ? `<${
         generics
           .map((g: TypeGeneric) => {
-            let s = g.name;
-            if (g.extends) s += ` extends ${g.extends}`;
-            if (g.default) s += ` = ${g.default}`;
-            return s;
+            let s = g.name
+            if (g.extends)
+              s += ` extends ${g.extends}`
+            if (g.default)
+              s += ` = ${g.default}`
+            return s
           })
-          .join(", ") +
-        ">"
-      : "";
-  const prefix = [options.export && "export", "type", name + genericPart]
+          .join(', ')
+      }>`
+      : ''
+  const prefix = [options.export && 'export', 'type', name + genericPart]
     .filter(Boolean)
-    .join(" ");
-  return `${prefix} = ${typeValue}`;
+    .join(' ')
+  return `${prefix} = ${typeValue}`
 }
 
 /**
@@ -98,7 +101,7 @@ export function genTypeExport(
   imports: ESMImport[],
   options: ESMCodeGenOptions = {},
 ) {
-  return _genStatement("export type", specifier, imports, options);
+  return _genStatement('export type', specifier, imports, options)
 }
 
 /**
@@ -118,10 +121,10 @@ export function genTypeExport(
  */
 export function genInlineTypeImport(
   specifier: string,
-  name = "default",
+  name = 'default',
   options: ESMCodeGenOptions = {},
 ) {
-  return genDynamicImport(specifier, { ...options, type: true, name });
+  return genDynamicImport(specifier, { ...options, type: true, name })
 }
 
 /**
@@ -150,47 +153,47 @@ export function genInlineTypeImport(
  */
 export function genTypeObject(
   object: TypeObject | TypeObjectField[],
-  indent = "",
+  indent = '',
 ): string {
-  const newIndent = indent + "  ";
+  const newIndent = `${indent}  `
 
   if (Array.isArray(object)) {
     const lines = object.map((item) => {
-      const optional = item.required ? "" : "?";
-      const type = item.type ?? "any";
-      const jsdocComment =
-        item.jsdoc === undefined
-          ? ""
-          : genJSDocComment(item.jsdoc, newIndent) + newIndent;
-      const prefix = jsdocComment || newIndent;
-      return `${prefix}${genKey(item.name)}${optional}: ${type}`;
-    });
-    return wrapInDelimiters(lines, indent, "{}", false);
+      const optional = item.required ? '' : '?'
+      const type = item.type ?? 'any'
+      const jsdocComment
+        = item.jsdoc === undefined
+          ? ''
+          : genJSDocComment(item.jsdoc, newIndent) + newIndent
+      const prefix = jsdocComment || newIndent
+      return `${prefix}${genKey(item.name)}${optional}: ${type}`
+    })
+    return wrapInDelimiters(lines, indent, '{}', false)
   }
 
   return wrapInDelimiters(
     Object.entries(object).map(([key, value]) => {
-      const [, k = key, optional = ""] =
-        key.match(/^(.*[^?])(\?)?$/) /* c8 ignore next */ || [];
+      const [, k = key, optional = '']
+        = key.match(/^(.*[^?])(\?)?$/) /* c8 ignore next */ || []
 
       if (isTypeObjectWithJSDoc(value)) {
-        const jsdocComment =
-          genJSDocComment(value.jsdoc, newIndent) + newIndent;
-        return `${jsdocComment}${genKey(k)}${optional}: ${value.type}`;
+        const jsdocComment
+          = genJSDocComment(value.jsdoc, newIndent) + newIndent
+        return `${jsdocComment}${genKey(k)}${optional}: ${value.type}`
       }
 
-      if (typeof value === "string") {
-        return `${newIndent}${genKey(k)}${optional}: ${value}`;
+      if (typeof value === 'string') {
+        return `${newIndent}${genKey(k)}${optional}: ${value}`
       }
       return `${newIndent}${genKey(k)}${optional}: ${genTypeObject(
         value,
         newIndent,
-      )}`;
+      )}`
     }),
     indent,
-    "{}",
+    '{}',
     false,
-  );
+  )
 }
 
 /**
@@ -213,14 +216,14 @@ export function genTypeObject(
  * @group Typescript
  */
 export function genUnion(types: string | string[]): string {
-  const typeArray = Array.isArray(types) ? types : [types];
+  const typeArray = Array.isArray(types) ? types : [types]
   if (typeArray.length === 0) {
-    return "never";
+    return 'never'
   }
   if (typeArray.length === 1) {
-    return typeArray[0]!;
+    return typeArray[0]!
   }
-  return typeArray.join(" | ");
+  return typeArray.join(' | ')
 }
 
 /**
@@ -243,14 +246,14 @@ export function genUnion(types: string | string[]): string {
  * @group Typescript
  */
 export function genIntersection(types: string | string[]): string {
-  const typeArray = Array.isArray(types) ? types : [types];
+  const typeArray = Array.isArray(types) ? types : [types]
   if (typeArray.length === 0) {
-    return "never";
+    return 'never'
   }
   if (typeArray.length === 1) {
-    return typeArray[0]!;
+    return typeArray[0]!
   }
-  return typeArray.join(" & ");
+  return typeArray.join(' & ')
 }
 
 /**
@@ -276,7 +279,7 @@ export function genMappedType(
   keyType: string,
   valueType: string,
 ): string {
-  return `{ [${keyName} in ${keyType}]: ${valueType} }`;
+  return `{ [${keyName} in ${keyType}]: ${valueType} }`
 }
 
 /**
@@ -303,14 +306,14 @@ export function genMappedType(
  */
 export function genTemplateLiteralType(parts: string[]): string {
   if (parts.length === 0) {
-    return "``";
+    return '``'
   }
-  let result = "`";
+  let result = '`'
   for (const [i, part] of parts.entries()) {
-    result += i % 2 === 0 ? part : `\${${part}}`;
+    result += i % 2 === 0 ? part : `\${${part}}`
   }
-  result += "`";
-  return result;
+  result += '`'
+  return result
 }
 
 /**
@@ -330,7 +333,7 @@ export function genTemplateLiteralType(parts: string[]): string {
  * @group Typescript
  */
 export function genKeyOf(type: string): string {
-  return `keyof ${type}`;
+  return `keyof ${type}`
 }
 
 /**
@@ -350,7 +353,7 @@ export function genKeyOf(type: string): string {
  * @group Typescript
  */
 export function genTypeof(expr: string): string {
-  return `typeof ${expr}`;
+  return `typeof ${expr}`
 }
 
 /**
@@ -371,7 +374,7 @@ export function genTypeof(expr: string): string {
  * @group Typescript
  */
 export function genTypeAssertion(expr: string, type: string): string {
-  return `${expr} as ${type}`;
+  return `${expr} as ${type}`
 }
 
 /**
@@ -392,5 +395,5 @@ export function genTypeAssertion(expr: string, type: string): string {
  * @group Typescript
  */
 export function genSatisfies(expr: string, type: string): string {
-  return `${expr} satisfies ${type}`;
+  return `${expr} satisfies ${type}`
 }

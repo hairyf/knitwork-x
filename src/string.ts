@@ -1,4 +1,4 @@
-import type { CodegenOptions } from "./types";
+import type { CodegenOptions } from './types'
 
 /**
  * Generate a string with double or single quotes and handle escapes.
@@ -19,17 +19,17 @@ import type { CodegenOptions } from "./types";
  * @group string
  */
 export function genString(input: string, options: CodegenOptions = {}) {
-  const str = JSON.stringify(input);
+  const str = JSON.stringify(input)
   if (!options.singleQuotes) {
-    return str;
+    return str
   }
-  return `'${escapeString(str).slice(1, -1)}'`;
+  return `'${escapeString(str).slice(1, -1)}'`
 }
 
 // https://github.com/rollup/rollup/blob/master/src/utils/escapeId.ts
-const NEEDS_ESCAPE_RE = /[\n\r'\\\u2028\u2029]/;
-const QUOTE_NEWLINE_RE = /([\n\r'\u2028\u2029])/g;
-const BACKSLASH_RE = /\\/g;
+const NEEDS_ESCAPE_RE = /[\n\r'\\\u2028\u2029]/
+const QUOTE_NEWLINE_RE = /([\n\r'\u2028\u2029])/g
+const BACKSLASH_RE = /\\/g
 
 /**
  * Escape a string for use in a javascript string.
@@ -48,9 +48,9 @@ const BACKSLASH_RE = /\\/g;
  */
 export function escapeString(id: string): string {
   if (!NEEDS_ESCAPE_RE.test(id)) {
-    return id;
+    return id
   }
-  return id.replace(BACKSLASH_RE, "\\\\").replace(QUOTE_NEWLINE_RE, "\\$1");
+  return id.replace(BACKSLASH_RE, '\\\\').replace(QUOTE_NEWLINE_RE, '\\$1')
 }
 
 /**
@@ -77,21 +77,21 @@ export function escapeString(id: string): string {
  */
 export function genTemplateLiteral(parts: string[]): string {
   if (parts.length === 0) {
-    return "``";
+    return '``'
   }
   // Escape backticks and ${ in string parts
   const escapeTemplateString = (str: string): string => {
     return str
-      .replace(/\\/g, "\\\\")
-      .replace(/`/g, "\\`")
-      .replace(/\$\{/g, "\\${");
-  };
-  let result = "`";
-  for (const [i, part] of parts.entries()) {
-    result += i % 2 === 0 ? escapeTemplateString(part) : `\${${part}}`;
+      .replace(/\\/g, '\\\\')
+      .replace(/`/g, '\\`')
+      .replace(/\$\{/g, '\\${')
   }
-  result += "`";
-  return result;
+  let result = '`'
+  for (const [i, part] of parts.entries()) {
+    result += i % 2 === 0 ? escapeTemplateString(part) : `\${${part}}`
+  }
+  result += '`'
+  return result
 }
 
 // -- internal --

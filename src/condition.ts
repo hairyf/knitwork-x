@@ -1,9 +1,9 @@
-import { genBlock } from "./function";
 import type {
-  GenIfOptions,
   GenElseOptions,
+  GenIfOptions,
   GenPrefixedBlockOptions,
-} from "./types";
+} from './types'
+import { genBlock } from './function'
 
 /**
  * Low-level helper: generate `prefix { statements }` or `prefix statement`.
@@ -27,16 +27,16 @@ export function genPrefixedBlock(
   prefix: string,
   statements: string | string[],
   options: GenPrefixedBlockOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const { bracket = true } = options;
-  const lines = Array.isArray(statements) ? statements : [statements];
+  const { bracket = true } = options
+  const lines = Array.isArray(statements) ? statements : [statements]
   if (!bracket) {
-    const stmt = lines.length === 1 ? lines[0] : lines.join("\n");
-    return `${indent}${prefix} ${stmt}`;
+    const stmt = lines.length === 1 ? lines[0] : lines.join('\n')
+    return `${indent}${prefix} ${stmt}`
   }
-  const body = genBlock(lines, indent);
-  return `${indent}${prefix} ${body}`;
+  const body = genBlock(lines, indent)
+  return `${indent}${prefix} ${body}`
 }
 
 /**
@@ -59,7 +59,7 @@ export function genTernary(
   whenTrue: string,
   whenFalse: string,
 ): string {
-  return `${cond} ? ${whenTrue} : ${whenFalse}`;
+  return `${cond} ? ${whenTrue} : ${whenFalse}`
 }
 
 /**
@@ -84,9 +84,9 @@ export function genIf(
   cond: string,
   statements: string | string[],
   options: GenIfOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  return genPrefixedBlock(`if (${cond})`, statements, options, indent);
+  return genPrefixedBlock(`if (${cond})`, statements, options, indent)
 }
 
 /**
@@ -108,9 +108,9 @@ export function genElseIf(
   cond: string,
   statements: string | string[],
   options: GenIfOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  return genPrefixedBlock(`else if (${cond})`, statements, options, indent);
+  return genPrefixedBlock(`else if (${cond})`, statements, options, indent)
 }
 
 /**
@@ -134,7 +134,7 @@ export function genElseIf(
 export function genElse(
   statements: string | string[],
   options: GenElseOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  return genPrefixedBlock("else", statements, options, indent);
+  return genPrefixedBlock('else', statements, options, indent)
 }

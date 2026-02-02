@@ -22,7 +22,7 @@
  * @param indent - base indent
  * @group Typescript
  */
-export function genDecorator(name: string, args?: string, indent = ""): string {
-  const decorator = args === undefined ? `@${name}` : `@${name}${args}`;
-  return `${indent}${decorator}`;
+export function genDecorator(name: string, args?: string, indent = ''): string {
+  const decorator = args === undefined ? `@${name}` : `@${name}${args}`
+  return `${indent}${decorator}`
 }

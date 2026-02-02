@@ -1,15 +1,10 @@
-import { genBlock, genParam } from "./function";
-import type { CodegenOptions, Field } from "./types";
-import { genJSDocComment, genKey, wrapInDelimiters } from "./utils";
-import type {
-  TypeGeneric,
-  GenGetterOptions,
-  GenSetterOptions,
-  GenMethodOptions,
-} from "./types";
+import type { CodegenOptions, Field, GenGetterOptions, GenMethodOptions, GenSetterOptions, TypeGeneric } from './types'
+
+import { genBlock, genParam } from './function'
+import { genJSDocComment, genKey, wrapInDelimiters } from './utils'
 
 export interface GenObjectOptions extends CodegenOptions {
-  preserveTypes?: boolean;
+  preserveTypes?: boolean
 }
 
 /**
@@ -34,21 +29,21 @@ export interface GenObjectOptions extends CodegenOptions {
  */
 export function genObject(
   object: Record<string, any> | Field[],
-  indent = "",
+  indent = '',
   options: GenObjectOptions = {},
 ): string {
-  const newIdent = indent + "  ";
+  const newIdent = `${indent}  `
 
   if (Array.isArray(object)) {
     const lines = object.map((item) => {
-      const jsdocComment =
-        item.jsdoc === undefined
-          ? ""
-          : genJSDocComment(item.jsdoc, newIdent) + newIdent;
-      const prefix = jsdocComment || newIdent;
-      return `${prefix}${genKey(item.name)}: ${item.value}`;
-    });
-    return wrapInDelimiters(lines, indent, "{}");
+      const jsdocComment
+        = item.jsdoc === undefined
+          ? ''
+          : genJSDocComment(item.jsdoc, newIdent) + newIdent
+      const prefix = jsdocComment || newIdent
+      return `${prefix}${genKey(item.name)}: ${item.value}`
+    })
+    return wrapInDelimiters(lines, indent, '{}')
   }
 
   return wrapInDelimiters(
@@ -57,8 +52,8 @@ export function genObject(
         `${newIdent}${genKey(key)}: ${genRawValue(value, newIdent, options)}`,
     ),
     indent,
-    "{}",
-  );
+    '{}',
+  )
 }
 
 /**
@@ -77,15 +72,15 @@ export function genObject(
  */
 export function genArray(
   array: any[],
-  indent = "",
+  indent = '',
   options: GenObjectOptions = {},
 ) {
-  const newIdent = indent + "  ";
+  const newIdent = `${indent}  `
   return wrapInDelimiters(
-    array.map((index) => `${newIdent}${genRawValue(index, newIdent, options)}`),
+    array.map(index => `${newIdent}${genRawValue(index, newIdent, options)}`),
     indent,
-    "[]",
-  );
+    '[]',
+  )
 }
 
 /**
@@ -104,31 +99,31 @@ export function genArray(
  */
 export function genMap(
   entries: [key: any, value: any][],
-  indent = "",
+  indent = '',
   options: GenObjectOptions = {},
 ): string {
-  const opts = { preserveTypes: true, ...options };
+  const opts = { preserveTypes: true, ...options }
   if (entries.length === 0) {
-    return "new Map([])";
+    return 'new Map([])'
   }
   // For simple cases, use single-line format
   const entriesString = entries.map(
     ([key, value]) =>
-      `[${genRawValue(key, "", opts)}, ${genRawValue(value, "", opts)}]`,
-  );
+      `[${genRawValue(key, '', opts)}, ${genRawValue(value, '', opts)}]`,
+  )
   // Check if all entries are simple (single line each)
-  const allSimple = entriesString.every((s) => !s.includes("\n"));
+  const allSimple = entriesString.every(s => !s.includes('\n'))
   if (allSimple) {
-    return `new Map([${entriesString.join(", ")}])`;
+    return `new Map([${entriesString.join(', ')}])`
   }
   // Multi-line format for complex entries
-  const newIndent = indent + "  ";
+  const newIndent = `${indent}  `
   const multiLineEntries = entries.map(
     ([key, value]) =>
       `[${genRawValue(key, newIndent, opts)}, ${genRawValue(value, newIndent, opts)}]`,
-  );
-  const entriesArray = wrapInDelimiters(multiLineEntries, indent, "[]");
-  return `new Map(${entriesArray})`;
+  )
+  const entriesArray = wrapInDelimiters(multiLineEntries, indent, '[]')
+  return `new Map(${entriesArray})`
 }
 
 /**
@@ -147,27 +142,27 @@ export function genMap(
  */
 export function genSet(
   values: any[],
-  indent = "",
+  indent = '',
   options: GenObjectOptions = {},
 ): string {
-  const opts = { preserveTypes: true, ...options };
+  const opts = { preserveTypes: true, ...options }
   if (values.length === 0) {
-    return "new Set([])";
+    return 'new Set([])'
   }
   // For simple cases, use single-line format
-  const valuesString = values.map((value) => genRawValue(value, "", opts));
+  const valuesString = values.map(value => genRawValue(value, '', opts))
   // Check if all values are simple (single line each)
-  const allSimple = valuesString.every((s) => !s.includes("\n"));
+  const allSimple = valuesString.every(s => !s.includes('\n'))
   if (allSimple) {
-    return `new Set([${valuesString.join(", ")}])`;
+    return `new Set([${valuesString.join(', ')}])`
   }
   // Multi-line format for complex values
-  const newIndent = indent + "  ";
-  const multiLineValues = values.map((value) =>
+  const newIndent = `${indent}  `
+  const multiLineValues = values.map(value =>
     genRawValue(value, newIndent, opts),
-  );
-  const valuesArray = wrapInDelimiters(multiLineValues, indent, "[]");
-  return `new Set(${valuesArray})`;
+  )
+  const valuesArray = wrapInDelimiters(multiLineValues, indent, '[]')
+  return `new Set(${valuesArray})`
 }
 
 /**
@@ -194,58 +189,62 @@ export function genSet(
  * @param indent - base indent
  * @group Typescript
  */
-export function genMethod(options: GenMethodOptions, indent = ""): string {
+export function genMethod(options: GenMethodOptions, indent = ''): string {
   const {
     name,
     parameters = [],
     body = [],
-    kind = "method",
+    kind = 'method',
     static: isStatic,
     async: isAsync,
     generator: isGenerator,
     returnType,
     generics = [],
     jsdoc,
-  } = options;
+  } = options
 
-  const jsdocComment = jsdoc === undefined ? "" : genJSDocComment(jsdoc);
+  const jsdocComment = jsdoc === undefined ? '' : genJSDocComment(jsdoc)
 
-  const genericPart =
-    generics.length > 0
-      ? "<" +
+  const genericPart
+    = generics.length > 0
+      ? `<${
         generics
           .map((g: TypeGeneric) => {
-            let s = g.name;
-            if (g.extends) s += ` extends ${g.extends}`;
-            if (g.default) s += ` = ${g.default}`;
-            return s;
+            let s = g.name
+            if (g.extends)
+              s += ` extends ${g.extends}`
+            if (g.default)
+              s += ` = ${g.default}`
+            return s
           })
-          .join(", ") +
-        ">"
-      : "";
+          .join(', ')
+      }>`
+      : ''
 
-  const paramsPart = "(" + parameters.map((p) => genParam(p)).join(", ") + ")";
-  const returnPart = returnType ? `: ${returnType}` : "";
-  const bodyContent = genBlock(body.length > 0 ? body : undefined, indent);
+  const paramsPart = `(${parameters.map(p => genParam(p)).join(', ')})`
+  const returnPart = returnType ? `: ${returnType}` : ''
+  const bodyContent = genBlock(body.length > 0 ? body : undefined, indent)
 
-  let prefix: string;
-  if (kind === "get") {
-    prefix = [isStatic && "static", "get", name + "()" + returnPart]
+  let prefix: string
+  if (kind === 'get') {
+    prefix = [isStatic && 'static', 'get', `${name}()${returnPart}`]
       .filter(Boolean)
-      .join(" ");
-  } else if (kind === "set") {
-    prefix = [isStatic && "static", "set", name + paramsPart]
+      .join(' ')
+  }
+  else if (kind === 'set') {
+    prefix = [isStatic && 'static', 'set', name + paramsPart]
       .filter(Boolean)
-      .join(" ");
-  } else {
-    const namePart =
-      name + genericPart + (isGenerator ? "*" : "") + paramsPart + returnPart;
-    prefix = [isStatic && "static", isAsync && "async", namePart]
+      .join(' ')
+  }
+  else {
+    const namePart
+      = name + genericPart + (isGenerator ? '*' : '') + paramsPart + returnPart
+    prefix = [isStatic && 'static', isAsync && 'async', namePart]
       .filter(Boolean)
-      .join(" ");
+      .join(' ')
   }
 
-  return `${jsdocComment}${indent}${prefix} ${bodyContent}`;
+  return `${jsdocComment}${indent}${prefix} ${bodyContent}`
 }
 
 /**
@@ -271,13 +270,13 @@ export function genGetter(
   name: string,
   body: string[] = [],
   options: GenGetterOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const returnPart = options.returnType ? `: ${options.returnType}` : "";
-  const jsdocComment =
-    options.jsdoc === undefined ? "" : genJSDocComment(options.jsdoc);
-  const block = genBlock(body.length > 0 ? body : undefined, indent);
-  return `${jsdocComment}${indent}get ${name}()${returnPart} ${block}`;
+  const returnPart = options.returnType ? `: ${options.returnType}` : ''
+  const jsdocComment
+    = options.jsdoc === undefined ? '' : genJSDocComment(options.jsdoc)
+  const block = genBlock(body.length > 0 ? body : undefined, indent)
+  return `${jsdocComment}${indent}get ${name}()${returnPart} ${block}`
 }
 
 /**
@@ -305,38 +304,38 @@ export function genSetter(
   paramName: string,
   body: string[] = [],
   options: GenSetterOptions = {},
-  indent = "",
+  indent = '',
 ): string {
   const paramPart = options.paramType
     ? `${paramName}: ${options.paramType}`
-    : paramName;
-  const jsdocComment =
-    options.jsdoc === undefined ? "" : genJSDocComment(options.jsdoc);
-  const block = genBlock(body.length > 0 ? body : undefined, indent);
-  return `${jsdocComment}${indent}set ${name}(${paramPart}) ${block}`;
+    : paramName
+  const jsdocComment
+    = options.jsdoc === undefined ? '' : genJSDocComment(options.jsdoc)
+  const block = genBlock(body.length > 0 ? body : undefined, indent)
+  return `${jsdocComment}${indent}set ${name}(${paramPart}) ${block}`
 }
 
 // --- Internals ---
 
 function genRawValue(
   value: unknown,
-  indent = "",
+  indent = '',
   options: GenObjectOptions = {},
 ): string {
   if (value === undefined) {
-    return "undefined";
+    return 'undefined'
   }
   if (value === null) {
-    return "null";
+    return 'null'
   }
   if (Array.isArray(value)) {
-    return genArray(value, indent, options);
+    return genArray(value, indent, options)
   }
-  if (value && typeof value === "object") {
-    return genObject(value, indent, options);
+  if (value && typeof value === 'object') {
+    return genObject(value, indent, options)
   }
-  if (options.preserveTypes && typeof value !== "function") {
-    return JSON.stringify(value);
+  if (options.preserveTypes && typeof value !== 'function') {
+    return JSON.stringify(value)
   }
-  return value.toString();
+  return value.toString()
 }

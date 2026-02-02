@@ -1,33 +1,33 @@
-import { CodegenOptions } from "./types";
-import { genString } from "./string";
-import { _genStatement, VALID_IDENTIFIER_RE } from "./_utils";
+import type { CodegenOptions } from './types'
+import { _genStatement, VALID_IDENTIFIER_RE } from './_utils'
+import { genString } from './string'
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
-export type ESMImport = string | { name: string; as?: string };
+export type ESMImport = string | { name: string, as?: string }
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export
 // https://tc39.es/ecma262/multipage/ecmascript-language-scripts-and-modules.html#sec-exports
-export type ESMExport = string | { name: string; as?: string };
+export type ESMExport = string | { name: string, as?: string }
 
 export interface ESMCodeGenOptions extends CodegenOptions {
   /** Emit `import type` instead of `import` (TypeScript). */
-  type?: boolean;
+  type?: boolean
   // https://github.com/tc39/proposal-import-attributes
   // https://nodejs.org/api/esm.html#import-attributes
-  attributes?: { type: string };
+  attributes?: { type: string }
   /** @deprecated use attributes */
-  assert?: { type: string };
+  assert?: { type: string }
 }
 
 export interface DynamicImportOptions extends ESMCodeGenOptions {
   /** Emit `typeof import()` (TypeScript type-only). */
-  type?: boolean;
+  type?: boolean
   /** Property name for type import, e.g. `typeof import("pkg").name`. */
-  name?: string;
-  comment?: string;
+  name?: string
+  comment?: string
   /** Wrap with `() => `. Default: false. */
-  wrapper?: boolean;
-  interopDefault?: boolean;
+  wrapper?: boolean
+  interopDefault?: boolean
 }
 
 /**
@@ -65,8 +65,8 @@ export function genImport(
   imports?: ESMImport | ESMImport[],
   options: ESMCodeGenOptions = {},
 ) {
-  const statementType = options.type ? "import type" : "import";
-  return _genStatement(statementType, specifier, imports, options);
+  const statementType = options.type ? 'import type' : 'import'
+  return _genStatement(statementType, specifier, imports, options)
 }
 
 /**
@@ -95,7 +95,7 @@ export function genExport(
   exports?: ESMExport | ESMExport[],
   options: ESMCodeGenOptions = {},
 ) {
-  return _genStatement("export", specifier, exports, options);
+  return _genStatement('export', specifier, exports, options)
 }
 
 /**
@@ -126,28 +126,28 @@ export function genDynamicImport(
   specifier: string,
   options: DynamicImportOptions = {},
 ) {
-  const commentString = options.comment ? ` /* ${options.comment} */` : "";
-  const optionsString = _genDynamicImportAttributes(options);
+  const commentString = options.comment ? ` /* ${options.comment} */` : ''
+  const optionsString = _genDynamicImportAttributes(options)
   const importExpr = `import(${genString(
     specifier,
     options,
-  )}${commentString}${optionsString})`;
+  )}${commentString}${optionsString})`
 
   if (options.type) {
-    let nameString = "";
+    let nameString = ''
     if (options.name) {
       nameString = VALID_IDENTIFIER_RE.test(options.name)
         ? `.${options.name}`
-        : `[${genString(options.name)}]`;
+        : `[${genString(options.name)}]`
     }
-    return `typeof ${importExpr}${nameString}`;
+    return `typeof ${importExpr}${nameString}`
   }
 
-  const wrapperString = options.wrapper === true ? "() => " : "";
+  const wrapperString = options.wrapper === true ? '() => ' : ''
   const interopString = options.interopDefault
-    ? ".then(m => m.default || m)"
-    : "";
-  return `${wrapperString}${importExpr}${interopString}`;
+    ? '.then(m => m.default || m)'
+    : ''
+  return `${wrapperString}${importExpr}${interopString}`
 }
 
 /**
@@ -166,18 +166,18 @@ export function genDynamicImport(
  * @group ESM
  */
 export function genDefaultExport(value: string, _options: CodegenOptions = {}) {
-  return `export default ${value};`;
+  return `export default ${value};`
 }
 
 function _genDynamicImportAttributes(options: DynamicImportOptions = {}) {
   // TODO: Remove deprecated `assert` in the next major release
-  if (typeof options.assert?.type === "string") {
-    return `, { assert: { type: ${genString(options.assert.type)} } }`;
+  if (typeof options.assert?.type === 'string') {
+    return `, { assert: { type: ${genString(options.assert.type)} } }`
   }
 
-  if (typeof options.attributes?.type === "string") {
-    return `, { with: { type: ${genString(options.attributes.type)} } }`;
+  if (typeof options.attributes?.type === 'string') {
+    return `, { with: { type: ${genString(options.attributes.type)} } }`
   }
 
-  return "";
+  return ''
 }

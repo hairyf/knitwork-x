@@ -1,11 +1,11 @@
 # yaml-language-server: $schema=https://unpkg.com/undocs/schema/config.json
 
-name: "knitwork-x"
-shortDescription: "Utilities to generate JavaScript code."
-themeColor: "blue"
-description: "Utilities to generate JavaScript code. with comprehensive TypeScript generation tools."
-github: "hairyf/knitwork-x"
-url: "https://knitwork-x.vercel.app"
+name: knitwork-x
+shortDescription: Utilities to generate JavaScript code.
+themeColor: blue
+description: Utilities to generate JavaScript code. with comprehensive TypeScript generation tools.
+github: hairyf/knitwork-x
+url: 'https://knitwork-x.vercel.app'
 landing:
-  heroCode: "pnpm add knitwork-x"
+  heroCode: pnpm add knitwork-x
 automd: true

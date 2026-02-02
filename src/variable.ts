@@ -1,59 +1,59 @@
-import type { GenVariableOptions } from "./types";
+import type { GenVariableOptions } from './types'
 
 // Credit: https://mathiasbynens.be/notes/reserved-keywords
 const reservedNames = new Set([
-  "Infinity",
-  "NaN",
-  "arguments",
-  "await",
-  "break",
-  "case",
-  "catch",
-  "class",
-  "const",
-  "continue",
-  "debugger",
-  "default",
-  "delete",
-  "do",
-  "else",
-  "enum",
-  "eval",
-  "export",
-  "extends",
-  "false",
-  "finally",
-  "for",
-  "function",
-  "if",
-  "implements",
-  "import",
-  "in",
-  "instanceof",
-  "interface",
-  "let",
-  "new",
-  "null",
-  "package",
-  "private",
-  "protected",
-  "public",
-  "return",
-  "static",
-  "super",
-  "switch",
-  "this",
-  "throw",
-  "true",
-  "try",
-  "typeof",
-  "undefined",
-  "var",
-  "void",
-  "while",
-  "with",
-  "yield",
-]);
+  'Infinity',
+  'NaN',
+  'arguments',
+  'await',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'debugger',
+  'default',
+  'delete',
+  'do',
+  'else',
+  'enum',
+  'eval',
+  'export',
+  'extends',
+  'false',
+  'finally',
+  'for',
+  'function',
+  'if',
+  'implements',
+  'import',
+  'in',
+  'instanceof',
+  'interface',
+  'let',
+  'new',
+  'null',
+  'package',
+  'private',
+  'protected',
+  'public',
+  'return',
+  'static',
+  'super',
+  'switch',
+  'this',
+  'throw',
+  'true',
+  'try',
+  'typeof',
+  'undefined',
+  'var',
+  'void',
+  'while',
+  'with',
+  'yield',
+])
 
 /**
  * Generate a safe javascript variable name.
@@ -75,13 +75,12 @@ const reservedNames = new Set([
  */
 export function genVariableName(name: string) {
   if (reservedNames.has(name)) {
-    return `_${name}`;
+    return `_${name}`
   }
-  /* eslint-disable unicorn/prefer-code-point */
+
   return name
-    .replace(/^\d/, (r) => `_${r}`)
-    .replace(/\W/g, (r) => "_" + r.charCodeAt(0));
-  /* eslint-enable unicorn/prefer-code-point */
+    .replace(/^\d/, r => `_${r}`)
+    .replace(/\W/g, r => `_${r.charCodeAt(0)}`)
 }
 
 /**
@@ -113,9 +112,9 @@ export function genVariable(
   value: string,
   options: GenVariableOptions = {},
 ): string {
-  const kind = options.kind ?? "const";
-  const prefix = [options.export && "export", kind, name]
+  const kind = options.kind ?? 'const'
+  const prefix = [options.export && 'export', kind, name]
     .filter(Boolean)
-    .join(" ");
-  return `${prefix} = ${value}`;
+    .join(' ')
+  return `${prefix} = ${value}`
 }

@@ -1,11 +1,14 @@
-import unjs from "eslint-config-unjs";
+// @ts-check
+import antfu from '@antfu/eslint-config'
 
-// https://github.com/unjs/eslint-config
-export default unjs({
-  ignores: [
-    "docs/.docs"
-  ],
-  rules: {
-    "unicorn/prefer-string-raw": "off",
+export default antfu(
+  {
+    type: 'lib',
+    pnpm: true,
+    ignores: ['README.md', 'docs/**/*.md'],
+    rules: {
+      'no-template-curly-in-string': 'off',
+      'ts/explicit-function-return-type': 'off',
+    },
   },
-});
+)

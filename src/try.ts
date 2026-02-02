@@ -1,9 +1,9 @@
-import { genPrefixedBlock } from "./condition";
 import type {
-  GenTryOptions,
   GenCatchOptions,
   GenFinallyOptions,
-} from "./types";
+  GenTryOptions,
+} from './types'
+import { genPrefixedBlock } from './condition'
 
 /**
  * Generate `try { statements }` or `try statement`.
@@ -26,9 +26,9 @@ import type {
 export function genTry(
   statements: string | string[],
   options: GenTryOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  return genPrefixedBlock("try", statements, options, indent);
+  return genPrefixedBlock('try', statements, options, indent)
 }
 
 /**
@@ -52,13 +52,13 @@ export function genTry(
 export function genCatch(
   statements: string | string[],
   options: GenCatchOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  const prefix =
-    typeof options.binding === "string"
+  const prefix
+    = typeof options.binding === 'string'
       ? `catch (${options.binding})`
-      : "catch";
-  return genPrefixedBlock(prefix, statements, options, indent);
+      : 'catch'
+  return genPrefixedBlock(prefix, statements, options, indent)
 }
 
 /**
@@ -82,7 +82,7 @@ export function genCatch(
 export function genFinally(
   statements: string | string[],
   options: GenFinallyOptions = {},
-  indent = "",
+  indent = '',
 ): string {
-  return genPrefixedBlock("finally", statements, options, indent);
+  return genPrefixedBlock('finally', statements, options, indent)
 }

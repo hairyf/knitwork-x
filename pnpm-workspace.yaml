@@ -1,3 +1,33 @@
+catalogMode: prefer
+ignoreWorkspaceRootCheck: true
+shellEmulator: true
+trustPolicy: no-downgrade
+
 packages:
   - .
   - docs
+
+catalogs:
+  cli:
+    '@antfu/eslint-config': ^6.6.1
+    '@antfu/ni': ^28.0.0
+    bumpp: ^10.3.2
+    eslint: ^9.39.2
+    lint-staged: ^16.2.7
+    publint: ^0.3.16
+    simple-git-hooks: ^2.13.1
+    tsdown: ^0.17.3
+    tsx: ^4.21.0
+    typescript: ^5.9.3
+  docs:
+    '@vueuse/core': ^14.2.0
+    nuxt: 3.14.0
+    shiki: ^3.22.0
+    undocs: latest
+    vue: ^3.5.0
+
+  testing:
+    vitest: ^4.0.15
+    vitest-package-exports: ^0.1.1
+onlyBuiltDependencies:
+  - simple-git-hooks

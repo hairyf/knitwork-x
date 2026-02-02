@@ -1,10 +1,10 @@
-import * as knitwork from "knitwork-x";
-import type { Preset } from "./types";
+import type { Preset } from './types'
+import * as knitwork from 'knitwork-x'
 
 export const classPresets: Preset[] = [
   {
-    module: "class",
-    label: "genClass",
+    module: 'class',
+    label: 'genClass',
     code: `genClass('Foo', [genConstructor([], [])])
 genClass('Bar', [
   genConstructor(
@@ -13,22 +13,22 @@ genClass('Bar', [
   )
 ], { extends: 'Base' })`,
     output: () => [
-      knitwork.genClass("Foo", [knitwork.genConstructor([], [])]),
+      knitwork.genClass('Foo', [knitwork.genConstructor([], [])]),
       knitwork.genClass(
-        "Bar",
+        'Bar',
         [
           knitwork.genConstructor(
-            [{ name: "x", type: "number" }],
-            ["super();", "this.x = x;"],
+            [{ name: 'x', type: 'number' }],
+            ['super();', 'this.x = x;'],
           ),
         ],
-        { extends: "Base" },
+        { extends: 'Base' },
       ),
     ],
   },
   {
-    module: "class",
-    label: "genConstructor",
+    module: 'class',
+    label: 'genConstructor',
     code: `genConstructor()
 genConstructor(
   [{ name: 'x', type: 'string' }],
@@ -37,14 +37,14 @@ genConstructor(
     output: () => [
       knitwork.genConstructor(),
       knitwork.genConstructor(
-        [{ name: "x", type: "string" }],
-        ["super();", "this.x = x;"],
+        [{ name: 'x', type: 'string' }],
+        ['super();', 'this.x = x;'],
       ),
     ],
   },
   {
-    module: "class",
-    label: "genProperty",
+    module: 'class',
+    label: 'genProperty',
     code: `genProperty({ name: 'x', type: 'number' })
 genProperty({
   name: 'name',
@@ -52,8 +52,8 @@ genProperty({
   optional: true
 })`,
     output: () => [
-      knitwork.genProperty({ name: "x", type: "number" }),
-      knitwork.genProperty({ name: "name", type: "string", optional: true }),
+      knitwork.genProperty({ name: 'x', type: 'number' }),
+      knitwork.genProperty({ name: 'name', type: 'string', optional: true }),
     ],
   },
-];
+]

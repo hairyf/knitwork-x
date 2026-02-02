@@ -1,5 +1,5 @@
-import * as knitwork from 'knitwork-x'
 import type { Preset } from './types'
+import * as knitwork from 'knitwork-x'
 
 export const statementPresets: Preset[] = [
   {
@@ -18,7 +18,7 @@ genReturn()`,
     code: `genThrow("new Error('failed')")
 genThrow('e')`,
     output: () => [
-      knitwork.genThrow("new Error('failed')"),
+      knitwork.genThrow('new Error(\'failed\')'),
       knitwork.genThrow('e'),
     ],
   },

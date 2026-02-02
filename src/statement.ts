@@ -13,8 +13,8 @@
  *
  * @group Typescript
  */
-export function genThrow(expr: string, indent = ""): string {
-  return `${indent}throw ${expr};`;
+export function genThrow(expr: string, indent = ''): string {
+  return `${indent}throw ${expr};`
 }
 
 /**
@@ -35,6 +35,6 @@ export function genThrow(expr: string, indent = ""): string {
  *
  * @group Typescript
  */
-export function genReturn(expr?: string, indent = ""): string {
-  return expr === undefined ? `${indent}return;` : `${indent}return ${expr};`;
+export function genReturn(expr?: string, indent = ''): string {
+  return expr === undefined ? `${indent}return;` : `${indent}return ${expr};`
 }
