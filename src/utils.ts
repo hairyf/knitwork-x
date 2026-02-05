@@ -225,11 +225,35 @@ export function genRegExp(pattern: string, flags?: string): string {
  *
  * genKey("with space");
  * // ~> `"with space"`
+ *
+ * genKey(Symbol.for("key"));
+ * // ~> `[Symbol.for("key")]`
+ *
+ * const sym = Symbol("unique");
+ * genKey(sym);
+ * // ~> `[sym]`
  * ```
  *
  * @group utils
  */
-export function genKey(key: string) {
+export function genKey(key: string | symbol) {
+  if (typeof key === 'symbol') {
+    // 检查是否是 Symbol.for 创建的符号
+    const keyFor = Symbol.keyFor(key)
+    if (keyFor !== undefined) {
+      return `[Symbol.for(${genString(keyFor)})]`
+    }
+    // 对于其他符号，使用描述或默认名称
+    const description = key.description
+    if (description) {
+      return `[Symbol(${genString(description)})]`
+    }
+    return '[symbol]'
+  }
+  // 检查是否是计算属性名（以 [ 开头，以 ] 结尾）
+  if (key.startsWith('[') && key.endsWith(']')) {
+    return key
+  }
   return VALID_IDENTIFIER_RE.test(key) ? key : genString(key)
 }
 

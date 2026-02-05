@@ -7,8 +7,8 @@ export interface TypeGeneric {
 }
 
 export interface TypeField {
-  /** parameter name */
-  name: string
+  /** parameter name (string or symbol) */
+  name: string | symbol
   /** parameter type */
   type?: string
   /** optional parameter */
@@ -64,13 +64,13 @@ export interface TypeObjectWithJSDoc {
 }
 
 export interface TypeObject {
-  [key: string]: string | TypeObject | TypeObjectWithJSDoc
+  [key: string | symbol]: string | TypeObject | TypeObjectWithJSDoc
 }
 
 /** Field descriptor for genTypeObject when called with an array. */
 export interface TypeObjectField {
-  /** property name */
-  name: string
+  /** property name (string or symbol) */
+  name: string | symbol
   /** property type (default: "any") */
   type?: string
   /** if false or omitted, property is optional (key?) */

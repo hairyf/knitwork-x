@@ -137,6 +137,66 @@ const genTypeObjectTests: Array<{
   prop: boolean
 }`,
   },
+  {
+    input: [
+      {
+        name: 'string',
+        [Symbol.for('key')]: 'number',
+      },
+    ],
+    code: `{
+  name: string
+  [Symbol.for("key")]: number
+}`,
+  },
+  {
+    input: [
+      [
+        { name: 'name', type: 'string' },
+        { name: Symbol.for('symbolKey'), type: 'number', required: true },
+      ],
+    ],
+    code: `{
+  name?: string
+  [Symbol.for("symbolKey")]: number
+}`,
+  },
+  {
+    input: [
+      {
+        [Symbol('unique')]: 'string',
+      },
+    ],
+    code: `{
+  [Symbol("unique")]: string
+}`,
+  },
+  {
+    input: [
+      {
+        '/api': {
+          method: 'string',
+          path: 'string',
+        },
+      },
+    ],
+    code: `{
+  "/api": {
+    method: string
+    path: string
+  }
+}`,
+  },
+  {
+    input: [
+      [
+        { name: '[Endpoint]', type: '{}', required: true },
+      ],
+    ],
+    code: `{
+  [Endpoint]: {}
+}`,
+  },
 ]
 
 describe('genTypeObject', () => {

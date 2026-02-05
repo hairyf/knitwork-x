@@ -171,10 +171,22 @@ export function genTypeObject(
     return wrapInDelimiters(lines, indent, '{}', false)
   }
 
+  // 使用 Reflect.ownKeys 获取所有键（包括符号键）
+  const keys = Reflect.ownKeys(object)
   return wrapInDelimiters(
-    Object.entries(object).map(([key, value]) => {
-      const [, k = key, optional = '']
-        = key.match(/^(.*[^?])(\?)?$/) /* c8 ignore next */ || []
+    keys.map((key) => {
+      const value = object[key as string | symbol]
+      
+      // 对于字符串键，检查是否有可选标记
+      let k: string | symbol = key
+      let optional = ''
+      if (typeof key === 'string') {
+        const match = key.match(/^(.*[^?])(\?)?$/)
+        if (match) {
+          k = match[1] ?? key
+          optional = match[2] ?? ''
+        }
+      }
 
       if (isTypeObjectWithJSDoc(value)) {
         const jsdocComment

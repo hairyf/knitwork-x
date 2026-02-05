@@ -183,6 +183,71 @@ export interface FooInterface {
   id: string
 }`,
   },
+  {
+    input: [
+      'FooInterface',
+      {
+        name: 'string',
+        [Symbol.for('key')]: 'number',
+      },
+    ],
+    code: `interface FooInterface {
+  name: string
+  [Symbol.for("key")]: number
+}`,
+  },
+  {
+    input: [
+      'FooInterface',
+      [
+        { name: 'name', type: 'string' },
+        { name: Symbol.for('symbolKey'), type: 'number', optional: true },
+      ],
+    ],
+    code: `interface FooInterface {
+  name: string
+  [Symbol.for("symbolKey")]?: number
+}`,
+  },
+  {
+    input: [
+      'FooInterface',
+      {
+        [Symbol('unique')]: 'string',
+      },
+    ],
+    code: `interface FooInterface {
+  [Symbol("unique")]: string
+}`,
+  },
+  {
+    input: [
+      'APISchema',
+      {
+        '/api': {
+          method: 'string',
+          path: 'string',
+        },
+      },
+    ],
+    code: `interface APISchema {
+  "/api": {
+    method: string
+    path: string
+  }
+}`,
+  },
+  {
+    input: [
+      'APISchema',
+      [
+        { name: '[Endpoint]', type: '{}' },
+      ],
+    ],
+    code: `interface APISchema {
+  [Endpoint]: {}
+}`,
+  },
 ]
 
 describe('genInterface', () => {
