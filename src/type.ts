@@ -176,7 +176,7 @@ export function genTypeObject(
   return wrapInDelimiters(
     keys.map((key) => {
       const value = object[key as string | symbol]
-      
+
       // 对于字符串键，检查是否有可选标记
       let k: string | symbol = key
       let optional = ''
