@@ -1,36 +1,42 @@
-catalogMode: prefer
-ignoreWorkspaceRootCheck: true
-shellEmulator: true
-trustPolicy: no-downgrade
-
 packages:
   - .
   - docs
 
-overrides:
-  nuxt: 4.2.0
+catalog:
+  '@vitest/coverage-v8': ^4.0.18
+
+catalogMode: prefer
 
 catalogs:
   cli:
-    '@antfu/eslint-config': ^6.6.1
-    '@antfu/ni': ^28.0.0
-    bumpp: ^10.3.2
-    eslint: ^9.39.2
-    lint-staged: ^16.2.7
-    publint: ^0.3.16
+    '@antfu/eslint-config': ^7.6.1
+    '@antfu/ni': ^28.2.0
+    bumpp: ^10.4.1
+    eslint: ^10.0.2
+    lint-staged: ^16.3.1
+    publint: ^0.3.18
     simple-git-hooks: ^2.13.1
-    tsdown: ^0.17.3
+    tsdown: ^0.20.3
     tsx: ^4.21.0
     typescript: ^5.9.3
   docs:
-    '@vueuse/core': ^14.2.0
+    '@vueuse/core': ^14.2.1
     nuxt: 3.14.0
-    shiki: ^3.22.0
+    shiki: ^4.0.1
     undocs: latest
-    vue: ^3.5.0
-
+    vue: ^3.5.29
   testing:
-    vitest: ^4.0.15
-    vitest-package-exports: ^0.1.1
+    vitest: ^4.0.18
+    vitest-package-exports: ^1.2.0
+
+ignoreWorkspaceRootCheck: true
+
 onlyBuiltDependencies:
   - simple-git-hooks
+
+overrides:
+  nuxt: 4.2.0
+
+shellEmulator: true
+
+trustPolicy: no-downgrade
