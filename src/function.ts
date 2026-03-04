@@ -28,7 +28,7 @@ import { genJSDocComment, wrapInDelimiters } from './utils'
  * @group Typescript
  */
 export function genParam(p: TypeField): string {
-  let s = p.name
+  let s: string = typeof p.name === 'string' ? p.name : (p.name as symbol).toString()
   if (p.optional)
     s += '?'
   if (p.type)
